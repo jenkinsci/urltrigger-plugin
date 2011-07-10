@@ -94,7 +94,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             if (entry.isCheckStatus()) {
                 int status = clientResponse.getStatus();
                 if (status == entry.getStatusCode()) {
-                    log.info(String.format("The returned status match the expected status: \n %s", url));
+                    log.info(String.format("The returned status matches the expected status: \n %s", url));
                     return true;
                 }
             }

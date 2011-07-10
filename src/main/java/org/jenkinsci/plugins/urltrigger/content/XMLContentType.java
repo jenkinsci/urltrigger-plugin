@@ -98,12 +98,12 @@ public class XMLContentType extends URLTriggerContentType {
         }
 
         if (results.size() != newResults.size()) {
-            throw new URLTriggerException("Regarding the trigger life cycle, the size between old results and new results have to be the same.");
+            throw new URLTriggerException("Regarding the trigger life cycle, the size between old results and new results has to be the same.");
         }
 
         //The results object have to be the same keys
         if (!results.keySet().containsAll(newResults.keySet())) {
-            throw new URLTriggerException("Regarding the set up of the result objects, the keys for the old results and the new results have to the same.");
+            throw new URLTriggerException("Regarding the set up of the result objects, the keys for the old results and the new results have to be the same.");
         }
 
 
@@ -119,12 +119,12 @@ public class XMLContentType extends URLTriggerContentType {
             }
 
             if (initValue == null && newValue != null) {
-                log.info(String.format("There was no value and there is a new value for the expression '%s'.", expression));
+                log.info(String.format("There was no value and now there is a new value for the expression '%s'.", expression));
                 return true;
             }
 
             if (initValue != null && newValue == null) {
-                log.info(String.format("There was a value and now the there is no value for the expression '%s'.", expression));
+                log.info(String.format("There was a value and now there is no value for the expression '%s'.", expression));
                 return true;
             }
 
@@ -149,7 +149,7 @@ public class XMLContentType extends URLTriggerContentType {
 
         @Override
         public String getDisplayName() {
-            return "Monitor the contents of an XML content";
+            return "Monitor the contents of an XML response";
         }
 
         @Override
