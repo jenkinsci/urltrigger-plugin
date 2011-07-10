@@ -5,6 +5,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.Util;
 import hudson.model.*;
@@ -13,9 +14,12 @@ import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
+import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
+import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -52,7 +56,25 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
 
     @Override
     public Collection<? extends Action> getProjectActions() {
-        URLTriggerAction action = new URLTriggerAction((AbstractProject) job, getLogFile(), this.getDescriptor().getDisplayName());
+
+        Map<String, String> subActionTitles = null;
+        for (URLTriggerEntry entry : entries) {
+            String url = entry.getUrl();
+            URLTriggerContentType[] urlTriggerContentTypes = entry.getContentTypes();
+            if (entry.getContentTypes() != null) {
+                subActionTitles = new HashMap<String, String>(urlTriggerContentTypes.length);
+                for (int i = 0; i < urlTriggerContentTypes.length; i++) {
+                    URLTriggerContentType fsTriggerContentFileType = urlTriggerContentTypes[i];
+                    if (fsTriggerContentFileType != null) {
+                        Descriptor<URLTriggerContentType> descriptor = fsTriggerContentFileType.getDescriptor();
+                        if (descriptor instanceof URLTriggerContentTypeDescriptor) {
+                            subActionTitles.put(url, ((URLTriggerContentTypeDescriptor) descriptor).getLabel());
+                        }
+                    }
+                }
+            }
+        }
+        URLTriggerAction action = new URLTriggerAction((AbstractProject) job, getLogFile(), this.getDescriptor().getDisplayName(), subActionTitles);
         return Collections.singleton(action);
     }
 
@@ -94,8 +116,22 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
                 }
             }
 
+            //Check the url content
+            //Call from master (it's an URL, it doesn't matter to call from a slave)
+            if (entry.isInspectingContent()) {
+                log.info("Inspecting the content");
+                for (final URLTriggerContentType type : entry.getContentTypes()) {
+                    String xmlString = clientResponse.getEntity(String.class);
+                    if (xmlString == null) {
+                        throw new URLTriggerException("The URL content is empty.");
+                    }
+                    boolean isTriggered = type.isTriggeringBuildForContent(xmlString, log);
+                    if (isTriggered) {
+                        return true;
+                    }
+                }
+            }
         }
-
         return false;
     }
 
@@ -143,10 +179,51 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         return new File(job.getRootDir(), "trigger-script-polling.log");
     }
 
+    @Override
+    public void start(BuildableItem project, boolean newInstance) {
+        super.start(project, newInstance);
+
+        try {
+            // Initialize the memory information if whe introspect the content
+            initContentElementsIfNeed();
+
+        } catch (URLTriggerException urle) {
+            LOGGER.log(Level.SEVERE, "Error on trigger startup " + urle.getMessage());
+            urle.printStackTrace();
+        } catch (Throwable t) {
+            LOGGER.log(Level.SEVERE, "Severe error on trigger startup " + t.getMessage());
+            t.printStackTrace();
+        }
+    }
+
+    private void initContentElementsIfNeed() throws URLTriggerException {
+        ClientConfig cc = new DefaultClientConfig();
+        Client client = Client.create(cc);
+        for (URLTriggerEntry entry : entries) {
+
+            //Get the url
+            String url = entry.getUrl();
+
+            //Invoke the Url and process its response
+            ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+
+            entry.setLastModifiedDate(clientResponse.getLastModified().getTime());
+
+            if (entry.isInspectingContent()) {
+                for (final URLTriggerContentType type : entry.getContentTypes()) {
+                    String xmlString = clientResponse.getEntity(String.class);
+                    if (xmlString == null) {
+                        throw new URLTriggerException("The URL content is empty.");
+                    }
+                    type.initForContent(xmlString);
+                }
+            }
+
+        }
+    }
 
     @Override
     public void run() {
-
         if (!Hudson.getInstance().isQuietingDown() && ((AbstractProject) this.job).isBuildable()) {
             URLScriptTriggerDescriptor descriptor = getDescriptor();
             ExecutorService executorService = descriptor.getExecutor();
@@ -195,12 +272,12 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
 
             List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
             if (entryObject instanceof JSONObject) {
-                entries.add(fillAndGetEntry((JSONObject) entryObject));
+                entries.add(fillAndGetEntry(req, (JSONObject) entryObject));
             } else {
                 JSONArray jsonArray = (JSONArray) entryObject;
                 Iterator it = jsonArray.iterator();
                 while (it.hasNext()) {
-                    entries.add(fillAndGetEntry((JSONObject) it.next()));
+                    entries.add(fillAndGetEntry(req, (JSONObject) it.next()));
                 }
             }
 
@@ -215,7 +292,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
 
         }
 
-        private URLTriggerEntry fillAndGetEntry(JSONObject entryObject) {
+        private URLTriggerEntry fillAndGetEntry(StaplerRequest req, JSONObject entryObject) {
             URLTriggerEntry urlTriggerEntry = new URLTriggerEntry();
             urlTriggerEntry.setUrl(entryObject.getString("url"));
 
@@ -242,12 +319,40 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
                 urlTriggerEntry.setCheckLastModifiedDate(false);
             }
 
+            //Process inspectingContent
+            Object inspectingContentObject = entryObject.get("inspectingContent");
+            if (inspectingContentObject == null) {
+                urlTriggerEntry.setInspectingContent(false);
+                urlTriggerEntry.setContentTypes(new URLTriggerContentType[0]);
+            } else {
+                urlTriggerEntry.setInspectingContent(true);
+                JSONObject inspectingContentJSONObject = entryObject.getJSONObject("inspectingContent");
+                JSON contentTypesJsonElt;
+                try {
+                    contentTypesJsonElt = inspectingContentJSONObject.getJSONArray("contentTypes");
+                } catch (JSONException jsone) {
+                    contentTypesJsonElt = inspectingContentJSONObject.getJSONObject("contentTypes");
+                }
+                List<URLTriggerContentType> types = req.bindJSONToList(URLTriggerContentType.class, contentTypesJsonElt);
+                urlTriggerEntry.setContentTypes(types.toArray(new URLTriggerContentType[types.size()]));
+
+            }
+
             return urlTriggerEntry;
         }
 
         @Override
         public String getDisplayName() {
             return "Poll with a URL";
+        }
+
+        @Override
+        public String getHelpFile(){
+            return "/plugin/urltrigger/help.html";
+        }
+
+        public DescriptorExtensionList getListURLTriggerDescriptors() {
+            return DescriptorExtensionList.createDescriptorList(Hudson.getInstance(), URLTriggerContentType.class);
         }
 
 

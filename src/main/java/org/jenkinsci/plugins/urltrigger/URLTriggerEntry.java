@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.urltrigger;
 
 import com.sun.jersey.api.client.ClientResponse;
+import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 
 import java.io.Serializable;
 
@@ -19,6 +20,10 @@ public class URLTriggerEntry implements Serializable {
 
     private boolean checkLastModifiedDate;
 
+    private boolean inspectingContent;
+
+    private URLTriggerContentType[] contentTypes;
+
     private transient long lastModifiedDate;
 
     public String getUrl() {
@@ -31,6 +36,10 @@ public class URLTriggerEntry implements Serializable {
 
     public boolean isCheckStatus() {
         return checkStatus;
+    }
+
+    public boolean isInspectingContent() {
+        return inspectingContent;
     }
 
     public void setCheckStatus(boolean checkStatus) {
@@ -57,7 +66,19 @@ public class URLTriggerEntry implements Serializable {
         return lastModifiedDate;
     }
 
+    public void setInspectingContent(boolean inspectingContent) {
+        this.inspectingContent = inspectingContent;
+    }
+
     public void setLastModifiedDate(long lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
+    }
+
+    public URLTriggerContentType[] getContentTypes() {
+        return contentTypes;
+    }
+
+    public void setContentTypes(URLTriggerContentType[] contentTypes) {
+        this.contentTypes = contentTypes;
     }
 }

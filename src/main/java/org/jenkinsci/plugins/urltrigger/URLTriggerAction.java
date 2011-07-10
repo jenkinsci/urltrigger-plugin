@@ -9,6 +9,7 @@ import org.apache.commons.jelly.XMLOutput;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * @author Gregory Boissinot
@@ -18,11 +19,13 @@ public class URLTriggerAction implements Action {
     private transient AbstractProject<?, ?> job;
     private transient File logFile;
     private transient String label;
+    private transient Map<String, String> subActionTitle;
 
-    public URLTriggerAction(AbstractProject<?, ?> job, File logFile, String label) {
+    public URLTriggerAction(AbstractProject<?, ?> job, File logFile, String label, Map<String,String> subActionTitle) {
         this.job = job;
         this.logFile = logFile;
         this.label = label;
+        this.subActionTitle =subActionTitle;
     }
 
     @SuppressWarnings("unused")
@@ -52,6 +55,11 @@ public class URLTriggerAction implements Action {
     @SuppressWarnings("unused")
     public String getLog() throws IOException {
         return Util.loadFile(getLogFile());
+    }
+
+    @SuppressWarnings("unused")
+    public Map<String,String> getSubActionTitle() {
+        return subActionTitle;
     }
 
     public File getLogFile() {

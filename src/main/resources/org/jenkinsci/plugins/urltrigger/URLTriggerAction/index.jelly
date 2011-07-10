@@ -27,6 +27,13 @@ THE SOFTWARE.
     <st:include it="${it.owner}" page="sidepanel.jelly" />
     <l:main-panel>
       <h1>${it.label}</h1>
+
+      <f:repeatable var="subAction" items="${it.subActionTitle}" noAddButton="true">
+         <br/>
+         <b>Inspecting ${subAction.value} content for URL ${subAction.key}</b>
+         <br/>
+      </f:repeatable>
+
       <j:set var="log" value="${it.log}" />
       <j:choose>
         <j:when test="${empty(log)}">

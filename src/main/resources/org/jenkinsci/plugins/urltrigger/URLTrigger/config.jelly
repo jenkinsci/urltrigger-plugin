@@ -32,12 +32,31 @@
                 </f:entry>
 
                 <f:entry>
+                   <table style="width:100%">
                     <f:checkbox
                             field="checkLastModifiedDate"
                             name="urlElements.checkLastModifiedDate"
                             checked="${urlElements.checkLastModifiedDate}"
                             title="${%Check the last modified Date}">
                     </f:checkbox>
+                   </table>
+                </f:entry>
+
+                <f:entry>
+                   <table style="width:100%">
+                      <f:optionalBlock
+                         name="urlElements.inspectingContent"
+                         field="inspectingContent"
+                         checked="${urlElements.inspectingContent}"
+                         title="${%Inspect URL content}">
+
+                           <f:block>
+                                <f:hetero-list name="urlElements.contentTypes" descriptors="${descriptor.listURLTriggerDescriptors}" items="${urlElements.contentTypes}" />
+                                <label class="attach-previous">${%Content nature to check}</label>
+                           </f:block>
+
+                      </f:optionalBlock>
+                   </table>
                 </f:entry>
 
             </table>
