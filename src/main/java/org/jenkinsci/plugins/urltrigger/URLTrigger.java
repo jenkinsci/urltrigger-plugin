@@ -343,7 +343,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
 
         @Override
         public String getDisplayName() {
-            return "Poll with a URL";
+            return "[URLTrigger] - Poll with a URL";
         }
 
         @Override
