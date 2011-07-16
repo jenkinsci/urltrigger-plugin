@@ -1,0 +1,13 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+  <f:entry title="${descriptor.label}"  help="/descriptor/org.jenkinsci.plugins.urltrigger.content.JSONContentType/help/type">
+     <f:repeatable var="element" items="${instance.jsonPaths}">
+        <table width="100%">
+           <f:entry field="jsonPath" title="${%JsonPath}">
+               <f:textbox name="json.jsonPath" value="${element.jsonPath}"/>
+           </f:entry>
+        </table>
+     </f:repeatable>
+  </f:entry>
+
+</j:jelly>
