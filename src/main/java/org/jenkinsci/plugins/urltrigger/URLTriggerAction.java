@@ -21,11 +21,11 @@ public class URLTriggerAction implements Action {
     private transient String label;
     private transient Map<String, String> subActionTitle;
 
-    public URLTriggerAction(AbstractProject<?, ?> job, File logFile, String label, Map<String,String> subActionTitle) {
+    public URLTriggerAction(AbstractProject<?, ?> job, File logFile, String label, Map<String, String> subActionTitle) {
         this.job = job;
         this.logFile = logFile;
         this.label = label;
-        this.subActionTitle =subActionTitle;
+        this.subActionTitle = subActionTitle;
     }
 
     @SuppressWarnings("unused")
@@ -58,7 +58,7 @@ public class URLTriggerAction implements Action {
     }
 
     @SuppressWarnings("unused")
-    public Map<String,String> getSubActionTitle() {
+    public Map<String, String> getSubActionTitle() {
         return subActionTitle;
     }
 

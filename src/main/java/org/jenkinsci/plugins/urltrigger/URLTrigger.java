@@ -347,7 +347,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         }
 
         @Override
-        public String getHelpFile(){
+        public String getHelpFile() {
             return "/plugin/urltrigger/help.html";
         }
 

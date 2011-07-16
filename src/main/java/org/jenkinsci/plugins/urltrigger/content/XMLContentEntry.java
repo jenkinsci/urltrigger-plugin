@@ -7,12 +7,12 @@ import java.io.Serializable;
 /**
  * @author Gregory Boissinot
  */
-public class XMLFileContentEntry implements Serializable {
+public class XMLContentEntry implements Serializable {
 
     private String expression;
 
     @DataBoundConstructor
-    public XMLFileContentEntry(String expression) {
+    public XMLContentEntry(String expression) {
         this.expression = expression;
     }
 

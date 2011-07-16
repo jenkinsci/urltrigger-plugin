@@ -7,7 +7,6 @@ import hudson.model.Hudson;
 import org.jenkinsci.plugins.urltrigger.URLTriggerException;
 import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
 
-import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -24,5 +23,6 @@ public abstract class URLTriggerContentType implements ExtensionPoint, Describab
      * These methods have to be overridden in each trigger implementation
      */
     public abstract void initForContent(String content) throws URLTriggerException;
+
     public abstract boolean isTriggeringBuildForContent(String content, URLTriggerLog log) throws URLTriggerException;
 }

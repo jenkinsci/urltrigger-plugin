@@ -30,17 +30,17 @@ public class XMLContentType extends URLTriggerContentType {
 
     private transient Document xmlDocument;
 
-    private List<XMLFileContentEntry> expressions = new ArrayList<XMLFileContentEntry>();
+    private List<XMLContentEntry> expressions = new ArrayList<XMLContentEntry>();
 
     @DataBoundConstructor
-    public XMLContentType(List<XMLFileContentEntry> element) {
+    public XMLContentType(List<XMLContentEntry> element) {
         if (element != null) {
             this.expressions = element;
         }
     }
 
     @SuppressWarnings("unused")
-    public List<XMLFileContentEntry> getExpressions() {
+    public List<XMLContentEntry> getExpressions() {
         return expressions;
     }
 
@@ -72,7 +72,7 @@ public class XMLContentType extends URLTriggerContentType {
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
         try {
-            for (XMLFileContentEntry expressionEntry : expressions) {
+            for (XMLContentEntry expressionEntry : expressions) {
                 String expression = expressionEntry.getExpression();
                 XPathExpression xPathExpression = xPath.compile(expression);
                 Object result = xPathExpression.evaluate(document);
@@ -140,7 +140,7 @@ public class XMLContentType extends URLTriggerContentType {
 
     @Extension
     @SuppressWarnings("unused")
-    public static class XMLFileContentDescriptor extends URLTriggerContentTypeDescriptor<XMLContentType> {
+    public static class XMLContentDescriptor extends URLTriggerContentTypeDescriptor<XMLContentType> {
 
         @Override
         public Class<? extends URLTriggerContentType> getType() {
@@ -156,8 +156,6 @@ public class XMLContentType extends URLTriggerContentType {
         public String getLabel() {
             return "XML";
         }
-
     }
-
 
 }
