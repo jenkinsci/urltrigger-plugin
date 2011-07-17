@@ -4,6 +4,7 @@ import com.jayway.jsonpath.JsonPath;
 import hudson.Extension;
 import org.jenkinsci.plugins.urltrigger.URLTriggerException;
 import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
+import org.jenkinsci.plugins.urltrigger.content.json.util.JsonUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.text.ParseException;
@@ -17,7 +18,7 @@ import java.util.Map;
  */
 public class JSONContentType extends URLTriggerContentType {
 
-    private transient Map<String, Object> results;
+    private transient Map<String, Object> results = new HashMap<String, Object>();
 
     private List<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
 
@@ -35,8 +36,19 @@ public class JSONContentType extends URLTriggerContentType {
 
     @Override
     public void initForContent(String content) throws URLTriggerException {
+
+        if (content == null) {
+            throw new URLTriggerException("The given content is not set.");
+        }
+        if (content.trim().isEmpty()) {
+            throw new URLTriggerException("The given content is empty.");
+        }
+
+        JsonUtils.validateJson(content);
+
         results = readJsonPath(content);
     }
+
 
     private Map<String, Object> readJsonPath(String content) throws URLTriggerException {
         Map<String, Object> results = new HashMap<String, Object>(jsonPaths.size());
