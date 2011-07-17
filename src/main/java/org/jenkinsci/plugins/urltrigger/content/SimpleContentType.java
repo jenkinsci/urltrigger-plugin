@@ -14,6 +14,7 @@ public class SimpleContentType extends URLTriggerContentType {
     private transient String md5;
 
     @DataBoundConstructor
+    @SuppressWarnings("unused")
     public SimpleContentType() {
     }
 
