@@ -26,22 +26,22 @@ import java.util.Map;
  */
 public class XMLContentType extends URLTriggerContentType {
 
-    private transient Map<String, Object> results;
+    private transient Map<String, Object> results = new HashMap<String, Object>();
 
     private transient Document xmlDocument;
 
-    private List<XMLContentEntry> expressions = new ArrayList<XMLContentEntry>();
+    private List<XMLContentEntry> xPaths = new ArrayList<XMLContentEntry>();
 
     @DataBoundConstructor
     public XMLContentType(List<XMLContentEntry> element) {
         if (element != null) {
-            this.expressions = element;
+            this.xPaths = element;
         }
     }
 
     @SuppressWarnings("unused")
-    public List<XMLContentEntry> getExpressions() {
-        return expressions;
+    public List<XMLContentEntry> getXPaths() {
+        return xPaths;
     }
 
     @Override
@@ -68,12 +68,12 @@ public class XMLContentType extends URLTriggerContentType {
     }
 
     private Map<String, Object> readXMLPath(Document document) throws URLTriggerException {
-        Map<String, Object> results = new HashMap<String, Object>(expressions.size());
+        Map<String, Object> results = new HashMap<String, Object>(xPaths.size());
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
         try {
-            for (XMLContentEntry expressionEntry : expressions) {
-                String expression = expressionEntry.getExpression();
+            for (XMLContentEntry expressionEntry : xPaths) {
+                String expression = expressionEntry.getXPath();
                 XPathExpression xPathExpression = xPath.compile(expression);
                 Object result = xPathExpression.evaluate(document);
                 results.put(expression, result);

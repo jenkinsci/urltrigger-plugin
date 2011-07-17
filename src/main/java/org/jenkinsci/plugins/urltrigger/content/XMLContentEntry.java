@@ -9,15 +9,15 @@ import java.io.Serializable;
  */
 public class XMLContentEntry implements Serializable {
 
-    private String expression;
+    private String xPath;
 
     @DataBoundConstructor
-    public XMLContentEntry(String expression) {
-        this.expression = expression;
+    public XMLContentEntry(String xPath) {
+        this.xPath = xPath;
     }
 
     @SuppressWarnings("unused")
-    public String getExpression() {
-        return expression;
+    public String getXPath() {
+        return xPath;
     }
 }
