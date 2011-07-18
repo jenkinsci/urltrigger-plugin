@@ -20,6 +20,7 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
+import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -104,12 +105,12 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
                 Date lastModifiedDate = clientResponse.getLastModified();
                 if (lastModifiedDate != null) {
                     long newLastModifiedDate = lastModifiedDate.getTime();
-                    if (entry.getLastModifiedDate() == 0L) {
-                        entry.setLastModifiedDate(newLastModifiedDate);
+                    if (entry.getLastModificationDate() == 0L) {
+                        entry.setLastModificationDate(newLastModifiedDate);
                         return false;
                     }
-                    if (entry.getLastModifiedDate() != newLastModifiedDate) {
-                        entry.setLastModifiedDate(newLastModifiedDate);
+                    if (entry.getLastModificationDate() != newLastModifiedDate) {
+                        entry.setLastModificationDate(newLastModifiedDate);
                         log.info("The last modification date has changed.");
                         return true;
                     }
@@ -183,42 +184,27 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
     public void start(BuildableItem project, boolean newInstance) {
         super.start(project, newInstance);
 
+        URLTriggerService service = URLTriggerService.getInstance();
         try {
-            // Initialize the memory information if whe introspect the content
-            initContentElementsIfNeed();
+            ClientConfig cc = new DefaultClientConfig();
+            Client client = Client.create(cc);
+            for (URLTriggerEntry entry : entries) {
 
+                //Get the url
+                String url = entry.getUrl();
+
+                //Invoke the Url and process its response
+                ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+
+                //Process the entry
+                service.processEntry(clientResponse, entry);
+            }
         } catch (URLTriggerException urle) {
             LOGGER.log(Level.SEVERE, "Error on trigger startup " + urle.getMessage());
             urle.printStackTrace();
         } catch (Throwable t) {
             LOGGER.log(Level.SEVERE, "Severe error on trigger startup " + t.getMessage());
             t.printStackTrace();
-        }
-    }
-
-    private void initContentElementsIfNeed() throws URLTriggerException {
-        ClientConfig cc = new DefaultClientConfig();
-        Client client = Client.create(cc);
-        for (URLTriggerEntry entry : entries) {
-
-            //Get the url
-            String url = entry.getUrl();
-
-            //Invoke the Url and process its response
-            ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
-
-            entry.setLastModifiedDate(clientResponse.getLastModified().getTime());
-
-            if (entry.isInspectingContent()) {
-                for (final URLTriggerContentType type : entry.getContentTypes()) {
-                    String xmlString = clientResponse.getEntity(String.class);
-                    if (xmlString == null) {
-                        throw new URLTriggerException("The URL content is empty.");
-                    }
-                    type.initForContent(xmlString);
-                }
-            }
-
         }
     }
 
@@ -351,6 +337,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             return "/plugin/urltrigger/help.html";
         }
 
+        @SuppressWarnings("unchecked")
         public DescriptorExtensionList getListURLTriggerDescriptors() {
             return DescriptorExtensionList.createDescriptorList(Hudson.getInstance(), URLTriggerContentType.class);
         }

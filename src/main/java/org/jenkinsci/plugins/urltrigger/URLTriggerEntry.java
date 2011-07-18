@@ -24,7 +24,7 @@ public class URLTriggerEntry implements Serializable {
 
     private URLTriggerContentType[] contentTypes;
 
-    private transient long lastModifiedDate;
+    private transient long lastModificationDate;
 
     public String getUrl() {
         return url;
@@ -62,16 +62,16 @@ public class URLTriggerEntry implements Serializable {
         this.checkLastModifiedDate = checkLastModifiedDate;
     }
 
-    public long getLastModifiedDate() {
-        return lastModifiedDate;
+    public long getLastModificationDate() {
+        return lastModificationDate;
     }
 
     public void setInspectingContent(boolean inspectingContent) {
         this.inspectingContent = inspectingContent;
     }
 
-    public void setLastModifiedDate(long lastModifiedDate) {
-        this.lastModifiedDate = lastModifiedDate;
+    public void setLastModificationDate(long lastModificationdDate) {
+        this.lastModificationDate = lastModificationdDate;
     }
 
     public URLTriggerContentType[] getContentTypes() {
