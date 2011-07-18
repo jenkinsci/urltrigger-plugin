@@ -342,7 +342,6 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             return DescriptorExtensionList.createDescriptorList(Hudson.getInstance(), URLTriggerContentType.class);
         }
 
-
         public FormValidation doCheckStatus(@QueryParameter String value) {
 
             if (value == null || value.trim().isEmpty()) {
@@ -372,6 +371,5 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             }
         }
     }
-
 
 }
