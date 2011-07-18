@@ -2,7 +2,6 @@ package org.jenkinsci.plugins.urltrigger.content;
 
 import org.jenkinsci.plugins.urltrigger.URLTriggerException;
 import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
-import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.mockito.Mock;
 
 /**
