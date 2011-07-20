@@ -18,7 +18,7 @@ public class URLTriggerEntry implements Serializable {
 
     private int statusCode;
 
-    private boolean checkLastModifiedDate;
+    private boolean checkLastModificationDate;
 
     private boolean inspectingContent;
 
@@ -54,12 +54,12 @@ public class URLTriggerEntry implements Serializable {
         this.statusCode = statusCode;
     }
 
-    public boolean isCheckLastModifiedDate() {
-        return checkLastModifiedDate;
+    public boolean isCheckLastModificationDate() {
+        return checkLastModificationDate;
     }
 
-    public void setCheckLastModifiedDate(boolean checkLastModifiedDate) {
-        this.checkLastModifiedDate = checkLastModifiedDate;
+    public void setCheckLastModificationDate(boolean checkLastModifiedDate) {
+        this.checkLastModificationDate = checkLastModifiedDate;
     }
 
     public long getLastModificationDate() {

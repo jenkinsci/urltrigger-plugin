@@ -34,10 +34,10 @@
                 <f:entry>
                    <table style="width:100%">
                     <f:checkbox
-                            field="checkLastModifiedDate"
-                            name="urlElements.checkLastModifiedDate"
-                            checked="${urlElements.checkLastModifiedDate}"
-                            title="${%Check the last modified Date}">
+                            field="checkLastModificationDate"
+                            name="urlElements.checkLastModificationDate"
+                            checked="${urlElements.checkLastModificationDate}"
+                            title="${%Check the last modification Date}">
                     </f:checkbox>
                    </table>
                 </f:entry>

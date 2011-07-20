@@ -83,54 +83,17 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         ClientConfig cc = new DefaultClientConfig();
         Client client = Client.create(cc);
         for (URLTriggerEntry entry : entries) {
-
             //Get the url
             String url = entry.getUrl();
 
             //Invoke the Url and process its response
             log.info(String.format("Invoking the url: \n %s", url));
             ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+            //Get the business service
 
-            //Check the status if needed
-            if (entry.isCheckStatus()) {
-                int status = clientResponse.getStatus();
-                if (status == entry.getStatusCode()) {
-                    log.info(String.format("The returned status matches the expected status: \n %s", url));
-                    return true;
-                }
-            }
-
-            //Check the last modified date if needed
-            if (entry.isCheckLastModifiedDate()) {
-                Date lastModifiedDate = clientResponse.getLastModified();
-                if (lastModifiedDate != null) {
-                    long newLastModifiedDate = lastModifiedDate.getTime();
-                    if (entry.getLastModificationDate() == 0L) {
-                        entry.setLastModificationDate(newLastModifiedDate);
-                        return false;
-                    }
-                    if (entry.getLastModificationDate() != newLastModifiedDate) {
-                        entry.setLastModificationDate(newLastModifiedDate);
-                        log.info("The last modification date has changed.");
-                        return true;
-                    }
-                }
-            }
-
-            //Check the url content
-            //Call from master (it's an URL, it doesn't matter to call from a slave)
-            if (entry.isInspectingContent()) {
-                log.info("Inspecting the content");
-                for (final URLTriggerContentType type : entry.getContentTypes()) {
-                    String xmlString = clientResponse.getEntity(String.class);
-                    if (xmlString == null) {
-                        throw new URLTriggerException("The URL content is empty.");
-                    }
-                    boolean isTriggered = type.isTriggeringBuildForContent(xmlString, log);
-                    if (isTriggered) {
-                        return true;
-                    }
-                }
+            URLTriggerService urlTriggerService = URLTriggerService.getInstance();
+            if (urlTriggerService.isSchedulingForURLEntry(clientResponse, entry, log)) {
+                return true;
             }
         }
         return false;
@@ -197,7 +160,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
                 ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
 
                 //Process the entry
-                service.processEntry(clientResponse, entry);
+                service.processURLEntryFromStartStage(clientResponse, entry);
             }
         } catch (URLTriggerException urle) {
             LOGGER.log(Level.SEVERE, "Error on trigger startup " + urle.getMessage());
@@ -298,11 +261,11 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             }
 
             //Process checkLastModifiedDate
-            Object checkLastModifiedDateObject = entryObject.get("checkLastModifiedDate");
+            Object checkLastModifiedDateObject = entryObject.get("checkLastModificationDate");
             if (checkLastModifiedDateObject != null) {
-                urlTriggerEntry.setCheckLastModifiedDate(true);
+                urlTriggerEntry.setCheckLastModificationDate(true);
             } else {
-                urlTriggerEntry.setCheckLastModifiedDate(false);
+                urlTriggerEntry.setCheckLastModificationDate(false);
             }
 
             //Process inspectingContent
