@@ -184,31 +184,6 @@ public class URLTriggerServiceTest {
         verify(clientResponseMock, never()).getEntity(String.class);
     }
 
-    class TestContentType_Triggered extends URLTriggerContentType {
-
-        @Override
-        public void initForContent(String content) throws URLTriggerException {
-        }
-
-        @Override
-        public boolean isTriggeringBuildForContent(String content, URLTriggerLog log) throws URLTriggerException {
-            return true;
-        }
-    }
-
-    class TestContentType_NotTriggered extends URLTriggerContentType {
-
-        @Override
-        public void initForContent(String content) throws URLTriggerException {
-        }
-
-        @Override
-        public boolean isTriggeringBuildForContent(String content, URLTriggerLog log) throws URLTriggerException {
-            return false;
-        }
-    }
-
-
     @Test
     public void isSchedulingForURLEntry_checkContent_2() throws URLTriggerException {
         URLTriggerEntry urlEntryMock = mock(URLTriggerEntry.class);

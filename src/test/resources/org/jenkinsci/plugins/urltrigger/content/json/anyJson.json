@@ -1,5 +1,8 @@
 { "store": {
     "book": [
-      { "category": "reference"}]
-  }
+        {
+            "category": "reference"
+        }
+    ]
+}
 }
