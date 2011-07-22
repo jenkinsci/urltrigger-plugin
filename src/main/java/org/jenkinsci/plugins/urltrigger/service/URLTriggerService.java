@@ -56,11 +56,12 @@ public class URLTriggerService {
             Date lastModifiedDate = clientResponse.getLastModified();
             if (lastModifiedDate != null) {
                 long newLastModifiedDate = lastModifiedDate.getTime();
-                if (entry.getLastModificationDate() == 0L) {
+                long entryLastModificationDate = entry.getLastModificationDate();
+                if (entryLastModificationDate == 0L) {
                     entry.setLastModificationDate(newLastModifiedDate);
                     return false;
                 }
-                if (entry.getLastModificationDate() != newLastModifiedDate) {
+                if (entryLastModificationDate != newLastModifiedDate) {
                     entry.setLastModificationDate(newLastModifiedDate);
                     log.info("The last modification date has changed.");
                     return true;
