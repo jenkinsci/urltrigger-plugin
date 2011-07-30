@@ -12,15 +12,21 @@ import java.net.URISyntaxException;
 public abstract class AbstractXMLContentTypeTest extends AbstractContentTypeTest {
 
     protected String getAnyContent() throws IOException, URISyntaxException {
-        return readXMLContent("xml/anyXml.xml");
+        return readContentAsString("xml/anyXml.xml");
     }
 
     protected String getEmptyTypeContent() throws IOException, URISyntaxException {
-        return readXMLContent("xml/emptyXml.xml");
+        return readContentAsString("xml/emptyXml.xml");
+    }
+
+    @Test(expected = URLTriggerException.class)
+    public void testInitForContentEmpty() throws Exception {
+        initForContent(getEmptyContent());
     }
 
     @Test(expected = Throwable.class)
     public void testInitForContentNoXML() throws URLTriggerException {
         initForContent(new String("NO XML"));
     }
+
 }

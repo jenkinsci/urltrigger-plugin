@@ -19,7 +19,7 @@ public class SimpleContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContent(String content) throws URLTriggerException {
+    public void initForContentType(String content) throws URLTriggerException {
         this.md5 = Util.getDigestOf(content);
     }
 

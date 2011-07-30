@@ -16,11 +16,11 @@ public class JSONContentTypeNoExpressionsTest extends AbstractJSONContentTypeTes
     }
 
     protected String getOldContentNotEmpty() throws IOException, URISyntaxException {
-        return readXMLContent("json/noExpressions/oldJsonContent.json");
+        return readContentAsString("json/noExpressions/oldJsonContent.json");
     }
 
     protected String getNewContent() throws IOException, URISyntaxException {
-        return readXMLContent("json/noExpressions/newJsonContent.json");
+        return readContentAsString("json/noExpressions/newJsonContent.json");
     }
 
     @Test

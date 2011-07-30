@@ -19,10 +19,19 @@ public abstract class URLTriggerContentType implements ExtensionPoint, Describab
     }
 
     /**
-     * Cycle of the trigger
      * These methods have to be overridden in each trigger implementation
      */
-    public abstract void initForContent(String content) throws URLTriggerException;
+    public abstract void initForContentType(String content) throws URLTriggerException;
+
+
+    public void initForContent(String content) throws URLTriggerException {
+
+        if (content == null) {
+            throw new URLTriggerException("The given content is not set.");
+        }
+
+        initForContentType(content);
+    }
 
     public abstract boolean isTriggeringBuildForContent(String content, URLTriggerLog log) throws URLTriggerException;
 }

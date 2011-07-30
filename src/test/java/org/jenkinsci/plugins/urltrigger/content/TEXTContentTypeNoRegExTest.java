@@ -9,12 +9,12 @@ import org.mockito.MockitoAnnotations;
 /**
  * @author Gregory Boissinot
  */
-public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
+public class TEXTContentTypeNoRegExTest extends AbstractURLTriggerContentTypeTest {
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        type = new SimpleContentType();
+        type = new TEXTContentType(null);
     }
 
     @Test(expected = URLTriggerException.class)
@@ -34,7 +34,7 @@ public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
         Assert.assertTrue(true);
     }
 
-    @Test(expected = Throwable.class)
+    @Test(expected = URLTriggerException.class)
     public void testIsTriggeringBuildForContentWithNoChange_NullPreviousContent() throws URLTriggerException {
         String content = null;
         initForContent(content);
@@ -55,32 +55,32 @@ public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
         Assert.assertFalse(isTriggeringBuildForContent(content));
     }
 
-    private String getNewContent(String oldContent) {
-        return oldContent + "AddedContent";
+    private String getNewAnyContent(String oldContent) {
+        return oldContent + "AddedAnyContent";
     }
 
     @Test(expected = URLTriggerException.class)
-    public void testIsTriggeringBuildForContentWithChange_NullPreviousContent() throws URLTriggerException {
+    public void testIsTriggeringBuildForAnyContent_NullPreviousContent() throws URLTriggerException {
         String oldContent = null;
-        String newContent = getNewContent(oldContent);
+        String newContent = getNewAnyContent(oldContent);
         initForContent(oldContent);
         Assert.assertFalse(isTriggeringBuildForContent(newContent));
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_EmptyPreviousContent() throws URLTriggerException {
+    public void testIsTriggeringBuildForAnyContent_EmptyPreviousContent() throws URLTriggerException {
         String oldContent = new String();
-        String newContent = getNewContent(oldContent);
+        String newContent = getNewAnyContent(oldContent);
         initForContent(oldContent);
-        Assert.assertTrue(isTriggeringBuildForContent(newContent));
+        Assert.assertFalse(isTriggeringBuildForContent(newContent));
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_AnyStringPreviousContent() throws URLTriggerException {
+    public void testIsTriggeringBuildForAnyNewContent_AnyPreviousContent() throws URLTriggerException {
         String oldContent = new String("AnyString");
-        String newContent = getNewContent(oldContent);
+        String newContent = getNewAnyContent(oldContent);
         initForContent(oldContent);
-        Assert.assertTrue(isTriggeringBuildForContent(newContent));
+        Assert.assertFalse(isTriggeringBuildForContent(newContent));
     }
 
 }

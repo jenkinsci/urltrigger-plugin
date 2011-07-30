@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import org.jenkinsci.plugins.urltrigger.URLTriggerException;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,12 +13,18 @@ import java.net.URISyntaxException;
 public abstract class AbstractJSONContentTypeTest extends AbstractContentTypeTest {
 
     protected String getAnyContent() throws IOException, URISyntaxException {
-        return readXMLContent("json/anyJson.json");
+        return readContentAsString("json/anyJson.json");
     }
 
     protected String getEmptyTypeContent() throws IOException, URISyntaxException {
-        return readXMLContent("json/emptyJson.json");
+        return readContentAsString("json/emptyJson.json");
     }
+
+    @Test(expected = URLTriggerException.class)
+    public void testInitForContentEmpty() throws Exception {
+        initForContent(getEmptyContent());
+    }
+
 
     @Test(expected = Throwable.class)
     public void testInitForContentNoJSON() throws URLTriggerException {

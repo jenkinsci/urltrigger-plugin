@@ -45,7 +45,7 @@ public class XMLContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContent(String content) throws URLTriggerException {
+    public void initForContentType(String content) throws URLTriggerException {
         xmlDocument = initXMLFile(content);
         results = readXMLPath(xmlDocument);
     }

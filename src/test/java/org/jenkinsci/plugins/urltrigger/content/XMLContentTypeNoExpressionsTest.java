@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
+import org.jenkinsci.plugins.urltrigger.URLTriggerException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,11 +17,11 @@ public class XMLContentTypeNoExpressionsTest extends AbstractXMLContentTypeTest 
     }
 
     protected String getOldContentNotEmpty() throws IOException, URISyntaxException {
-        return readXMLContent("xml/noExpressions/oldXmlContent.xml");
+        return readContentAsString("xml/noExpressions/oldXmlContent.xml");
     }
 
     protected String getNewContent() throws IOException, URISyntaxException {
-        return readXMLContent("xml/noExpressions/newXmlContent.xml");
+        return readContentAsString("xml/noExpressions/newXmlContent.xml");
     }
 
     @Test

@@ -18,22 +18,21 @@ public class JSONContentTypeWithExpressionsTest extends AbstractJSONContentTypeT
     }
 
     protected String getOldContentNotEmpty() throws IOException, URISyntaxException {
-        return readXMLContent("json/expressions/oldJsonContent.json");
+        return readContentAsString("json/expressions/oldJsonContent.json");
     }
 
     protected String getNewContent() throws IOException, URISyntaxException {
-        return readXMLContent("json/expressions/newJsonContent.json");
+        return readContentAsString("json/expressions/newJsonContent.json");
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_EmptyTypePreviousContent() throws Exception {
+    public void testIsTriggeringMatchingNewContentWithEmptyPreviousContent() throws Exception {
         Assert.assertTrue(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_AnyContentPreviousContent() throws Exception {
+    public void testIsTriggeringMatchingNewContentWithMatchingPreviousContent() throws Exception {
         Assert.assertTrue(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
     }
-
 }
 

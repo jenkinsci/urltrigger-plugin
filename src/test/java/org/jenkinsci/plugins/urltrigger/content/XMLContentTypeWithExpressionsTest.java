@@ -18,20 +18,20 @@ public class XMLContentTypeWithExpressionsTest extends AbstractXMLContentTypeTes
     }
 
     protected String getOldContentNotEmpty() throws IOException, URISyntaxException {
-        return readXMLContent("xml/expressions/oldXmlContent.xml");
+        return readContentAsString("xml/expressions/oldXmlContent.xml");
     }
 
     protected String getNewContent() throws IOException, URISyntaxException {
-        return readXMLContent("xml/expressions/newXmlContent.xml");
+        return readContentAsString("xml/expressions/newXmlContent.xml");
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_EmptyTypePreviousContent() throws Exception {
+    public void testIsTriggeringMatchingNewContentWithEmptyPreviousContent() throws Exception {
         Assert.assertTrue(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_AnyContentPreviousContent() throws Exception {
+    public void testIsTriggeringMatchingNewContentWithMatchingPreviousContent() throws Exception {
         Assert.assertTrue(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
     }
 

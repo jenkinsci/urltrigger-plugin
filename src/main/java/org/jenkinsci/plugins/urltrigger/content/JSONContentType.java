@@ -35,11 +35,8 @@ public class JSONContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContent(String content) throws URLTriggerException {
+    public void initForContentType(String content) throws URLTriggerException {
 
-        if (content == null) {
-            throw new URLTriggerException("The given content is not set.");
-        }
         if (content.trim().isEmpty()) {
             throw new URLTriggerException("The given content is empty.");
         }

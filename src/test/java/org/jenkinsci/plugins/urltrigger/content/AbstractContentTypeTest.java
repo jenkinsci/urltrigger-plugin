@@ -21,11 +21,11 @@ public abstract class AbstractContentTypeTest extends AbstractURLTriggerContentT
         MockitoAnnotations.initMocks(this);
     }
 
-    protected String readXMLContent(String relativeXMLFilePath) throws URISyntaxException, IOException {
-        return Util.loadFile(new File(this.getClass().getResource(relativeXMLFilePath).toURI()));
+    protected String readContentAsString(String relativeFilePath) throws URISyntaxException, IOException {
+        return Util.loadFile(new File(this.getClass().getResource(relativeFilePath).toURI()));
     }
 
-    private String getEmptyContent() {
+    protected String getEmptyContent() {
         return new String();
     }
 
@@ -44,11 +44,6 @@ public abstract class AbstractContentTypeTest extends AbstractURLTriggerContentT
     @Test(expected = Throwable.class)
     public void testInitForContentNull() throws URLTriggerException {
         initForContent(null);
-    }
-
-    @Test(expected = Throwable.class)
-    public void testInitForContentEmpty() throws Exception {
-        initForContent(getEmptyContent());
     }
 
     @Test
