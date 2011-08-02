@@ -59,11 +59,16 @@
                    </table>
                 </f:entry>
 
+                <f:entry title="">
+                    <div align="right">
+                        <f:repeatableDeleteButton/>
+                    </div>
+                </f:entry>
+
             </table>
         </f:repeatable>
 
     </f:entry>
-
 
     <f:entry title="${%Schedule}" help="/descriptor/hudson.triggers.TimerTrigger/help/spec">
         <f:textarea name="cronTabSpec"
