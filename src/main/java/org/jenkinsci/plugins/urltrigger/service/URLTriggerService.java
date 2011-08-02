@@ -24,7 +24,20 @@ public class URLTriggerService {
 
     public void processURLEntryFromStartStage(ClientResponse clientResponse, URLTriggerEntry entry) throws URLTriggerException {
 
-        entry.setLastModificationDate(clientResponse.getLastModified().getTime());
+        if (clientResponse == null) {
+            throw new NullPointerException("The given clientResponse object is not set.");
+        }
+
+        if (entry == null) {
+            throw new NullPointerException("The given entry object is not set.");
+        }
+
+        Date lastModified = clientResponse.getLastModified();
+        if (lastModified != null) {
+            entry.setLastModificationDate(lastModified.getTime());
+        } else {
+            entry.setLastModificationDate(0);
+        }
 
         if (entry.isInspectingContent()) {
             for (final URLTriggerContentType type : entry.getContentTypes()) {
