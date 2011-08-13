@@ -224,9 +224,11 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
                 entries.add(fillAndGetEntry(req, (JSONObject) entryObject));
             } else {
                 JSONArray jsonArray = (JSONArray) entryObject;
-                Iterator it = jsonArray.iterator();
-                while (it.hasNext()) {
-                    entries.add(fillAndGetEntry(req, (JSONObject) it.next()));
+                if (jsonArray != null) {
+                    Iterator it = jsonArray.iterator();
+                    while (it.hasNext()) {
+                        entries.add(fillAndGetEntry(req, (JSONObject) it.next()));
+                    }
                 }
             }
 
