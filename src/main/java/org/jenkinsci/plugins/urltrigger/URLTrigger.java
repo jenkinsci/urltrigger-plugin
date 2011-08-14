@@ -80,6 +80,12 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
     }
 
     private boolean checkForScheduling(URLTriggerLog log) throws URLTriggerException {
+
+        if (entries == null || entries.size() == 0) {
+            log.info("No URLs to poll.");
+            return false;
+        }
+
         ClientConfig cc = new DefaultClientConfig();
         Client client = Client.create(cc);
         for (URLTriggerEntry entry : entries) {
