@@ -1,7 +1,7 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
 
   <f:entry title="${descriptor.label}"  help="/descriptor/org.jenkinsci.plugins.urltrigger.content.TEXTContentType/help/type">
-     <f:repeatable var="element" items="${instance.regExElements}">
+     <f:repeatable var="element" items="${instance.regExElements}" add="${%Add a regEx}">
         <table width="100%">
            <f:entry field="regEx" title="${%Regular Expression}">
                <f:textbox name="txt.regEx" value="${element.regEx}"/>

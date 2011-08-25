@@ -4,7 +4,7 @@
 
     <f:entry>
 
-        <f:repeatable var="urlElements" items="${instance.entries}">
+        <f:repeatable var="urlElements" items="${instance.entries}" add="${%Add an URL to poll}">
             <table width="100%">
 
                 <f:entry field="url" title="${%URL Content Path}">
@@ -51,8 +51,10 @@
                          title="${%Inspect URL content}">
 
                            <f:block>
-                                <f:hetero-list name="urlElements.contentTypes" descriptors="${descriptor.listURLTriggerDescriptors}" items="${urlElements.contentTypes}" />
-                                <label class="attach-previous">${%Content nature to check}</label>
+                                <f:hetero-list name="urlElements.contentTypes"
+                                               descriptors="${descriptor.listURLTriggerDescriptors}"
+                                               addCaption="${%Add a content nature}"
+                                               items="${urlElements.contentTypes}" />
                            </f:block>
 
                       </f:optionalBlock>
