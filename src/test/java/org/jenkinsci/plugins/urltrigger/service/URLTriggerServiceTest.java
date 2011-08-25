@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.urltrigger.service;
 
-import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import org.jenkinsci.plugins.urltrigger.URLTriggerEntry;
 import org.jenkinsci.plugins.urltrigger.URLTriggerException;
@@ -25,9 +24,6 @@ import static org.mockito.Mockito.*;
 public class URLTriggerServiceTest {
 
     @Mock
-    private Client clientMock;
-
-    @Mock
     private ClientResponse clientResponseMock;
 
     private URLTriggerService urlTriggerService;
@@ -43,7 +39,7 @@ public class URLTriggerServiceTest {
         Date d1 = Calendar.getInstance().getTime();
         when(clientResponseMock.getLastModified()).thenReturn(d1);
         URLTriggerEntry urlTriggerEntry = new URLTriggerEntry();
-        urlTriggerService.processURLEntryFromStartStage(clientResponseMock, urlTriggerEntry);
+        urlTriggerService.initContent(clientResponseMock, urlTriggerEntry);
         Assert.assertThat(urlTriggerEntry.getLastModificationDate(), is(d1.getTime()));
     }
 
@@ -53,7 +49,7 @@ public class URLTriggerServiceTest {
         when(clientResponseMock.getLastModified()).thenReturn(stubDate);
         URLTriggerEntry urlTriggerEntryMock = mock(URLTriggerEntry.class);
         when(urlTriggerEntryMock.isInspectingContent()).thenReturn(false);
-        urlTriggerService.processURLEntryFromStartStage(clientResponseMock, urlTriggerEntryMock);
+        urlTriggerService.initContent(clientResponseMock, urlTriggerEntryMock);
         verify(urlTriggerEntryMock, never()).getContentTypes();
     }
 
@@ -68,7 +64,7 @@ public class URLTriggerServiceTest {
         when(urlTriggerEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{urlTriggerContentTypeMock});
         when(clientResponseMock.getEntity(String.class)).thenReturn(null);
 
-        urlTriggerService.processURLEntryFromStartStage(clientResponseMock, urlTriggerEntryMock);
+        urlTriggerService.initContent(clientResponseMock, urlTriggerEntryMock);
     }
 
 
@@ -86,7 +82,7 @@ public class URLTriggerServiceTest {
         when(urlTriggerEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{urlTriggerContentTypeMock});
         when(clientResponseMock.getEntity(String.class)).thenReturn(contentStub);
 
-        urlTriggerService.processURLEntryFromStartStage(clientResponseMock, urlTriggerEntryMock);
+        urlTriggerService.initContent(clientResponseMock, urlTriggerEntryMock);
 
         verify(urlTriggerEntryMock, times(1)).getContentTypes();
         verify(urlTriggerContentTypeMock, times(1)).initForContent(contentStub);
