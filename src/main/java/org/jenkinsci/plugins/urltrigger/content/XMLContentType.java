@@ -98,12 +98,12 @@ public class XMLContentType extends URLTriggerContentType {
         }
 
         if (results.size() != newResults.size()) {
-            throw new URLTriggerException("Regarding the trigger life cycle, the size between old results and new results has to be the same.");
+            throw new URLTriggerException("According the trigger lifecycle, the size between old results and new results has to be the same.");
         }
 
         //The results object have to be the same keys
         if (!results.keySet().containsAll(newResults.keySet())) {
-            throw new URLTriggerException("Regarding the set up of the result objects, the keys for the old results and the new results have to be the same.");
+            throw new URLTriggerException("According the setup of the result objects, the keys for the old results and the new results have to be the same.");
         }
 
 
