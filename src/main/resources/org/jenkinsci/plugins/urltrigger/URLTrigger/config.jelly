@@ -4,7 +4,7 @@
 
     <f:entry>
 
-        <f:repeatable var="urlElements" items="${instance.entries}" add="${%Add an URL to poll}">
+        <f:repeatable var="urlElements" items="${instance.entries}" add="${%Add URL to monitor}">
             <table width="100%">
 
                 <f:entry field="url" title="${%URL Content Path}">
