@@ -22,7 +22,11 @@ public class URLTriggerService {
         return INSTANCE;
     }
 
-    public void processURLEntryFromStartStage(ClientResponse clientResponse, URLTriggerEntry entry) throws URLTriggerException {
+    public void refreshContent(ClientResponse clientResponse, URLTriggerEntry entry) throws URLTriggerException {
+        initContent(clientResponse, entry);
+    }
+
+    public void initContent(ClientResponse clientResponse, URLTriggerEntry entry) throws URLTriggerException {
 
         if (clientResponse == null) {
             throw new NullPointerException("The given clientResponse object is not set.");
