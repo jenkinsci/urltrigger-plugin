@@ -70,9 +70,9 @@ public class URLTriggerService {
 
         //Check the last modified date if needed
         if (entry.isCheckLastModificationDate()) {
-            Date lastModifiedDate = clientResponse.getLastModified();
-            if (lastModifiedDate != null) {
-                long newLastModifiedDate = lastModifiedDate.getTime();
+            Date lastModificationDate = clientResponse.getLastModified();
+            if (lastModificationDate != null) {
+                long newLastModifiedDate = lastModificationDate.getTime();
                 long entryLastModificationDate = entry.getLastModificationDate();
                 if (entryLastModificationDate == 0L) {
                     entry.setLastModificationDate(newLastModifiedDate);

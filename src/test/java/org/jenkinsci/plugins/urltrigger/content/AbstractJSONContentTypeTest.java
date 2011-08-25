@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import org.jenkinsci.plugins.urltrigger.URLTriggerException;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
