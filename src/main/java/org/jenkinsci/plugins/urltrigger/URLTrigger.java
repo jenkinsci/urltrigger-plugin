@@ -259,12 +259,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             }
 
             //Process checkLastModifiedDate
-            Object checkLastModifiedDateObject = entryObject.get("checkLastModificationDate");
-            if (checkLastModifiedDateObject != null) {
-                urlTriggerEntry.setCheckLastModificationDate(true);
-            } else {
-                urlTriggerEntry.setCheckLastModificationDate(false);
-            }
+            urlTriggerEntry.setCheckLastModificationDate(entryObject.getBoolean("checkLastModificationDate"));
 
             //Process inspectingContent
             Object inspectingContentObject = entryObject.get("inspectingContent");
