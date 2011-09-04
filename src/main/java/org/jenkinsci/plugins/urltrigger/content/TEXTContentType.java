@@ -21,9 +21,9 @@ public class TEXTContentType extends URLTriggerContentType {
     private List<TEXTContentEntry> regExElements = new ArrayList<TEXTContentEntry>();
 
     @DataBoundConstructor
-    public TEXTContentType(List<TEXTContentEntry> regExElements) {
-        if (regExElements != null) {
-            this.regExElements = regExElements;
+    public TEXTContentType(List<TEXTContentEntry> element) {
+        if (element != null) {
+            this.regExElements = element;
         }
     }
 
