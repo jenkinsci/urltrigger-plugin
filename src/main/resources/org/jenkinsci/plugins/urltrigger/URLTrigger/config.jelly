@@ -7,59 +7,74 @@
         <f:repeatable var="urlElements" items="${instance.entries}" add="${%Add URL to monitor}">
             <table width="100%">
 
-                <f:entry field="url" title="${%URL Content Path}">
+                <f:entry field="url" title="${%URL}">
                     <f:textbox name="url"
                                checkUrl="'${rootURL}/trigger/URLTrigger/checkURL?value='+encodeURIComponent(this.value)"
                                value="${urlElements.url}"/>
                 </f:entry>
 
-                <f:entry>
-                    <table style="width:100%">
-                        <f:optionalBlock
-                                field="checkStatus"
-                                name="urlElements.checkStatus"
-                                checked="${urlElements.checkStatus}"
-                                title="${%Check the status}">
+                <f:advanced>
+                    <f:section title="${%Basic Authentication}">
+                        <f:entry field="username" title="${%User}">
+                            <f:textbox name="username"
+                                       value="${urlElements.username}"/>
+                        </f:entry>
+                        <f:entry field="password" title="${%Password}">
+                            <f:password name="password"
+                                        value="${urlElements.realPassword}"/>
+                        </f:entry>
+                    </f:section>
+                </f:advanced>
 
-                            <f:entry field="statusCode" title="${%Status Code}">
-                                <f:textbox name="statusCode"
-                                           checkUrl="'${rootURL}/trigger/URLTrigger/checkStatus?value='+encodeURIComponent(this.value)"
-                                           value="${urlElements.statusCode}"/>
-                            </f:entry>
+                <f:section title="${%URL Properties}">
+                    <f:entry>
+                        <table style="width:100%">
+                            <f:optionalBlock
+                                    field="checkStatus"
+                                    name="urlElements.checkStatus"
+                                    checked="${urlElements.checkStatus}"
+                                    title="${%Check the status}">
 
-                        </f:optionalBlock>
-                    </table>
-                </f:entry>
+                                <f:entry field="statusCode" title="${%Status Code}">
+                                    <f:textbox name="statusCode"
+                                               checkUrl="'${rootURL}/trigger/URLTrigger/checkStatus?value='+encodeURIComponent(this.value)"
+                                               value="${urlElements.statusCode}"/>
+                                </f:entry>
 
-                <f:entry>
-                   <table style="width:100%">
-                    <f:checkbox
-                            field="checkLastModificationDate"
-                            name="urlElements.checkLastModificationDate"
-                            checked="${urlElements.checkLastModificationDate}"
-                            title="${%Check the last modification Date}">
-                    </f:checkbox>
-                   </table>
-                </f:entry>
+                            </f:optionalBlock>
+                        </table>
+                    </f:entry>
 
-                <f:entry>
-                   <table style="width:100%">
-                      <f:optionalBlock
-                         name="urlElements.inspectingContent"
-                         field="inspectingContent"
-                         checked="${urlElements.inspectingContent}"
-                         title="${%Inspect URL content}">
 
-                           <f:block>
-                                <f:hetero-list name="urlElements.contentTypes"
-                                               descriptors="${descriptor.listURLTriggerDescriptors}"
-                                               addCaption="${%Add a content nature}"
-                                               items="${urlElements.contentTypes}" />
-                           </f:block>
+                    <f:entry>
+                        <table style="width:100%">
+                            <f:checkbox
+                                    field="checkLastModificationDate"
+                                    name="urlElements.checkLastModificationDate"
+                                    checked="${urlElements.checkLastModificationDate}"
+                                    title="${%Check the last modification Date}">
+                            </f:checkbox>
+                        </table>
+                    </f:entry>
 
-                      </f:optionalBlock>
-                   </table>
-                </f:entry>
+                    <f:entry>
+                        <table style="width:100%">
+                            <f:optionalBlock
+                                    name="urlElements.inspectingContent"
+                                    field="inspectingContent"
+                                    checked="${urlElements.inspectingContent}"
+                                    title="${%Inspect URL content}">
+
+                                <f:block>
+                                    <f:hetero-list name="urlElements.contentTypes"
+                                                   descriptors="${descriptor.listURLTriggerDescriptors}"
+                                                   addCaption="${%Add a content nature}"
+                                                   items="${urlElements.contentTypes}"/>
+                                </f:block>
+                            </f:optionalBlock>
+                        </table>
+                    </f:entry>
+                </f:section>
 
                 <f:entry title="">
                     <div align="right">

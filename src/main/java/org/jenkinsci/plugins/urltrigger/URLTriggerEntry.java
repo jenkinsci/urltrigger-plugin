@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.urltrigger;
 
 import com.sun.jersey.api.client.ClientResponse;
+import hudson.util.Secret;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 
 import java.io.Serializable;
@@ -13,6 +14,10 @@ public class URLTriggerEntry implements Serializable {
     public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
 
     private String url;
+
+    private String username;
+
+    private String password;
 
     private boolean checkStatus;
 
@@ -32,6 +37,36 @@ public class URLTriggerEntry implements Serializable {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    @SuppressWarnings("unused")
+    public String getRealPassword() {
+        if (password == null) {
+            return "";
+        }
+
+        if (password.length() == 0) {
+            return "";
+        }
+
+        Secret secret = Secret.fromString(password);
+        return Secret.toString(secret);
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public boolean isCheckStatus() {

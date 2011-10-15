@@ -5,6 +5,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.Util;
@@ -12,6 +13,7 @@ import hudson.model.*;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
+import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
 import net.sf.json.JSON;
@@ -64,8 +66,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             URLTriggerContentType[] urlTriggerContentTypes = entry.getContentTypes();
             if (entry.getContentTypes() != null) {
                 subActionTitles = new HashMap<String, String>(urlTriggerContentTypes.length);
-                for (int i = 0; i < urlTriggerContentTypes.length; i++) {
-                    URLTriggerContentType fsTriggerContentFileType = urlTriggerContentTypes[i];
+                for (URLTriggerContentType fsTriggerContentFileType : urlTriggerContentTypes) {
                     if (fsTriggerContentFileType != null) {
                         Descriptor<URLTriggerContentType> descriptor = fsTriggerContentFileType.getDescriptor();
                         if (descriptor instanceof URLTriggerContentTypeDescriptor) {
@@ -87,11 +88,12 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         }
 
         ClientConfig cc = new DefaultClientConfig();
-        Client client = Client.create(cc);
         for (URLTriggerEntry entry : entries) {
+            Client client = createClient(cc, entry, log);
             String url = entry.getUrl();
             log.info(String.format("Invoking the url: \n %s", url));
             ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+
             URLTriggerService urlTriggerService = URLTriggerService.getInstance();
             if (urlTriggerService.isSchedulingForURLEntry(clientResponse, entry, log)) {
                 urlTriggerService.refreshContent(clientResponse, entry);
@@ -99,6 +101,22 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             }
         }
         return false;
+    }
+
+    private Client createClient(ClientConfig cc, URLTriggerEntry entry, URLTriggerLog log) {
+        Client client = Client.create(cc);
+        if (isAuthBasic(entry)) {
+            if (log != null) {
+                log.info(String.format("Using Basic Authentication with the user '%s'", entry.getUsername()));
+            }
+            String password = entry.getRealPassword();
+            client.addFilter(new HTTPBasicAuthFilter(entry.getUsername(), password));
+        }
+        return client;
+    }
+
+    private boolean isAuthBasic(URLTriggerEntry entry) {
+        return entry.getUsername() != null;
     }
 
     /**
@@ -152,8 +170,8 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         URLTriggerService service = URLTriggerService.getInstance();
         try {
             ClientConfig cc = new DefaultClientConfig();
-            Client client = Client.create(cc);
             for (URLTriggerEntry entry : entries) {
+                Client client = createClient(cc, entry, null);
                 String url = entry.getUrl();
                 ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
                 service.initContent(clientResponse, entry);
@@ -221,9 +239,8 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             } else {
                 JSONArray jsonArray = (JSONArray) entryObject;
                 if (jsonArray != null) {
-                    Iterator it = jsonArray.iterator();
-                    while (it.hasNext()) {
-                        entries.add(fillAndGetEntry(req, (JSONObject) it.next()));
+                    for (Object aJsonArray : jsonArray) {
+                        entries.add(fillAndGetEntry(req, (JSONObject) aJsonArray));
                     }
                 }
             }
@@ -242,6 +259,16 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         private URLTriggerEntry fillAndGetEntry(StaplerRequest req, JSONObject entryObject) {
             URLTriggerEntry urlTriggerEntry = new URLTriggerEntry();
             urlTriggerEntry.setUrl(entryObject.getString("url"));
+
+            String username = Util.fixEmpty(entryObject.getString("username"));
+            if (username != null) {
+                urlTriggerEntry.setUsername(username);
+
+                Secret secret = Secret.fromString(Util.fixEmpty(entryObject.getString("password")));
+                String encryptedValue = secret.getEncryptedValue();
+
+                urlTriggerEntry.setPassword(encryptedValue);
+            }
 
             //Process checkStatus
             Object checkStatusObject = entryObject.get("checkStatus");
@@ -326,6 +353,8 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
                 return FormValidation.error(e.getMessage());
             }
         }
+
+
     }
 
 }
