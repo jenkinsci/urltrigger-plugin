@@ -6,8 +6,11 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
+import com.sun.jersey.client.apache.ApacheHttpClient;
+import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
+import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.model.*;
 import hudson.triggers.Trigger;
@@ -20,6 +23,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
@@ -87,9 +91,8 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             return false;
         }
 
-        ClientConfig cc = new DefaultClientConfig();
         for (URLTriggerEntry entry : entries) {
-            Client client = createClient(cc, entry, log);
+            Client client = getClientObject(entry, log);
             String url = entry.getUrl();
             log.info(String.format("Invoking the url: \n %s", url));
             ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
@@ -103,16 +106,61 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         return false;
     }
 
-    private Client createClient(ClientConfig cc, URLTriggerEntry entry, URLTriggerLog log) {
-        Client client = Client.create(cc);
+    private Client getClientObject(URLTriggerEntry entry, URLTriggerLog log) {
+        Client client = createClient(entry);
         if (isAuthBasic(entry)) {
-            if (log != null) {
-                log.info(String.format("Using Basic Authentication with the user '%s'", entry.getUsername()));
-            }
-            String password = entry.getRealPassword();
-            client.addFilter(new HTTPBasicAuthFilter(entry.getUsername(), password));
+            addBasicAuth(entry, log, client);
         }
         return client;
+    }
+
+    private Client createClient(URLTriggerEntry entry) {
+        Client client;
+        if (entry.isProxyActivated()) {
+            client = createClientWithProxy();
+        } else {
+            client = createClientWithoutProxy();
+        }
+        return client;
+    }
+
+    private void addBasicAuth(URLTriggerEntry entry, URLTriggerLog log, Client client) {
+        if (log != null) {
+            log.info(String.format("Using Basic Authentication with the user '%s'", entry.getUsername()));
+        }
+        String password = entry.getRealPassword();
+        client.addFilter(new HTTPBasicAuthFilter(entry.getUsername(), password));
+    }
+
+    private Client createClientWithoutProxy() {
+        Client client;
+        ClientConfig cc = new DefaultClientConfig();
+        client = Client.create(cc);
+        return client;
+    }
+
+    private Client createClientWithProxy() {
+        Client client;
+        DefaultApacheHttpClientConfig cc = new DefaultApacheHttpClientConfig();
+        Hudson h = Hudson.getInstance(); // this code might run on slaves
+        ProxyConfiguration p = h != null ? h.proxy : null;
+        if (p != null) {
+            cc.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + p.name + ":" + p.port);
+            String password = getProxyPasswordDecrypted(p);
+            cc.getState().setProxyCredentials(AuthScope.ANY_REALM, p.name, p.port, p.getUserName(), Util.fixNull(password));
+        }
+        client = ApacheHttpClient.create(cc);
+        return client;
+    }
+
+    private String getProxyPasswordDecrypted(ProxyConfiguration p) {
+        String passwordEncrypted = p.getPassword();
+        String password = null;
+        if (passwordEncrypted != null) {
+            Secret secret = Secret.fromString(passwordEncrypted);
+            password = Secret.toString(secret);
+        }
+        return password;
     }
 
     private boolean isAuthBasic(URLTriggerEntry entry) {
@@ -171,7 +219,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         try {
             ClientConfig cc = new DefaultClientConfig();
             for (URLTriggerEntry entry : entries) {
-                Client client = createClient(cc, entry, null);
+                Client client = getClientObject(entry, null);
                 String url = entry.getUrl();
                 ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
                 service.initContent(clientResponse, entry);
@@ -259,14 +307,12 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         private URLTriggerEntry fillAndGetEntry(StaplerRequest req, JSONObject entryObject) {
             URLTriggerEntry urlTriggerEntry = new URLTriggerEntry();
             urlTriggerEntry.setUrl(entryObject.getString("url"));
-
+            urlTriggerEntry.setProxyActivated(entryObject.getBoolean("proxyActivated"));
             String username = Util.fixEmpty(entryObject.getString("username"));
             if (username != null) {
                 urlTriggerEntry.setUsername(username);
-
                 Secret secret = Secret.fromString(Util.fixEmpty(entryObject.getString("password")));
                 String encryptedValue = secret.getEncryptedValue();
-
                 urlTriggerEntry.setPassword(encryptedValue);
             }
 

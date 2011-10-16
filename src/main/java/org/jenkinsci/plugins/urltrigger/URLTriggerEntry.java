@@ -19,6 +19,8 @@ public class URLTriggerEntry implements Serializable {
 
     private String password;
 
+    private boolean proxyActivated;
+
     private boolean checkStatus;
 
     private int statusCode;
@@ -47,10 +49,6 @@ public class URLTriggerEntry implements Serializable {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     @SuppressWarnings("unused")
     public String getRealPassword() {
         if (password == null) {
@@ -67,6 +65,14 @@ public class URLTriggerEntry implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isProxyActivated() {
+        return proxyActivated;
+    }
+
+    public void setProxyActivated(boolean proxyActivated) {
+        this.proxyActivated = proxyActivated;
     }
 
     public boolean isCheckStatus() {

@@ -14,6 +14,14 @@
                 </f:entry>
 
                 <f:advanced>
+                    <f:entry field="proxyActivated">
+                        <f:checkbox
+                                field="proxyActivated"
+                                name="urlElements.proxyActivated"
+                                checked="${urlElements.proxyActivated}"
+                                title="${%Activate the Jenkins Proxy}"/>
+                    </f:entry>
+
                     <f:section title="${%Basic Authentication}">
                         <f:entry field="username" title="${%User}">
                             <f:textbox name="username"
@@ -26,7 +34,8 @@
                     </f:section>
                 </f:advanced>
 
-                <f:section title="${%URL Properties}">
+
+                <f:section title="${%URL Response Check}">
                     <f:entry>
                         <table style="width:100%">
                             <f:optionalBlock
