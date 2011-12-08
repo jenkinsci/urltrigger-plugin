@@ -87,7 +87,6 @@ public class URLTriggerService {
         }
 
         //Check the url content
-        //Call from master (it's an URL, it doesn't matter to call from a slave)
         if (entry.isInspectingContent()) {
             log.info("Inspecting the content");
             for (final URLTriggerContentType type : entry.getContentTypes()) {

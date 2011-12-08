@@ -8,10 +8,7 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
-import hudson.DescriptorExtensionList;
-import hudson.Extension;
-import hudson.ProxyConfiguration;
-import hudson.Util;
+import hudson.*;
 import hudson.model.*;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -26,6 +23,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
+import org.jenkinsci.plugins.urltrigger.service.URLTriggerEnvVarsResolver;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -84,6 +82,65 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         return Collections.singleton(action);
     }
 
+    private Node getLauncherNode(URLTriggerLog log) {
+        AbstractProject p = (AbstractProject) job;
+        Label label = p.getAssignedLabel();
+        if (label == null) {
+            log.info("Running on master.");
+            return getLauncherNodeMaster();
+        } else {
+            log.info(String.format("Searching a node to run the polling for the label '%s'.", label));
+            return getLauncherNodeSlave(p, label, log);
+        }
+    }
+
+    private Node getLauncherNodeMaster() {
+        Computer computer = Hudson.getInstance().toComputer();
+        if (computer != null) {
+            return computer.getNode();
+        } else {
+            return null;
+        }
+    }
+
+    private Node getLauncherNodeSlave(AbstractProject project, Label label, URLTriggerLog log) {
+        Node lastBuildOnNode = project.getLastBuiltOn();
+        boolean isAPreviousBuildNode = lastBuildOnNode != null;
+
+        Set<Node> nodes = label.getNodes();
+        for (Node node : nodes) {
+            if (node != null) {
+                if (!isAPreviousBuildNode) {
+                    FilePath nodePath = node.getRootPath();
+                    if (nodePath != null) {
+                        log.info(String.format("Running on %s.", node.getNodeName()));
+                        return node;
+                    }
+                } else {
+                    FilePath nodeRootPath = node.getRootPath();
+                    if (nodeRootPath != null) {
+                        if (nodeRootPath.equals(lastBuildOnNode.getRootPath())) {
+                            log.info("Running on " + node.getNodeName());
+                            return lastBuildOnNode;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private String getURLValue(URLTriggerEntry entry, Node node, URLTriggerLog log) throws URLTriggerException {
+        String entryURL = entry.getUrl();
+        if (entryURL != null) {
+            URLTriggerEnvVarsResolver resolver = new URLTriggerEnvVarsResolver();
+            Map<String, String> envVars = resolver.getEnvVars((AbstractProject) job, node, log);
+            return Util.replaceMacro(entryURL, envVars);
+        }
+        return null;
+    }
+
     private boolean checkForScheduling(URLTriggerLog log) throws URLTriggerException {
 
         if (entries == null || entries.size() == 0) {
@@ -91,9 +148,10 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             return false;
         }
 
+        Node executionNode = getLauncherNode(log);
         for (URLTriggerEntry entry : entries) {
             Client client = getClientObject(entry, log);
-            String url = entry.getUrl();
+            String url = getURLValue(entry, executionNode, log);
             log.info(String.format("Invoking the url: \n %s", url));
             ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
 
@@ -217,7 +275,6 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
 
         URLTriggerService service = URLTriggerService.getInstance();
         try {
-            ClientConfig cc = new DefaultClientConfig();
             for (URLTriggerEntry entry : entries) {
                 Client client = getClientObject(entry, null);
                 String url = entry.getUrl();
