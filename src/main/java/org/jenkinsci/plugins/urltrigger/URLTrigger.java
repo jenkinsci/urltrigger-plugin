@@ -154,10 +154,8 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
             String url = getURLValue(entry, executionNode, log);
             log.info(String.format("Invoking the url: \n %s", url));
             ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
-
             URLTriggerService urlTriggerService = URLTriggerService.getInstance();
-            if (urlTriggerService.isSchedulingForURLEntry(clientResponse, entry, log)) {
-                urlTriggerService.refreshContent(clientResponse, entry);
+            if (urlTriggerService.isSchedulingAndGetRefresh(clientResponse, entry, log)) {
                 return true;
             }
         }
@@ -272,7 +270,6 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
     @Override
     public void start(BuildableItem project, boolean newInstance) {
         super.start(project, newInstance);
-
         URLTriggerService service = URLTriggerService.getInstance();
         try {
             for (URLTriggerEntry entry : entries) {

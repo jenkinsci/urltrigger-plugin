@@ -22,10 +22,10 @@ public class URLTriggerService {
         return INSTANCE;
     }
 
-    public void refreshContent(ClientResponse clientResponse, URLTriggerEntry entry) throws URLTriggerException {
-        initContent(clientResponse, entry);
-    }
-
+    //    public void refreshContent(ClientResponse clientResponse, URLTriggerEntry entry) throws URLTriggerException {
+//        initContent(clientResponse, entry);
+//    }
+//
     public void initContent(ClientResponse clientResponse, URLTriggerEntry entry) throws URLTriggerException {
 
         if (clientResponse == null) {
@@ -46,58 +46,93 @@ public class URLTriggerService {
         if (entry.isInspectingContent()) {
             for (final URLTriggerContentType type : entry.getContentTypes()) {
                 String stringContent = clientResponse.getEntity(String.class);
+//                String stringContent = null;
+//                try {
+//                    InputStream entityInputStream = clientResponse.getEntityInputStream();
+//                    if (entityInputStream != null) {
+//                        stringContent = IOUtils.toString(entityInputStream);
+//                    }
+//                } catch (IOException ioe) {
+//                    throw new URLTriggerException(ioe);
+//                }
                 if (stringContent == null) {
                     throw new URLTriggerException("The URL content is empty.");
                 }
                 type.initForContent(stringContent);
             }
         }
-
     }
 
-    public boolean isSchedulingForURLEntry(ClientResponse clientResponse, URLTriggerEntry entry, URLTriggerLog log) throws URLTriggerException {
-        //Get the url
-        String url = entry.getUrl();
-
-        //Check the status if needed
+    public boolean isSchedulingAndGetRefresh(ClientResponse clientResponse, URLTriggerEntry entry, URLTriggerLog log) throws URLTriggerException {
+        //Check scheduling
+        boolean job2Schedule = false;
         if (entry.isCheckStatus()) {
-            int status = clientResponse.getStatus();
-            if (status == entry.getStatusCode()) {
-                log.info(String.format("The returned status matches the expected status: \n %s", url));
-                return true;
-            }
+            job2Schedule = checkStatus(entry, log, clientResponse.getStatus());
         }
-
-        //Check the last modified date if needed
         if (entry.isCheckLastModificationDate()) {
             Date lastModificationDate = clientResponse.getLastModified();
-            if (lastModificationDate != null) {
-                long newLastModifiedDate = lastModificationDate.getTime();
-                long entryLastModificationDate = entry.getLastModificationDate();
-                if (entryLastModificationDate == 0L) {
-                    entry.setLastModificationDate(newLastModifiedDate);
-                    return false;
-                }
-                if (entryLastModificationDate != newLastModifiedDate) {
-                    entry.setLastModificationDate(newLastModifiedDate);
-                    log.info("The last modification date has changed.");
-                    return true;
-                }
-            }
+            job2Schedule = job2Schedule || checkLastModificationDate(entry, log, lastModificationDate);
+            refreshLatModificationDate(entry, lastModificationDate);
+        }
+        if (entry.isInspectingContent()) {
+            String content = clientResponse.getEntity(String.class);
+            job2Schedule = job2Schedule || checkContent(entry, log, content);
+            refreshContent(entry, content);
         }
 
-        //Check the url content
-        if (entry.isInspectingContent()) {
-            log.info("Inspecting the content");
-            for (final URLTriggerContentType type : entry.getContentTypes()) {
-                String xmlString = clientResponse.getEntity(String.class);
-                if (xmlString == null) {
-                    throw new URLTriggerException("The URL content is empty.");
-                }
-                boolean isTriggered = type.isTriggeringBuildForContent(xmlString, log);
-                if (isTriggered) {
-                    return true;
-                }
+        return job2Schedule;
+    }
+
+    private void refreshLatModificationDate(URLTriggerEntry entry, Date lastModificationDate) {
+        if (lastModificationDate != null) {
+            entry.setLastModificationDate(lastModificationDate.getTime());
+        } else {
+            entry.setLastModificationDate(0);
+        }
+    }
+
+    private void refreshContent(URLTriggerEntry entry, String content) throws URLTriggerException {
+
+        for (final URLTriggerContentType type : entry.getContentTypes()) {
+            //Refresh the content
+            type.initForContent(content);
+        }
+    }
+
+    private boolean checkStatus(URLTriggerEntry entry, URLTriggerLog log, int status) throws URLTriggerException {
+        if (status == entry.getStatusCode()) {
+            log.info(String.format("The returned status matches the expected status: \n %s", entry.getUrl()));
+            return true;
+        }
+        return false;
+    }
+
+    private boolean checkLastModificationDate(URLTriggerEntry entry, URLTriggerLog log, Date clientLastModificationDate) throws URLTriggerException {
+
+        boolean isTriggering = false;
+        if (clientLastModificationDate != null) {
+            long newLastModifiedDateTime = clientLastModificationDate.getTime();
+            long previousLastModificationDateTime = entry.getLastModificationDate();
+            if (previousLastModificationDateTime != 0 && previousLastModificationDateTime != newLastModifiedDateTime) {
+                log.info("The last modification date has changed.");
+                isTriggering = true;
+            }
+        }
+        return isTriggering;
+    }
+
+
+    private boolean checkContent(URLTriggerEntry entry, URLTriggerLog log, String content) throws URLTriggerException {
+
+        if (content == null) {
+            return false;
+        }
+
+        log.info("Inspecting the content");
+        for (final URLTriggerContentType type : entry.getContentTypes()) {
+            boolean isTriggering = type.isTriggeringBuildForContent(content, log);
+            if (isTriggering) {
+                return true;
             }
         }
 

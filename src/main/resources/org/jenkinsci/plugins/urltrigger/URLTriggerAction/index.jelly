@@ -30,7 +30,8 @@ THE SOFTWARE.
 
       <f:repeatable var="subAction" items="${it.subActionTitle}" noAddButton="true">
          <br/>
-         <b>Inspecting ${subAction.value} content for URL ${subAction.key}</b>
+         Inspecting ${subAction.value} content for URL ${subAction.key}
+         <br/>
          <br/>
       </f:repeatable>
 

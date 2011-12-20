@@ -99,14 +99,14 @@ public class URLTriggerServiceTest {
         when(urlEntryMock.getStatusCode()).thenReturn(status);
         when(clientResponseMock.getStatus()).thenReturn(status);
 
-        boolean result = urlTriggerService.isSchedulingForURLEntry(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
+        boolean result = urlTriggerService.isSchedulingAndGetRefresh(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
         Assert.assertTrue(result);
 
         verify(clientResponseMock, times(1)).getStatus();
         verify(urlEntryMock, times(1)).isCheckStatus();
         verify(urlEntryMock, times(1)).getStatusCode();
-        verify(urlEntryMock, never()).isInspectingContent();
-        verify(urlEntryMock, never()).isCheckLastModificationDate();
+        verify(urlEntryMock, times(1)).isCheckLastModificationDate();
+        verify(urlEntryMock, times(1)).isInspectingContent();
     }
 
 
@@ -128,7 +128,7 @@ public class URLTriggerServiceTest {
         verify(urlEntryMock, times(1)).isCheckLastModificationDate();
         verify(urlEntryMock, times(1)).getLastModificationDate();
         verify(urlEntryMock, times(1)).setLastModificationDate(responseDate.getTime());
-        verify(urlEntryMock, never()).isInspectingContent();
+        verify(urlEntryMock, times(1)).isInspectingContent();
         verify(urlEntryMock, never()).getContentTypes();
     }
 
@@ -139,7 +139,7 @@ public class URLTriggerServiceTest {
         Date responseDate = Calendar.getInstance().getTime();
 
         setWhenIsSchedulingForURLEntryCheckLastModificationDate(urlEntryMock, 0L, responseDate);
-        boolean result = urlTriggerService.isSchedulingForURLEntry(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
+        boolean result = urlTriggerService.isSchedulingAndGetRefresh(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
         Assert.assertFalse(result);
         verifyIsSchedulingForURLEntryCheckLastModificationDate(urlEntryMock, responseDate);
     }
@@ -151,7 +151,7 @@ public class URLTriggerServiceTest {
         Date responseDate = Calendar.getInstance().getTime();
 
         setWhenIsSchedulingForURLEntryCheckLastModificationDate(urlEntryMock, 1L, responseDate);
-        boolean result = urlTriggerService.isSchedulingForURLEntry(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
+        boolean result = urlTriggerService.isSchedulingAndGetRefresh(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
         Assert.assertTrue(result);
         verifyIsSchedulingForURLEntryCheckLastModificationDate(urlEntryMock, responseDate);
     }
@@ -165,7 +165,7 @@ public class URLTriggerServiceTest {
         when(urlEntryMock.isInspectingContent()).thenReturn(true);
         when(urlEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{});
 
-        boolean result = urlTriggerService.isSchedulingForURLEntry(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
+        boolean result = urlTriggerService.isSchedulingAndGetRefresh(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
         Assert.assertFalse(result);
 
         verify(urlEntryMock, times(1)).isCheckStatus();
@@ -177,7 +177,7 @@ public class URLTriggerServiceTest {
 
         verify(clientResponseMock, never()).getStatus();
         verify(clientResponseMock, never()).getLastModified();
-        verify(clientResponseMock, never()).getEntity(String.class);
+        verify(clientResponseMock, times(1)).getEntity(String.class);
     }
 
     @Test
@@ -191,12 +191,8 @@ public class URLTriggerServiceTest {
         when(urlEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{contentTypeMock});
         when(clientResponseMock.getEntity(Matchers.any(Class.class))).thenReturn(null);
 
-        try {
-            urlTriggerService.isSchedulingForURLEntry(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
-            Assert.assertTrue(false);
-        } catch (URLTriggerException urle) {
-            Assert.assertTrue(true);
-        }
+        urlTriggerService.isSchedulingAndGetRefresh(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
+        Assert.assertFalse(false);
 
         verify(urlEntryMock, times(1)).isCheckStatus();
         verify(urlEntryMock, never()).getStatusCode();
@@ -223,7 +219,7 @@ public class URLTriggerServiceTest {
         when(clientResponseMock.getEntity(Matchers.any(Class.class))).thenReturn("S");
         when(contentTypeMock.isTriggeringBuildForContent(Matchers.any(String.class), Matchers.any(URLTriggerLog.class))).thenReturn(isTriggeringBuildContent);
 
-        boolean result = urlTriggerService.isSchedulingForURLEntry(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
+        boolean result = urlTriggerService.isSchedulingAndGetRefresh(clientResponseMock, urlEntryMock, mock(URLTriggerLog.class));
         Assert.assertEquals(expectedResult, result);
 
         verify(urlEntryMock, times(1)).isCheckStatus();
@@ -231,7 +227,7 @@ public class URLTriggerServiceTest {
         verify(urlEntryMock, times(1)).isCheckLastModificationDate();
         verify(urlEntryMock, never()).getLastModificationDate();
         verify(urlEntryMock, times(1)).isInspectingContent();
-        verify(urlEntryMock, times(1)).getContentTypes();
+        verify(urlEntryMock, times(2)).getContentTypes();
 
         verify(clientResponseMock, never()).getStatus();
         verify(clientResponseMock, never()).getLastModified();
