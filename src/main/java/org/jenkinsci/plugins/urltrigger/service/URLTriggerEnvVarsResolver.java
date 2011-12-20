@@ -11,8 +11,6 @@ import hudson.remoting.Callable;
 import org.jenkinsci.plugins.envinject.EnvInjectAction;
 import org.jenkinsci.plugins.urltrigger.URLTriggerException;
 import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
-import org.kohsuke.stapler.Stapler;
-import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.io.Serializable;
