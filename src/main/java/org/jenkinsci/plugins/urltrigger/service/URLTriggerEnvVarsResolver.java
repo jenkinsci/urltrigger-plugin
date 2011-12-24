@@ -8,9 +8,9 @@ import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.Run;
 import hudson.remoting.Callable;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.envinject.EnvInjectAction;
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
-import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -22,7 +22,7 @@ import java.util.Map;
  */
 public class URLTriggerEnvVarsResolver implements Serializable {
 
-    public Map<String, String> getEnvVars(AbstractProject project, Node node, URLTriggerLog log) throws URLTriggerException {
+    public Map<String, String> getEnvVars(AbstractProject project, Node node, XTriggerLog log) throws XTriggerException {
         Run lastBuild = project.getLastBuild();
         if (lastBuild != null) {
             EnvInjectAction envInjectAction = lastBuild.getAction(EnvInjectAction.class);
@@ -33,7 +33,7 @@ public class URLTriggerEnvVarsResolver implements Serializable {
         return getDefaultEnvVarsJob(project, node);
     }
 
-    private Map<String, String> getDefaultEnvVarsJob(AbstractProject project, Node node) throws URLTriggerException {
+    private Map<String, String> getDefaultEnvVarsJob(AbstractProject project, Node node) throws XTriggerException {
         Map<String, String> result = computeEnvVarsMaster(project);
         if (node != null) {
             result.putAll(computeEnvVarsNode(project, node));
@@ -41,7 +41,7 @@ public class URLTriggerEnvVarsResolver implements Serializable {
         return result;
     }
 
-    private Map<String, String> computeEnvVarsMaster(AbstractProject project) throws URLTriggerException {
+    private Map<String, String> computeEnvVarsMaster(AbstractProject project) throws XTriggerException {
         EnvVars env = new EnvVars();
         env.put("JENKINS_SERVER_COOKIE", Util.getDigestOf("ServerID:" + Hudson.getInstance().getSecretKey()));
         env.put("HUDSON_SERVER_COOKIE", Util.getDigestOf("ServerID:" + Hudson.getInstance().getSecretKey())); // Legacy compatibility
@@ -51,12 +51,12 @@ public class URLTriggerEnvVarsResolver implements Serializable {
         return env;
     }
 
-    private Map<String, String> computeEnvVarsNode(AbstractProject project, Node node) throws URLTriggerException {
+    private Map<String, String> computeEnvVarsNode(AbstractProject project, Node node) throws XTriggerException {
         assert node != null;
         assert node.getRootPath() != null;
         try {
-            Map<String, String> envVars = node.getRootPath().act(new Callable<Map<String, String>, URLTriggerException>() {
-                public Map<String, String> call() throws URLTriggerException {
+            Map<String, String> envVars = node.getRootPath().act(new Callable<Map<String, String>, XTriggerException>() {
+                public Map<String, String> call() throws XTriggerException {
                     return EnvVars.masterEnvVars;
                 }
             });
@@ -71,9 +71,9 @@ public class URLTriggerEnvVarsResolver implements Serializable {
             return envVars;
 
         } catch (IOException ioe) {
-            throw new URLTriggerException(ioe);
+            throw new XTriggerException(ioe);
         } catch (InterruptedException ie) {
-            throw new URLTriggerException(ie);
+            throw new XTriggerException(ie);
         }
     }
 

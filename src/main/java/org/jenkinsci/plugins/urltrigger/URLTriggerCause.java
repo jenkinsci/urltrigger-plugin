@@ -1,14 +1,14 @@
 package org.jenkinsci.plugins.urltrigger;
 
-import hudson.model.Cause;
+import org.jenkinsci.lib.xtrigger.XTriggerCause;
 
 /**
  * @author Gregory Boissinot
  */
-public class URLTriggerCause extends Cause {
+public class URLTriggerCause extends XTriggerCause {
 
-    @Override
-    public String getShortDescription() {
-        return "[URLTrigger] - Check the URL";
+    public URLTriggerCause(String causeFrom) {
+        super("URLTrigger", causeFrom);
     }
+
 }

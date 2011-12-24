@@ -2,8 +2,8 @@ package org.jenkinsci.plugins.urltrigger.content;
 
 import com.jayway.jsonpath.JsonPath;
 import hudson.Extension;
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
-import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.content.json.util.JsonUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -35,10 +35,10 @@ public class JSONContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContentType(String content) throws URLTriggerException {
+    public void initForContentType(String content) throws XTriggerException {
 
         if (content.trim().isEmpty()) {
-            throw new URLTriggerException("The given content is empty.");
+            throw new XTriggerException("The given content is empty.");
         }
 
         JsonUtils.validateJson(content);
@@ -46,8 +46,7 @@ public class JSONContentType extends URLTriggerContentType {
         results = readJsonPath(content);
     }
 
-
-    private Map<String, Object> readJsonPath(String content) throws URLTriggerException {
+    private Map<String, Object> readJsonPath(String content) throws XTriggerException {
         Map<String, Object> results = new HashMap<String, Object>(jsonPaths.size());
         try {
             for (JSONContentEntry jsonContentEntry : jsonPaths) {
@@ -56,13 +55,13 @@ public class JSONContentType extends URLTriggerContentType {
                 results.put(jsonPath, result);
             }
         } catch (ParseException pe) {
-            throw new URLTriggerException(pe);
+            throw new XTriggerException(pe);
         }
         return results;
     }
 
     @Override
-    public boolean isTriggeringBuildForContent(String content, URLTriggerLog log) throws URLTriggerException {
+    public boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
         Map<String, Object> newResults = readJsonPath(content);
 
@@ -74,12 +73,12 @@ public class JSONContentType extends URLTriggerContentType {
         }
 
         if (results.size() != newResults.size()) {
-            throw new URLTriggerException("Regarding the trigger life cycle, the size between old results and new results has to be the same.");
+            throw new XTriggerException("Regarding the trigger life cycle, the size between old results and new results has to be the same.");
         }
 
         //The results object have to be the same keys
         if (!results.keySet().containsAll(newResults.keySet())) {
-            throw new URLTriggerException("Regarding the set up of the result objects, the keys for the old results and the new results have to be the same.");
+            throw new XTriggerException("Regarding the set up of the result objects, the keys for the old results and the new results have to be the same.");
         }
 
         for (Map.Entry<String, Object> entry : results.entrySet()) {

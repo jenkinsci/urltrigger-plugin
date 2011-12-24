@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -19,14 +19,14 @@ public abstract class AbstractJSONContentTypeTest extends AbstractContentTypeTes
         return readContentAsString("json/emptyJson.json");
     }
 
-    @Test(expected = URLTriggerException.class)
+    @Test(expected = XTriggerException.class)
     public void testInitForContentEmpty() throws Exception {
         initForContent(getEmptyContent());
     }
 
 
     @Test(expected = Throwable.class)
-    public void testInitForContentNoJSON() throws URLTriggerException {
+    public void testInitForContentNoJSON() throws XTriggerException {
         initForContent(new String("NO JSON"));
     }
 }

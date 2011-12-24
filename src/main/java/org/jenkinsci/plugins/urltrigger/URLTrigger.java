@@ -10,17 +10,18 @@ import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 import hudson.*;
 import hudson.model.*;
-import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
-import hudson.util.StreamTaskListener;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.jenkinsci.lib.xtrigger.AbstractTrigger;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerEnvVarsResolver;
@@ -30,8 +31,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.File;
-import java.io.Serializable;
-import java.text.DateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,7 +41,7 @@ import java.util.logging.Logger;
 /**
  * @author Gregory Boissinot
  */
-public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
+public class URLTrigger extends AbstractTrigger {
 
     private static Logger LOGGER = Logger.getLogger(URLTrigger.class.getName());
 
@@ -82,7 +81,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         return Collections.singleton(action);
     }
 
-    private Node getLauncherNode(URLTriggerLog log) {
+    private Node getLauncherNode(XTriggerLog log) {
         AbstractProject p = (AbstractProject) job;
         Label label = p.getAssignedLabel();
         if (label == null) {
@@ -103,7 +102,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         }
     }
 
-    private Node getLauncherNodeSlave(AbstractProject project, Label label, URLTriggerLog log) {
+    private Node getLauncherNodeSlave(AbstractProject project, Label label, XTriggerLog log) {
         Node lastBuildOnNode = project.getLastBuiltOn();
         boolean isAPreviousBuildNode = lastBuildOnNode != null;
 
@@ -131,7 +130,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
     }
 
 
-    private String getURLValue(URLTriggerEntry entry, Node node, URLTriggerLog log) throws URLTriggerException {
+    private String getURLValue(URLTriggerEntry entry, Node node, XTriggerLog log) throws XTriggerException {
         String entryURL = entry.getUrl();
         if (entryURL != null) {
             URLTriggerEnvVarsResolver resolver = new URLTriggerEnvVarsResolver();
@@ -141,7 +140,14 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         return null;
     }
 
-    private boolean checkForScheduling(URLTriggerLog log) throws URLTriggerException {
+
+    @Override
+    public String getCause() {
+        return "URLTrigger";
+    }
+
+    @Override
+    protected boolean checkIfModified(XTriggerLog log) throws XTriggerException {
 
         if (entries == null || entries.size() == 0) {
             log.info("No URLs to poll.");
@@ -162,7 +168,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         return false;
     }
 
-    private Client getClientObject(URLTriggerEntry entry, URLTriggerLog log) {
+    private Client getClientObject(URLTriggerEntry entry, XTriggerLog log) {
         Client client = createClient(entry);
         if (isAuthBasic(entry)) {
             addBasicAuth(entry, log, client);
@@ -180,7 +186,7 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         return client;
     }
 
-    private void addBasicAuth(URLTriggerEntry entry, URLTriggerLog log, Client client) {
+    private void addBasicAuth(URLTriggerEntry entry, XTriggerLog log, Client client) {
         if (log != null) {
             log.info(String.format("Using Basic Authentication with the user '%s'", entry.getUsername()));
         }
@@ -223,47 +229,44 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
         return entry.getUsername() != null;
     }
 
-    /**
-     * Asynchronous task
-     */
-    protected class Runner implements Runnable, Serializable {
+//    /**
+//     * Asynchronous task
+//     */
+//    protected class Runner implements Runnable, Serializable {
+//
+//        private AbstractProject project;
+//
+//        private URLTriggerLog log;
+//
+//        Runner(AbstractProject project, URLTriggerLog log) {
+//            this.project = project;
+//            this.log = log;
+//        }
+//
+//        public void run() {
+//
+//            try {
+//                long start = System.currentTimeMillis();
+//                log.info("Polling started on " + DateFormat.getDateTimeInstance().format(new Date(start)));
+//                boolean scheduling = checkForScheduling(log);
+//                log.info("Polling complete. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
+//                if (scheduling) {
+//                    log.info("There are changes. Scheduling a build.");
+//                    project.scheduleBuild(new URLTriggerCause());
+//                } else {
+//                    log.info("No changes.");
+//                }
+//            } catch (URLTriggerException e) {
+//                log.error("Polling error " + e.getMessage());
+//            } catch (Throwable e) {
+//                log.error("SEVERE - Polling error " + e.getMessage());
+//            }
+//        }
+//    }
 
-        private AbstractProject project;
 
-        private URLTriggerLog log;
-
-        Runner(AbstractProject project, URLTriggerLog log) {
-            this.project = project;
-            this.log = log;
-        }
-
-        public void run() {
-
-            try {
-                long start = System.currentTimeMillis();
-                log.info("Polling started on " + DateFormat.getDateTimeInstance().format(new Date(start)));
-                boolean scheduling = checkForScheduling(log);
-                log.info("Polling complete. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
-                if (scheduling) {
-                    log.info("There are changes. Scheduling a build.");
-                    project.scheduleBuild(new URLTriggerCause());
-                } else {
-                    log.info("No changes.");
-                }
-            } catch (URLTriggerException e) {
-                log.error("Polling error " + e.getMessage());
-            } catch (Throwable e) {
-                log.error("SEVERE - Polling error " + e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * Gets the triggering log file
-     *
-     * @return the trigger log
-     */
-    private File getLogFile() {
+    @Override
+    protected File getLogFile() {
         return new File(job.getRootDir(), "trigger-script-polling.log");
     }
 
@@ -278,36 +281,11 @@ public class URLTrigger extends Trigger<BuildableItem> implements Serializable {
                 ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
                 service.initContent(clientResponse, entry);
             }
-        } catch (URLTriggerException urle) {
-            LOGGER.log(Level.SEVERE, "Error on trigger startup " + urle.getMessage());
-            urle.printStackTrace();
         } catch (Throwable t) {
             LOGGER.log(Level.SEVERE, "Severe error on trigger startup " + t.getMessage());
             t.printStackTrace();
         }
     }
-
-    @Override
-    public void run() {
-        if (!Hudson.getInstance().isQuietingDown() && ((AbstractProject) this.job).isBuildable()) {
-            URLScriptTriggerDescriptor descriptor = getDescriptor();
-            ExecutorService executorService = descriptor.getExecutor();
-            StreamTaskListener listener;
-            try {
-                listener = new StreamTaskListener(getLogFile());
-                URLTriggerLog log = new URLTriggerLog(listener);
-                if (job instanceof AbstractProject) {
-                    Runner runner = new Runner((AbstractProject) job, log);
-                    executorService.execute(runner);
-                }
-
-            } catch (Throwable t) {
-                LOGGER.log(Level.SEVERE, "Severe Error during the trigger execution " + t.getMessage());
-                t.printStackTrace();
-            }
-        }
-    }
-
 
     @Override
     public URLScriptTriggerDescriptor getDescriptor() {

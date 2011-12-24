@@ -4,8 +4,8 @@ import hudson.ExtensionPoint;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.model.Hudson;
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
-import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerLog;
 
 import java.io.Serializable;
 
@@ -21,17 +21,17 @@ public abstract class URLTriggerContentType implements ExtensionPoint, Describab
     /**
      * These methods have to be overridden in each trigger implementation
      */
-    public abstract void initForContentType(String content) throws URLTriggerException;
+    public abstract void initForContentType(String content) throws XTriggerException;
 
 
-    public void initForContent(String content) throws URLTriggerException {
+    public void initForContent(String content) throws XTriggerException {
 
         if (content == null) {
-            throw new URLTriggerException("The given content is not set.");
+            throw new XTriggerException("The given content is not set.");
         }
 
         initForContentType(content);
     }
 
-    public abstract boolean isTriggeringBuildForContent(String content, URLTriggerLog log) throws URLTriggerException;
+    public abstract boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException;
 }

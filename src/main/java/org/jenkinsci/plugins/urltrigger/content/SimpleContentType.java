@@ -2,8 +2,8 @@ package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Extension;
 import hudson.Util;
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
-import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -19,12 +19,12 @@ public class SimpleContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContentType(String content) throws URLTriggerException {
+    public void initForContentType(String content) throws XTriggerException {
         this.md5 = Util.getDigestOf(content);
     }
 
     @Override
-    public boolean isTriggeringBuildForContent(String content, URLTriggerLog log) throws URLTriggerException {
+    public boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
         assert md5 != null;
 
         String newComputedMd5 = Util.getDigestOf(content);

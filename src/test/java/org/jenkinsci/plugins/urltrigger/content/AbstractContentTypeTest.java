@@ -1,7 +1,7 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Util;
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public abstract class AbstractContentTypeTest extends AbstractURLTriggerContentT
     //---
 
     @Test(expected = Throwable.class)
-    public void testInitForContentNull() throws URLTriggerException {
+    public void testInitForContentNull() throws XTriggerException {
         initForContent(null);
     }
 

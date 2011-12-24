@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.urltrigger.content.json.util;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
 
 import java.io.IOException;
 
@@ -12,19 +12,19 @@ import java.io.IOException;
  */
 public class JsonUtils {
 
-    public static void validateJson(String content) throws URLTriggerException {
+    public static void validateJson(String content) throws XTriggerException {
         try {
             JsonParser parser = new JsonFactory().createJsonParser(content.getBytes());
             JsonToken currentToken = parser.nextToken();
             if (currentToken.equals(JsonToken.START_OBJECT)) {
                 validateObject(parser);
             } else if (currentToken.equals(JsonToken.START_ARRAY)) {
-                throw new URLTriggerException("Json documents starting with arrays are not supported!");
+                throw new XTriggerException("Json documents starting with arrays are not supported!");
             } else {
-                throw new URLTriggerException("Bad Json value starting with: " + currentToken.toString());
+                throw new XTriggerException("Bad Json value starting with: " + currentToken.toString());
             }
         } catch (IOException ex) {
-            throw new URLTriggerException("Bad Json value: " + ex.getMessage());
+            throw new XTriggerException("Bad Json value: " + ex.getMessage());
         }
     }
 

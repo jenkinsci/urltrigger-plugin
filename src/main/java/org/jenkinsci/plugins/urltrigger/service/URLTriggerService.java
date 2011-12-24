@@ -1,9 +1,9 @@
 package org.jenkinsci.plugins.urltrigger.service;
 
 import com.sun.jersey.api.client.ClientResponse;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.URLTriggerEntry;
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
-import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 
 import java.util.Date;
@@ -26,7 +26,7 @@ public class URLTriggerService {
 //        initContent(clientResponse, entry);
 //    }
 //
-    public void initContent(ClientResponse clientResponse, URLTriggerEntry entry) throws URLTriggerException {
+    public void initContent(ClientResponse clientResponse, URLTriggerEntry entry) throws XTriggerException {
 
         if (clientResponse == null) {
             throw new NullPointerException("The given clientResponse object is not set.");
@@ -56,14 +56,14 @@ public class URLTriggerService {
 //                    throw new URLTriggerException(ioe);
 //                }
                 if (stringContent == null) {
-                    throw new URLTriggerException("The URL content is empty.");
+                    throw new XTriggerException("The URL content is empty.");
                 }
                 type.initForContent(stringContent);
             }
         }
     }
 
-    public boolean isSchedulingAndGetRefresh(ClientResponse clientResponse, URLTriggerEntry entry, URLTriggerLog log) throws URLTriggerException {
+    public boolean isSchedulingAndGetRefresh(ClientResponse clientResponse, URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
         //Check scheduling
         boolean job2Schedule = false;
         if (entry.isCheckStatus()) {
@@ -91,7 +91,7 @@ public class URLTriggerService {
         }
     }
 
-    private void refreshContent(URLTriggerEntry entry, String content) throws URLTriggerException {
+    private void refreshContent(URLTriggerEntry entry, String content) throws XTriggerException {
 
         for (final URLTriggerContentType type : entry.getContentTypes()) {
             //Refresh the content
@@ -99,7 +99,7 @@ public class URLTriggerService {
         }
     }
 
-    private boolean checkStatus(URLTriggerEntry entry, URLTriggerLog log, int status) throws URLTriggerException {
+    private boolean checkStatus(URLTriggerEntry entry, XTriggerLog log, int status) throws XTriggerException {
         if (status == entry.getStatusCode()) {
             log.info(String.format("The returned status matches the expected status: \n %s", entry.getUrl()));
             return true;
@@ -107,7 +107,7 @@ public class URLTriggerService {
         return false;
     }
 
-    private boolean checkLastModificationDate(URLTriggerEntry entry, URLTriggerLog log, Date clientLastModificationDate) throws URLTriggerException {
+    private boolean checkLastModificationDate(URLTriggerEntry entry, XTriggerLog log, Date clientLastModificationDate) throws XTriggerException {
 
         boolean isTriggering = false;
         if (clientLastModificationDate != null) {
@@ -122,7 +122,7 @@ public class URLTriggerService {
     }
 
 
-    private boolean checkContent(URLTriggerEntry entry, URLTriggerLog log, String content) throws URLTriggerException {
+    private boolean checkContent(URLTriggerEntry entry, XTriggerLog log, String content) throws XTriggerException {
 
         if (content == null) {
             return false;

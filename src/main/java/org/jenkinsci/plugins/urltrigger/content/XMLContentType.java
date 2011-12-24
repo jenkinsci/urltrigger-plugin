@@ -1,8 +1,8 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Extension;
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
-import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -45,12 +45,12 @@ public class XMLContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContentType(String content) throws URLTriggerException {
+    public void initForContentType(String content) throws XTriggerException {
         xmlDocument = initXMLFile(content);
         results = readXMLPath(xmlDocument);
     }
 
-    private Document initXMLFile(String content) throws URLTriggerException {
+    private Document initXMLFile(String content) throws XTriggerException {
         Document xmlDocument;
         try {
             StringReader stringReader = new StringReader(content);
@@ -58,16 +58,16 @@ public class XMLContentType extends URLTriggerContentType {
             xmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSource);
             stringReader.close();
         } catch (SAXException e) {
-            throw new URLTriggerException(e);
+            throw new XTriggerException(e);
         } catch (IOException e) {
-            throw new URLTriggerException(e);
+            throw new XTriggerException(e);
         } catch (ParserConfigurationException e) {
-            throw new URLTriggerException(e);
+            throw new XTriggerException(e);
         }
         return xmlDocument;
     }
 
-    private Map<String, Object> readXMLPath(Document document) throws URLTriggerException {
+    private Map<String, Object> readXMLPath(Document document) throws XTriggerException {
         Map<String, Object> results = new HashMap<String, Object>(xPaths.size());
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
@@ -79,13 +79,13 @@ public class XMLContentType extends URLTriggerContentType {
                 results.put(expression, result);
             }
         } catch (XPathExpressionException xpe) {
-            throw new URLTriggerException(xpe);
+            throw new XTriggerException(xpe);
         }
         return results;
     }
 
     @Override
-    public boolean isTriggeringBuildForContent(String content, URLTriggerLog log) throws URLTriggerException {
+    public boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
         Document newDocument = initXMLFile(content);
         Map<String, Object> newResults = readXMLPath(newDocument);
@@ -98,12 +98,12 @@ public class XMLContentType extends URLTriggerContentType {
         }
 
         if (results.size() != newResults.size()) {
-            throw new URLTriggerException("According the trigger lifecycle, the size between old results and new results has to be the same.");
+            throw new XTriggerException("According the trigger lifecycle, the size between old results and new results has to be the same.");
         }
 
         //The results object have to be the same keys
         if (!results.keySet().containsAll(newResults.keySet())) {
-            throw new URLTriggerException("According the setup of the result objects, the keys for the old results and the new results have to be the same.");
+            throw new XTriggerException("According the setup of the result objects, the keys for the old results and the new results have to be the same.");
         }
 
 

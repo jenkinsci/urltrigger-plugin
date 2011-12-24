@@ -1,8 +1,8 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Extension;
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
-import org.jenkinsci.plugins.urltrigger.URLTriggerLog;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.BufferedReader;
@@ -32,11 +32,11 @@ public class TEXTContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContentType(String content) throws URLTriggerException {
+    public void initForContentType(String content) throws XTriggerException {
     }
 
     @Override
-    public boolean isTriggeringBuildForContent(String content, URLTriggerLog log) throws URLTriggerException {
+    public boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
         StringReader stringReader = null;
         BufferedReader bufferedReader = null;
@@ -58,13 +58,13 @@ public class TEXTContentType extends URLTriggerContentType {
             }
             return false;
         } catch (IOException ioe) {
-            throw new URLTriggerException(ioe);
+            throw new XTriggerException(ioe);
         } finally {
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
                 } catch (IOException ioe) {
-                    throw new URLTriggerException(ioe);
+                    throw new XTriggerException(ioe);
                 }
             }
             if (stringReader != null) {

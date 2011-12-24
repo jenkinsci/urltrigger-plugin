@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
-import org.jenkinsci.plugins.urltrigger.URLTriggerException;
+import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,39 +17,39 @@ public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
         type = new SimpleContentType();
     }
 
-    @Test(expected = URLTriggerException.class)
-    public void testInitForContentNull() throws URLTriggerException {
+    @Test(expected = XTriggerException.class)
+    public void testInitForContentNull() throws XTriggerException {
         initForContent(null);
     }
 
     @Test
-    public void testInitForContentEmpty() throws URLTriggerException {
+    public void testInitForContentEmpty() throws XTriggerException {
         initForContent(new String());
         Assert.assertTrue(true);
     }
 
     @Test
-    public void testInitForContentAnyString() throws URLTriggerException {
+    public void testInitForContentAnyString() throws XTriggerException {
         initForContent(new String("Any string"));
         Assert.assertTrue(true);
     }
 
     @Test(expected = Throwable.class)
-    public void testIsTriggeringBuildForContentWithNoChange_NullPreviousContent() throws URLTriggerException {
+    public void testIsTriggeringBuildForContentWithNoChange_NullPreviousContent() throws XTriggerException {
         String content = null;
         initForContent(content);
         Assert.assertTrue(isTriggeringBuildForContent(content));
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithNoChange_EmptyPreviousContent() throws URLTriggerException {
+    public void testIsTriggeringBuildForContentWithNoChange_EmptyPreviousContent() throws XTriggerException {
         String content = new String();
         initForContent(content);
         Assert.assertFalse(isTriggeringBuildForContent(content));
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithNoChange_AnyStringPreviousContent() throws URLTriggerException {
+    public void testIsTriggeringBuildForContentWithNoChange_AnyStringPreviousContent() throws XTriggerException {
         String content = new String("AnyString");
         initForContent(content);
         Assert.assertFalse(isTriggeringBuildForContent(content));
@@ -59,8 +59,8 @@ public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
         return oldContent + "AddedContent";
     }
 
-    @Test(expected = URLTriggerException.class)
-    public void testIsTriggeringBuildForContentWithChange_NullPreviousContent() throws URLTriggerException {
+    @Test(expected = XTriggerException.class)
+    public void testIsTriggeringBuildForContentWithChange_NullPreviousContent() throws XTriggerException {
         String oldContent = null;
         String newContent = getNewContent(oldContent);
         initForContent(oldContent);
@@ -68,7 +68,7 @@ public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_EmptyPreviousContent() throws URLTriggerException {
+    public void testIsTriggeringBuildForContentWithChange_EmptyPreviousContent() throws XTriggerException {
         String oldContent = new String();
         String newContent = getNewContent(oldContent);
         initForContent(oldContent);
@@ -76,7 +76,7 @@ public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_AnyStringPreviousContent() throws URLTriggerException {
+    public void testIsTriggeringBuildForContentWithChange_AnyStringPreviousContent() throws XTriggerException {
         String oldContent = new String("AnyString");
         String newContent = getNewContent(oldContent);
         initForContent(oldContent);
