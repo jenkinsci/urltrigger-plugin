@@ -22,10 +22,6 @@ public class URLTriggerService {
         return INSTANCE;
     }
 
-    //    public void refreshContent(ClientResponse clientResponse, URLTriggerEntry entry) throws URLTriggerException {
-//        initContent(clientResponse, entry);
-//    }
-//
     public void initContent(ClientResponse clientResponse, URLTriggerEntry entry) throws XTriggerException {
 
         if (clientResponse == null) {
@@ -46,15 +42,6 @@ public class URLTriggerService {
         if (entry.isInspectingContent()) {
             for (final URLTriggerContentType type : entry.getContentTypes()) {
                 String stringContent = clientResponse.getEntity(String.class);
-//                String stringContent = null;
-//                try {
-//                    InputStream entityInputStream = clientResponse.getEntityInputStream();
-//                    if (entityInputStream != null) {
-//                        stringContent = IOUtils.toString(entityInputStream);
-//                    }
-//                } catch (IOException ioe) {
-//                    throw new URLTriggerException(ioe);
-//                }
                 if (stringContent == null) {
                     throw new XTriggerException("The URL content is empty.");
                 }

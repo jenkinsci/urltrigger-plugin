@@ -22,9 +22,9 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.jenkinsci.lib.xtrigger.AbstractTrigger;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
+import org.jenkinsci.lib.xtrigger.service.XTriggerEnvVarsResolver;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
-import org.jenkinsci.plugins.urltrigger.service.URLTriggerEnvVarsResolver;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -133,7 +133,7 @@ public class URLTrigger extends AbstractTrigger {
     private String getURLValue(URLTriggerEntry entry, Node node, XTriggerLog log) throws XTriggerException {
         String entryURL = entry.getUrl();
         if (entryURL != null) {
-            URLTriggerEnvVarsResolver resolver = new URLTriggerEnvVarsResolver();
+            XTriggerEnvVarsResolver resolver = new XTriggerEnvVarsResolver();
             Map<String, String> envVars = resolver.getEnvVars((AbstractProject) job, node, log);
             return Util.replaceMacro(entryURL, envVars);
         }
@@ -228,42 +228,6 @@ public class URLTrigger extends AbstractTrigger {
     private boolean isAuthBasic(URLTriggerEntry entry) {
         return entry.getUsername() != null;
     }
-
-//    /**
-//     * Asynchronous task
-//     */
-//    protected class Runner implements Runnable, Serializable {
-//
-//        private AbstractProject project;
-//
-//        private URLTriggerLog log;
-//
-//        Runner(AbstractProject project, URLTriggerLog log) {
-//            this.project = project;
-//            this.log = log;
-//        }
-//
-//        public void run() {
-//
-//            try {
-//                long start = System.currentTimeMillis();
-//                log.info("Polling started on " + DateFormat.getDateTimeInstance().format(new Date(start)));
-//                boolean scheduling = checkForScheduling(log);
-//                log.info("Polling complete. Took " + Util.getTimeSpanString(System.currentTimeMillis() - start));
-//                if (scheduling) {
-//                    log.info("There are changes. Scheduling a build.");
-//                    project.scheduleBuild(new URLTriggerCause());
-//                } else {
-//                    log.info("No changes.");
-//                }
-//            } catch (URLTriggerException e) {
-//                log.error("Polling error " + e.getMessage());
-//            } catch (Throwable e) {
-//                log.error("SEVERE - Polling error " + e.getMessage());
-//            }
-//        }
-//    }
-
 
     @Override
     protected File getLogFile() {
@@ -431,7 +395,6 @@ public class URLTrigger extends AbstractTrigger {
                 return FormValidation.error(e.getMessage());
             }
         }
-
 
     }
 
