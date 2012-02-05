@@ -1,10 +1,10 @@
 package org.jenkinsci.plugins.urltrigger;
 
 import com.sun.jersey.api.client.ClientResponse;
-import hudson.model.BuildableItem;
+import hudson.model.AbstractProject;
+import hudson.model.Hudson;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -19,7 +19,11 @@ public class URLTriggerTest {
     @Mock
     private ClientResponse clientResponse;
 
-    private BuildableItem project;
+    @Mock
+    private AbstractProject project;
+
+    @Mock
+    private Hudson hudson;
 
     private String validCron;
 
@@ -29,8 +33,7 @@ public class URLTriggerTest {
         validCron = "* * * * *";
     }
 
-    @Test
-    public void testStartEmptyEnytries() throws Exception {
+    public void testStartEmptyEntries() throws Exception {
         List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
         URLTrigger urlTrigger = new URLTrigger(validCron, entries);
         urlTrigger.start(project, false);

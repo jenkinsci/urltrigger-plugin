@@ -8,9 +8,11 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
-import hudson.*;
+import hudson.DescriptorExtensionList;
+import hudson.Extension;
+import hudson.ProxyConfiguration;
+import hudson.Util;
 import hudson.model.*;
-import hudson.triggers.TriggerDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
@@ -19,10 +21,12 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.jenkinsci.lib.envinject.EnvInjectException;
+import org.jenkinsci.lib.envinject.service.EnvVarsResolver;
 import org.jenkinsci.lib.xtrigger.AbstractTrigger;
+import org.jenkinsci.lib.xtrigger.XTriggerDescriptor;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
-import org.jenkinsci.lib.xtrigger.service.XTriggerEnvVarsResolver;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
@@ -81,83 +85,33 @@ public class URLTrigger extends AbstractTrigger {
         return Collections.singleton(action);
     }
 
-    private Node getLauncherNode(XTriggerLog log) {
-        AbstractProject p = (AbstractProject) job;
-        Label label = p.getAssignedLabel();
-        if (label == null) {
-            log.info("Running on master.");
-            return getLauncherNodeMaster();
-        } else {
-            log.info(String.format("Searching a node to run the polling for the label '%s'.", label));
-            return getLauncherNodeSlave(p, label, log);
-        }
-    }
-
-    private Node getLauncherNodeMaster() {
-        Computer computer = Hudson.getInstance().toComputer();
-        if (computer != null) {
-            return computer.getNode();
-        } else {
-            return null;
-        }
-    }
-
-    private Node getLauncherNodeSlave(AbstractProject project, Label label, XTriggerLog log) {
-        Node lastBuildOnNode = project.getLastBuiltOn();
-        boolean isAPreviousBuildNode = lastBuildOnNode != null;
-
-        Set<Node> nodes = label.getNodes();
-        for (Node node : nodes) {
-            if (node != null) {
-                if (!isAPreviousBuildNode) {
-                    FilePath nodePath = node.getRootPath();
-                    if (nodePath != null) {
-                        log.info(String.format("Running on %s.", node.getNodeName()));
-                        return node;
-                    }
-                } else {
-                    FilePath nodeRootPath = node.getRootPath();
-                    if (nodeRootPath != null) {
-                        if (nodeRootPath.equals(lastBuildOnNode.getRootPath())) {
-                            log.info("Running on " + node.getNodeName());
-                            return lastBuildOnNode;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
 
     private String getURLValue(URLTriggerEntry entry, Node node, XTriggerLog log) throws XTriggerException {
         String entryURL = entry.getUrl();
         if (entryURL != null) {
-            XTriggerEnvVarsResolver resolver = new XTriggerEnvVarsResolver();
-            Map<String, String> envVars = resolver.getEnvVars((AbstractProject) job, node, log);
+            EnvVarsResolver varsRetriever = new EnvVarsResolver();
+            Map<String, String> envVars = null;
+            try {
+                envVars = varsRetriever.getPollingEnvVars((AbstractProject) job, node);
+            } catch (EnvInjectException e) {
+                throw new XTriggerException(e);
+            }
             return Util.replaceMacro(entryURL, envVars);
         }
         return null;
     }
 
-
     @Override
-    public String getCause() {
-        return "URLTrigger";
-    }
-
-    @Override
-    protected boolean checkIfModified(XTriggerLog log) throws XTriggerException {
+    protected boolean checkIfModified(Node pollingNode, XTriggerLog log) throws XTriggerException {
 
         if (entries == null || entries.size() == 0) {
             log.info("No URLs to poll.");
             return false;
         }
 
-        Node executionNode = getLauncherNode(log);
         for (URLTriggerEntry entry : entries) {
             Client client = getClientObject(entry, log);
-            String url = getURLValue(entry, executionNode, log);
+            String url = getURLValue(entry, pollingNode, log);
             log.info(String.format("Invoking the url: \n %s", url));
             ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
             URLTriggerService urlTriggerService = URLTriggerService.getInstance();
@@ -166,6 +120,17 @@ public class URLTrigger extends AbstractTrigger {
             }
         }
         return false;
+    }
+
+
+    @Override
+    public String getCause() {
+        return URLTriggerCause.CAUSE;
+    }
+
+    @Override
+    protected String getName() {
+        return URLTriggerCause.NAME;
     }
 
     private Client getClientObject(URLTriggerEntry entry, XTriggerLog log) {
@@ -235,8 +200,17 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     @Override
-    public void start(BuildableItem project, boolean newInstance) {
-        super.start(project, newInstance);
+    protected Action[] getScheduledActions(Node node, XTriggerLog log) {
+        return new Action[0];
+    }
+
+    @Override
+    protected boolean requiresWorkspaceForPolling() {
+        return false;
+    }
+
+    @Override
+    protected void start(Node node, BuildableItem buildableItem, boolean newInstance, XTriggerLog log) {
         URLTriggerService service = URLTriggerService.getInstance();
         try {
             for (URLTriggerEntry entry : entries) {
@@ -258,7 +232,7 @@ public class URLTrigger extends AbstractTrigger {
 
     @Extension
     @SuppressWarnings("unused")
-    public static class URLScriptTriggerDescriptor extends TriggerDescriptor {
+    public static class URLScriptTriggerDescriptor extends XTriggerDescriptor {
 
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Executors.newSingleThreadExecutor());
 

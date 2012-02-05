@@ -1,14 +1,17 @@
 package org.jenkinsci.plugins.urltrigger;
 
-import org.jenkinsci.lib.xtrigger.XTriggerCause;
+import hudson.model.Cause;
 
 /**
  * @author Gregory Boissinot
  */
-public class URLTriggerCause extends XTriggerCause {
+public class URLTriggerCause extends Cause {
 
-    public URLTriggerCause(String causeFrom) {
-        super("URLTrigger", causeFrom);
+    public static final String NAME = "URLTrigger";
+    public static final String CAUSE = "A change within the response URL invocation";
+
+    @Override
+    public String getShortDescription() {
+        return String.format("[%s] - %s", NAME, CAUSE);
     }
-
 }
