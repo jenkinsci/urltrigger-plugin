@@ -138,6 +138,11 @@ public class URLTrigger extends AbstractTrigger {
         if (isAuthBasic(entry)) {
             addBasicAuth(entry, log, client);
         }
+        /* Set a connect and read timeout. If this hangs, it can actually
+           take down all of the jenkins schedule events.
+           This is 5 minutes expressed as milliseconds. */
+        client.setConnectTimeout(300000);
+        client.setReadTimeout(300000);
         return client;
     }
 
