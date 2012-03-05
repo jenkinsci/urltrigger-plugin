@@ -51,15 +51,26 @@ public class URLTrigger extends AbstractTrigger {
 
     private List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
 
+    private boolean labelRestriction;
+
     @DataBoundConstructor
-    public URLTrigger(String cronTabSpec, List<URLTriggerEntry> entries) throws ANTLRException {
-        super(cronTabSpec);
+    public URLTrigger(String cronTabSpec,
+                      List<URLTriggerEntry> entries,
+                      boolean labelRestriction,
+                      String triggerLabel) throws ANTLRException {
+        super(cronTabSpec, triggerLabel);
         this.entries = entries;
+        this.labelRestriction = labelRestriction;
     }
 
     @SuppressWarnings("unused")
     public List<URLTriggerEntry> getEntries() {
         return entries;
+    }
+
+    @SuppressWarnings("unused")
+    public boolean isLabelRestriction() {
+        return labelRestriction;
     }
 
     @Override
@@ -231,13 +242,13 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     @Override
-    public URLScriptTriggerDescriptor getDescriptor() {
-        return (URLScriptTriggerDescriptor) Hudson.getInstance().getDescriptorOrDie(getClass());
+    public URLTriggerDescriptor getDescriptor() {
+        return (URLTriggerDescriptor) Hudson.getInstance().getDescriptorOrDie(getClass());
     }
 
     @Extension
     @SuppressWarnings("unused")
-    public static class URLScriptTriggerDescriptor extends XTriggerDescriptor {
+    public static class URLTriggerDescriptor extends XTriggerDescriptor {
 
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Executors.newSingleThreadExecutor());
 
@@ -254,6 +265,14 @@ public class URLTrigger extends AbstractTrigger {
         public URLTrigger newInstance(StaplerRequest req, JSONObject formData) throws FormException {
 
             String cronTabSpec = formData.getString("cronTabSpec");
+            boolean labelRestriction = false;
+            String triggerLabel = null;
+            Object labelRestrictionObject = formData.get("labelRestriction");
+            if (labelRestrictionObject != null) {
+                labelRestriction = true;
+                triggerLabel = ((JSONObject) labelRestrictionObject).getString("triggerLabel");
+            }
+
             Object entryObject = formData.get("urlElements");
 
             List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
@@ -270,7 +289,7 @@ public class URLTrigger extends AbstractTrigger {
 
             URLTrigger urlTrigger;
             try {
-                urlTrigger = new URLTrigger(cronTabSpec, entries);
+                urlTrigger = new URLTrigger(cronTabSpec, entries, labelRestriction, triggerLabel);
             } catch (ANTLRException e) {
                 throw new RuntimeException(e.getMessage());
             }

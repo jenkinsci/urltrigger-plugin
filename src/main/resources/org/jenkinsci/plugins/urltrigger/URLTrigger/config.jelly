@@ -93,7 +93,27 @@
 
             </table>
         </f:repeatable>
+    </f:entry>
 
+
+    <f:entry title="${%Polling Node}">
+        <f:entry>
+            <table style="width:100%">
+                <f:optionalBlock
+                        name="labelRestriction"
+                        field="labelRestriction"
+                        checked="${instance.labelRestriction}"
+                        title="${%Restrict where the polling can be run}">
+
+                    <f:block>
+                        <f:entry title="Label Expression">
+                            <f:textbox name="triggerLabel"
+                                       value="${instance.triggerLabel}"/>
+                        </f:entry>
+                    </f:block>
+                </f:optionalBlock>
+            </table>
+        </f:entry>
     </f:entry>
 
     <f:entry title="${%Schedule}" help="/descriptor/hudson.triggers.TimerTrigger/help/spec">

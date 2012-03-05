@@ -35,7 +35,7 @@ public class URLTriggerTest {
 
     public void testStartEmptyEntries() throws Exception {
         List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
-        URLTrigger urlTrigger = new URLTrigger(validCron, entries);
+        URLTrigger urlTrigger = new URLTrigger(validCron, entries, false, null);
         urlTrigger.start(project, false);
         Assert.assertTrue(true);
     }
