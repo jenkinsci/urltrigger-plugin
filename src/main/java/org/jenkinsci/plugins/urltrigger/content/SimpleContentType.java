@@ -19,12 +19,12 @@ public class SimpleContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContentType(String content) throws XTriggerException {
+    protected void initForContentType(String content, XTriggerLog log) throws XTriggerException {
         this.md5 = Util.getDigestOf(content);
     }
 
     @Override
-    public boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
+    protected boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
         assert md5 != null;
 
         String newComputedMd5 = Util.getDigestOf(content);

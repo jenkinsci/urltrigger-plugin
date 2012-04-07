@@ -22,7 +22,7 @@ public class URLTriggerService {
         return INSTANCE;
     }
 
-    public void initContent(ClientResponse clientResponse, URLTriggerEntry entry) throws XTriggerException {
+    public void initContent(ClientResponse clientResponse, URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
 
         if (clientResponse == null) {
             throw new NullPointerException("The given clientResponse object is not set.");
@@ -45,13 +45,12 @@ public class URLTriggerService {
                 if (stringContent == null) {
                     throw new XTriggerException("The URL content is empty.");
                 }
-                type.initForContent(stringContent);
+                type.initForContent(stringContent, log);
             }
         }
     }
 
     public boolean isSchedulingAndGetRefresh(ClientResponse clientResponse, URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
-        //Check scheduling
         boolean job2Schedule = false;
         if (entry.isCheckStatus()) {
             job2Schedule = checkStatus(entry, log, clientResponse.getStatus());
@@ -64,7 +63,7 @@ public class URLTriggerService {
         if (entry.isInspectingContent()) {
             String content = clientResponse.getEntity(String.class);
             job2Schedule = job2Schedule || checkContent(entry, log, content);
-            refreshContent(entry, content);
+            refreshContent(entry, content, log);
         }
 
         return job2Schedule;
@@ -78,11 +77,9 @@ public class URLTriggerService {
         }
     }
 
-    private void refreshContent(URLTriggerEntry entry, String content) throws XTriggerException {
-
+    private void refreshContent(URLTriggerEntry entry, String content, XTriggerLog log) throws XTriggerException {
         for (final URLTriggerContentType type : entry.getContentTypes()) {
-            //Refresh the content
-            type.initForContent(content);
+            type.initForContent(content, log);
         }
     }
 
@@ -117,7 +114,7 @@ public class URLTriggerService {
 
         log.info("Inspecting the content");
         for (final URLTriggerContentType type : entry.getContentTypes()) {
-            boolean isTriggering = type.isTriggeringBuildForContent(content, log);
+            boolean isTriggering = type.isTriggering(content, log);
             if (isTriggering) {
                 return true;
             }

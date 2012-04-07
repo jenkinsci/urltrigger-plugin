@@ -18,20 +18,28 @@ public abstract class URLTriggerContentType implements ExtensionPoint, Describab
         return (URLTriggerContentTypeDescriptor) Hudson.getInstance().getDescriptor(getClass());
     }
 
-    /**
-     * These methods have to be overridden in each trigger implementation
-     */
-    public abstract void initForContentType(String content) throws XTriggerException;
-
-
-    public void initForContent(String content) throws XTriggerException {
+    public void initForContent(String content, XTriggerLog log) throws XTriggerException {
 
         if (content == null) {
             throw new XTriggerException("The given content is not set.");
         }
 
-        initForContentType(content);
+        if (content.trim().isEmpty()) {
+            throw new XTriggerException("The given content is empty.");
+        }
+
+        initForContentType(content, log);
     }
 
-    public abstract boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException;
+
+    /**
+     * These methods have to be overridden in each trigger implementation
+     */
+    protected abstract void initForContentType(String content, XTriggerLog log) throws XTriggerException;
+
+    public boolean isTriggering(String content, XTriggerLog log) throws XTriggerException {
+        return isTriggeringBuildForContent(content, log);
+    }
+
+    protected abstract boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException;
 }

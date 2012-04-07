@@ -45,7 +45,7 @@ public class XMLContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContentType(String content) throws XTriggerException {
+    protected void initForContentType(String content, XTriggerLog log) throws XTriggerException {
         xmlDocument = initXMLFile(content);
         results = readXMLPath(xmlDocument);
     }
@@ -85,7 +85,7 @@ public class XMLContentType extends URLTriggerContentType {
     }
 
     @Override
-    public boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
+    protected boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
         Document newDocument = initXMLFile(content);
         Map<String, Object> newResults = readXMLPath(newDocument);
@@ -98,7 +98,7 @@ public class XMLContentType extends URLTriggerContentType {
         }
 
         if (results.size() != newResults.size()) {
-            throw new XTriggerException("According the trigger lifecycle, the size between old results and new results has to be the same.");
+            throw new XTriggerException("The size between old results and new results has to be the same.");
         }
 
         //The results object have to be the same keys

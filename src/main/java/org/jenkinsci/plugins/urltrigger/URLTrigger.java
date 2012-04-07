@@ -16,6 +16,7 @@ import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
+import hudson.util.StreamTaskListener;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -233,7 +234,7 @@ public class URLTrigger extends AbstractTrigger {
                 Client client = getClientObject(entry, null);
                 String url = entry.getUrl();
                 ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
-                service.initContent(clientResponse, entry);
+                service.initContent(clientResponse, entry, new XTriggerLog((StreamTaskListener) TaskListener.NULL));
             }
         } catch (Throwable t) {
             LOGGER.log(Level.SEVERE, "Severe error on trigger startup " + t.getMessage());

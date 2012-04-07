@@ -24,7 +24,6 @@ public abstract class AbstractJSONContentTypeTest extends AbstractContentTypeTes
         initForContent(getEmptyContent());
     }
 
-
     @Test(expected = Throwable.class)
     public void testInitForContentNoJSON() throws XTriggerException {
         initForContent(new String("NO JSON"));

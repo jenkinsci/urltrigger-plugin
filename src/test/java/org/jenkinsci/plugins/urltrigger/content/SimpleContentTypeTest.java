@@ -22,7 +22,7 @@ public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
         initForContent(null);
     }
 
-    @Test
+    @Test(expected = XTriggerException.class)
     public void testInitForContentEmpty() throws XTriggerException {
         initForContent(new String());
         Assert.assertTrue(true);
@@ -41,7 +41,7 @@ public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
         Assert.assertTrue(isTriggeringBuildForContent(content));
     }
 
-    @Test
+    @Test(expected = XTriggerException.class)
     public void testIsTriggeringBuildForContentWithNoChange_EmptyPreviousContent() throws XTriggerException {
         String content = new String();
         initForContent(content);
@@ -67,7 +67,7 @@ public class SimpleContentTypeTest extends AbstractURLTriggerContentTypeTest {
         Assert.assertFalse(isTriggeringBuildForContent(newContent));
     }
 
-    @Test
+    @Test(expected = XTriggerException.class)
     public void testIsTriggeringBuildForContentWithChange_EmptyPreviousContent() throws XTriggerException {
         String oldContent = new String();
         String newContent = getNewContent(oldContent);

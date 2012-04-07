@@ -35,14 +35,8 @@ public class JSONContentType extends URLTriggerContentType {
     }
 
     @Override
-    public void initForContentType(String content) throws XTriggerException {
-
-        if (content.trim().isEmpty()) {
-            throw new XTriggerException("The given content is empty.");
-        }
-
+    protected void initForContentType(String content, XTriggerLog log) throws XTriggerException {
         JsonUtils.validateJson(content);
-
         results = readJsonPath(content);
     }
 
@@ -61,7 +55,7 @@ public class JSONContentType extends URLTriggerContentType {
     }
 
     @Override
-    public boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
+    protected boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
         Map<String, Object> newResults = readJsonPath(content);
 
@@ -73,7 +67,7 @@ public class JSONContentType extends URLTriggerContentType {
         }
 
         if (results.size() != newResults.size()) {
-            throw new XTriggerException("Regarding the trigger life cycle, the size between old results and new results has to be the same.");
+            throw new XTriggerException("The size between old results and new results has to be the same.");
         }
 
         //The results object have to be the same keys

@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
+import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,7 +14,7 @@ import java.util.Arrays;
 public class TEXTContentTypeWithRegExTest extends AbstractContentTypeTest {
 
     public TEXTContentTypeWithRegExTest() {
-        TEXTContentEntry[] regExElements = new TEXTContentEntry[]{new TEXTContentEntry("ERROR")};
+        TEXTContentEntry[] regExElements = new TEXTContentEntry[]{new TEXTContentEntry("^ERROR\\w+$")};
         type = new TEXTContentType(Arrays.<TEXTContentEntry>asList(regExElements));
     }
 
@@ -37,13 +38,12 @@ public class TEXTContentTypeWithRegExTest extends AbstractContentTypeTest {
         return readContentAsString("txt/matches/newLog.txt");
     }
 
-    @Test
+    @Test(expected = XTriggerException.class)
     public void testInitForContentEmpty() throws Exception {
         initForContent(getEmptyContent());
-        Assert.assertTrue(true);
     }
 
-    @Test
+    @Test(expected = XTriggerException.class)
     public void testIsTriggeringMatchingNewContentWithEmptyPreviousContent() throws Exception {
         Assert.assertTrue(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
     }

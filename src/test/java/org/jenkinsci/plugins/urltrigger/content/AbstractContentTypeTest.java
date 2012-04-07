@@ -46,7 +46,6 @@ public abstract class AbstractContentTypeTest extends AbstractURLTriggerContentT
         initForContent(null);
     }
 
-    @Test
     public void testInitForContentEmptyType() throws Exception {
         initForContent(getEmptyTypeContent());
         Assert.assertTrue(true);
@@ -70,7 +69,7 @@ public abstract class AbstractContentTypeTest extends AbstractURLTriggerContentT
         Assert.assertFalse(isTriggeringBuildForContent(newContent));
     }
 
-    @Test(expected = Throwable.class)
+    @Test(expected = XTriggerException.class)
     public void testIsTriggeringBuildForContentWithChange_EmptyPreviousContent() throws Exception {
         String oldContent = getEmptyContent();
         String newContent = getNewContent();
