@@ -25,7 +25,11 @@ public class SimpleContentType extends URLTriggerContentType {
 
     @Override
     protected boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
-        assert md5 != null;
+
+        if (md5 == null) {
+            log.info("Capturing URL context. Waiting next schedule to check a change.");
+            return false;
+        }
 
         String newComputedMd5 = Util.getDigestOf(content);
         if (!newComputedMd5.equals(md5)) {

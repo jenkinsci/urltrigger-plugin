@@ -44,6 +44,11 @@ public class TEXTContentType extends URLTriggerContentType {
     @Override
     protected boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
+        if (capturedValues == null) {
+            log.info("Capturing URL context. Waiting next schedule to check a change.");
+            return false;
+        }
+
         Map<String, List<String>> newCapturedValues = getMatchedValue(content);
 
         if (capturedValues.size() != newCapturedValues.size()) {

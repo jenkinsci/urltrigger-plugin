@@ -35,6 +35,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -234,6 +235,11 @@ public class URLTrigger extends AbstractTrigger {
                 Client client = getClientObject(entry, null);
                 String url = entry.getUrl();
                 ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+                if (HttpServletResponse.SC_SERVICE_UNAVAILABLE == clientResponse.getStatus()) {
+                    log.info("URL to poll unavailable.");
+                    log.info("Skipping URLTrigger initialization. Waiting next schedule");
+                    return;
+                }
                 service.initContent(clientResponse, entry, new XTriggerLog((StreamTaskListener) TaskListener.NULL));
             }
         } catch (Throwable t) {

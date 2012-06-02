@@ -57,11 +57,13 @@ public class JSONContentType extends URLTriggerContentType {
     @Override
     protected boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
+        if (results == null) {
+            log.info("Capturing URL context. Waiting next schedule to check a change.");
+            return false;
+        }
+
         Map<String, Object> newResults = readJsonPath(content);
 
-        if (results == null) {
-            throw new NullPointerException("Initial result object must not be a null reference.");
-        }
         if (newResults == null) {
             throw new NullPointerException("New computed results object must not be a null reference.");
         }

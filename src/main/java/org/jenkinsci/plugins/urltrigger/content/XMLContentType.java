@@ -87,12 +87,14 @@ public class XMLContentType extends URLTriggerContentType {
     @Override
     protected boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
+        if (results == null) {
+            log.info("Capturing URL context. Waiting next schedule to check a change.");
+            return false;
+        }
+
         Document newDocument = initXMLFile(content);
         Map<String, Object> newResults = readXMLPath(newDocument);
 
-        if (results == null) {
-            throw new NullPointerException("Initial result object must not be a null reference.");
-        }
         if (newResults == null) {
             throw new NullPointerException("New computed results object must not be a null reference.");
         }
