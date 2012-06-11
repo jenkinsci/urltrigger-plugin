@@ -6,6 +6,7 @@ import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.URLTriggerEntry;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 
+import javax.ws.rs.core.Response;
 import java.util.Date;
 
 /**
@@ -51,16 +52,27 @@ public class URLTriggerService {
     }
 
     public boolean isSchedulingAndGetRefresh(ClientResponse clientResponse, URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
+
         boolean job2Schedule = false;
+
         if (entry.isCheckStatus()) {
             job2Schedule = checkStatus(entry, log, clientResponse.getStatus());
         }
+
         if (entry.isCheckLastModificationDate()) {
             Date lastModificationDate = clientResponse.getLastModified();
             job2Schedule = job2Schedule || checkLastModificationDate(entry, log, lastModificationDate);
             refreshLatModificationDate(entry, lastModificationDate);
         }
+
         if (entry.isInspectingContent()) {
+
+            //The response need to be in the successful family
+            if (!isResponseInSuccessFamily(clientResponse)) {
+                log.info("[WARNING] - Checking content requires success responses (200 status code family)");
+                return false;
+            }
+
             String content = clientResponse.getEntity(String.class);
             job2Schedule = job2Schedule || checkContent(entry, log, content);
             refreshContent(entry, content, log);
@@ -68,6 +80,11 @@ public class URLTriggerService {
 
         return job2Schedule;
     }
+
+    private boolean isResponseInSuccessFamily(ClientResponse clientResponse) {
+        return clientResponse.getClientResponseStatus().getFamily() == Response.Status.Family.SUCCESSFUL;
+    }
+
 
     private void refreshLatModificationDate(URLTriggerEntry entry, Date lastModificationDate) {
         if (lastModificationDate != null) {
