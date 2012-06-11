@@ -116,25 +116,45 @@ public class URLTrigger extends AbstractTrigger {
 
     @Override
     protected boolean checkIfModified(Node pollingNode, XTriggerLog log) throws XTriggerException {
-
         if (entries == null || entries.size() == 0) {
             log.info("No URLs to poll.");
             return false;
         }
 
         for (URLTriggerEntry entry : entries) {
-            Client client = getClientObject(entry, log);
-            String url = getURLValue(entry, pollingNode, log);
-            log.info(String.format("Invoking the url: \n %s", url));
-            ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
-            URLTriggerService urlTriggerService = URLTriggerService.getInstance();
-            if (urlTriggerService.isSchedulingAndGetRefresh(clientResponse, entry, log)) {
+            boolean modified = checkIfModifiedEntry(entry, pollingNode, log);
+            if (modified) {
                 return true;
             }
         }
+
         return false;
     }
 
+    private boolean checkIfModifiedEntry(URLTriggerEntry entry, Node pollingNode, XTriggerLog log) throws XTriggerException {
+        Client client = getClientObject(entry, log);
+        String url = getURLValue(entry, pollingNode, log);
+        log.info(String.format("Invoking the url: \n %s", url));
+
+        ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+        if (isServiceUnavailableAndNotExpected(clientResponse, entry)) {
+            log.info("URL to poll unavailable.");
+            log.info("Skipping URLTrigger initialization. Waiting next schedule");
+            return false;
+        }
+
+        URLTriggerService urlTriggerService = URLTriggerService.getInstance();
+        if (urlTriggerService.isSchedulingAndGetRefresh(clientResponse, entry, log)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isServiceUnavailableAndNotExpected(ClientResponse clientResponse, URLTriggerEntry entry) {
+        return HttpServletResponse.SC_SERVICE_UNAVAILABLE == clientResponse.getStatus()
+                && entry.getStatusCode() != HttpServletResponse.SC_SERVICE_UNAVAILABLE;
+    }
 
     @Override
     public String getCause() {
