@@ -14,6 +14,7 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import javax.ws.rs.core.Response;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -36,6 +37,7 @@ public class URLTriggerServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
         urlTriggerService = URLTriggerService.getInstance();
+        when(clientResponseMock.getClientResponseStatus()).thenReturn(ClientResponse.Status.OK);
     }
 
     @Test
