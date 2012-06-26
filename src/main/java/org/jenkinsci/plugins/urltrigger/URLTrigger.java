@@ -99,11 +99,11 @@ public class URLTrigger extends AbstractTrigger {
     }
 
 
-    private String getURLValue(URLTriggerEntry entry, Node node, XTriggerLog log) throws XTriggerException {
+    private String getURLValue(URLTriggerEntry entry, Node node) throws XTriggerException {
         String entryURL = entry.getUrl();
         if (entryURL != null) {
             EnvVarsResolver varsRetriever = new EnvVarsResolver();
-            Map<String, String> envVars = null;
+            Map<String, String> envVars;
             try {
                 envVars = varsRetriever.getPollingEnvVars((AbstractProject) job, node);
             } catch (EnvInjectException e) {
@@ -133,7 +133,7 @@ public class URLTrigger extends AbstractTrigger {
 
     private boolean checkIfModifiedEntry(URLTriggerEntry entry, Node pollingNode, XTriggerLog log) throws XTriggerException {
         Client client = getClientObject(entry, log);
-        String url = getURLValue(entry, pollingNode, log);
+        String url = getURLValue(entry, pollingNode);
         log.info(String.format("Invoking the url: \n %s", url));
 
         ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
@@ -253,11 +253,11 @@ public class URLTrigger extends AbstractTrigger {
         try {
             for (URLTriggerEntry entry : entries) {
                 Client client = getClientObject(entry, null);
-                String url = entry.getUrl();
+                String url = getURLValue(entry, null);
                 ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
                 if (HttpServletResponse.SC_SERVICE_UNAVAILABLE == clientResponse.getStatus()) {
                     log.info("URL to poll unavailable.");
-                    log.info("Skipping URLTrigger initialization. Waiting next schedule");
+                    log.info("Skipping URLTrigger initialization. Waiting for next schedule.");
                     return;
                 }
                 service.initContent(clientResponse, entry, new XTriggerLog((StreamTaskListener) TaskListener.NULL));

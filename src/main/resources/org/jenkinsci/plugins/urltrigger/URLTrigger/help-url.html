@@ -1,5 +1,9 @@
 <div>
     <p>
-        Give the url to check.
+        Give the url to check.<br/>
+        You are able to give a template value (a value containing some environment variables to solve).<br/>
+        By default,  environment variables used by polling mechanism are supplied by the last build.<br/>
+        For the first build, Jenkins tries to resolve the environment variables from the current polling node.<br/>
+        <u>Be careful:</u> in the context of a previous build with no environment variables and a value with node or job environment variables, it is possible to have a build without a real URL change (due to a wrong URL check at Jenkins startup when all nodes are not up.)
     </p>
 </div>
