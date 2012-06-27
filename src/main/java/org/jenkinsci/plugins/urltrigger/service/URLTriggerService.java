@@ -6,6 +6,7 @@ import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.URLTriggerEntry;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 
+import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
 import java.util.Date;
 
@@ -59,6 +60,14 @@ public class URLTriggerService {
             job2Schedule = checkStatus(entry, log, clientResponse.getStatus());
         }
 
+        if (entry.isCheckETag()) {
+            EntityTag entityTag = clientResponse.getEntityTag();
+            if (entityTag != null) {
+                job2Schedule = job2Schedule || checkEntityTag(entry, log, entityTag.getValue());
+            }
+            refreshETag(entry, entityTag == null ? null : entityTag.getValue());
+        }
+
         if (entry.isCheckLastModificationDate()) {
             Date lastModificationDate = clientResponse.getLastModified();
             job2Schedule = job2Schedule || checkLastModificationDate(entry, log, lastModificationDate);
@@ -85,6 +94,9 @@ public class URLTriggerService {
         return clientResponse.getClientResponseStatus().getFamily() == Response.Status.Family.SUCCESSFUL;
     }
 
+    private void refreshETag(URLTriggerEntry entry, String entityTag) {
+        entry.setETag(entityTag);
+    }
 
     private void refreshLatModificationDate(URLTriggerEntry entry, Date lastModificationDate) {
         if (lastModificationDate != null) {
@@ -108,6 +120,19 @@ public class URLTriggerService {
         return false;
     }
 
+    private boolean checkEntityTag(URLTriggerEntry entry, XTriggerLog log, String entityTag) throws XTriggerException {
+
+        boolean isTriggering = false;
+        if (entityTag != null) {
+            String previousETag = entry.getETag();
+            if (!entityTag.equals(previousETag)) {
+                log.info("The ETag header has changed.");
+                isTriggering = true;
+            }
+        }
+        return isTriggering;
+    }
+
     private boolean checkLastModificationDate(URLTriggerEntry entry, XTriggerLog log, Date clientLastModificationDate) throws XTriggerException {
 
         boolean isTriggering = false;
@@ -121,7 +146,6 @@ public class URLTriggerService {
         }
         return isTriggering;
     }
-
 
     private boolean checkContent(URLTriggerEntry entry, XTriggerLog log, String content) throws XTriggerException {
 

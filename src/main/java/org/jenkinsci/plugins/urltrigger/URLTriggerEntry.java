@@ -14,23 +14,17 @@ public class URLTriggerEntry implements Serializable {
     public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
 
     private String url;
-
     private String username;
-
     private String password;
-
     private boolean proxyActivated;
-
     private boolean checkStatus;
-
     private int statusCode;
-
+    private boolean checkETag;
     private boolean checkLastModificationDate;
-
     private boolean inspectingContent;
-
     private URLTriggerContentType[] contentTypes;
 
+    private transient String ETag;
     private transient long lastModificationDate;
 
     public String getUrl() {
@@ -121,5 +115,21 @@ public class URLTriggerEntry implements Serializable {
 
     public void setContentTypes(URLTriggerContentType[] contentTypes) {
         this.contentTypes = contentTypes;
+    }
+
+    public boolean isCheckETag() {
+        return checkETag;
+    }
+
+    public void setCheckETag(boolean checkETag) {
+        this.checkETag = checkETag;
+    }
+
+    public String getETag() {
+        return ETag;
+    }
+
+    public void setETag(String ETag) {
+        this.ETag = ETag;
     }
 }

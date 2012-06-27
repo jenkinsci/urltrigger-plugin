@@ -32,7 +32,6 @@
                     </f:section>
                 </f:advanced>
 
-
                 <f:section title="${%URL Response Check}">
                     <f:entry>
                         <table style="width:100%">
@@ -52,6 +51,16 @@
                         </table>
                     </f:entry>
 
+                    <f:entry>
+                        <table style="width:100%">
+                            <f:checkbox
+                                    field="checkETag"
+                                    name="urlElements.checkETag"
+                                    checked="${urlElements.checkETag}"
+                                    title="${%Check ETag}">
+                            </f:checkbox>
+                        </table>
+                    </f:entry>
 
                     <f:entry>
                         <table style="width:100%">

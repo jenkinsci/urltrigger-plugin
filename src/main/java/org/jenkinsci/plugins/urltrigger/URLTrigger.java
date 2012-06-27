@@ -352,6 +352,9 @@ public class URLTrigger extends AbstractTrigger {
                 urlTriggerEntry.setStatusCode(URLTriggerEntry.DEFAULT_STATUS_CODE);
             }
 
+            //Process checkETag
+            urlTriggerEntry.setCheckETag(entryObject.getBoolean("checkETag"));
+
             //Process checkLastModifiedDate
             urlTriggerEntry.setCheckLastModificationDate(entryObject.getBoolean("checkLastModificationDate"));
 
