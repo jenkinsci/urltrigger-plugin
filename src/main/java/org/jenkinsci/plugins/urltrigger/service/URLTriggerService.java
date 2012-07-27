@@ -107,8 +107,13 @@ public class URLTriggerService {
     }
 
     private void refreshContent(URLTriggerEntry entry, String content, XTriggerLog log) throws XTriggerException {
-        for (final URLTriggerContentType type : entry.getContentTypes()) {
-            type.initForContent(content, log);
+        URLTriggerContentType[] contentTypes = entry.getContentTypes();
+        if (contentTypes != null) {
+            for (final URLTriggerContentType type : contentTypes) {
+                if (type != null) {
+                    type.initForContent(content, log);
+                }
+            }
         }
     }
 
@@ -153,11 +158,19 @@ public class URLTriggerService {
             return false;
         }
 
+        URLTriggerContentType[] contentTypes = entry.getContentTypes();
+        if (contentTypes == null) {
+            log.info("You have to add at least one content nature type to check.");
+            return false;
+        }
+
         log.info("Inspecting the content");
-        for (final URLTriggerContentType type : entry.getContentTypes()) {
-            boolean isTriggering = type.isTriggering(content, log);
-            if (isTriggering) {
-                return true;
+        for (final URLTriggerContentType type : contentTypes) {
+            if (type != null) {
+                boolean isTriggering = type.isTriggering(content, log);
+                if (isTriggering) {
+                    return true;
+                }
             }
         }
 

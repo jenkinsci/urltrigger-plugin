@@ -372,12 +372,23 @@ public class URLTrigger extends AbstractTrigger {
                 } catch (JSONException jsone) {
                     contentTypesJsonElt = inspectingContentJSONObject.getJSONObject("contentTypes");
                 }
-                List<URLTriggerContentType> types = req.bindJSONToList(URLTriggerContentType.class, contentTypesJsonElt);
-                urlTriggerEntry.setContentTypes(types.toArray(new URLTriggerContentType[types.size()]));
+                if (contentTypesJsonElt != null && !isEmptyJSONElement(contentTypesJsonElt)) {
+                    List<URLTriggerContentType> types = req.bindJSONToList(URLTriggerContentType.class, contentTypesJsonElt);
+                    urlTriggerEntry.setContentTypes(types.toArray(new URLTriggerContentType[types.size()]));
+                } else {
+                    urlTriggerEntry.setInspectingContent(false);
+                }
 
             }
 
             return urlTriggerEntry;
+        }
+
+        private boolean isEmptyJSONElement(JSON element) {
+            if (element instanceof JSONObject) {
+                return ((JSONObject) element).getString("kind").isEmpty();
+            }
+            return false;
         }
 
         @Override
