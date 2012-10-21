@@ -12,6 +12,7 @@
                 </f:entry>
 
                 <f:advanced>
+
                     <f:entry field="proxyActivated">
                         <f:checkbox
                                 field="proxyActivated"
@@ -19,6 +20,14 @@
                                 checked="${urlElements.proxyActivated}"
                                 title="${%Activate the Jenkins Proxy}"/>
                     </f:entry>
+
+                    <f:section title="${%Client parameters}">
+                        <f:entry field="timeout" title="${%Timeout}">
+                            <f:textbox name="timeout"
+                                       checkUrl="'${rootURL}/trigger/URLTrigger/checkTimeout?value='+encodeURIComponent(this.value)"
+                                       value="${urlElements.timeout}"/>
+                        </f:entry>
+                    </f:section>
 
                     <f:section title="${%Basic Authentication}">
                         <f:entry field="username" title="${%User}">

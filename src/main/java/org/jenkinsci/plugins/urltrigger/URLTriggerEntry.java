@@ -19,6 +19,7 @@ public class URLTriggerEntry implements Serializable {
     private boolean proxyActivated;
     private boolean checkStatus;
     private int statusCode;
+    private int timeout; //in seconds
     private boolean checkETag;
     private boolean checkLastModificationDate;
     private boolean inspectingContent;
@@ -131,5 +132,13 @@ public class URLTriggerEntry implements Serializable {
 
     public void setETag(String ETag) {
         this.ETag = ETag;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 }

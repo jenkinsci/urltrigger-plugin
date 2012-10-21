@@ -167,15 +167,19 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     private Client getClientObject(URLTriggerEntry entry, XTriggerLog log) {
+
         Client client = createClient(entry);
         if (isAuthBasic(entry)) {
             addBasicAuth(entry, log, client);
         }
+
         /* Set a connect and read timeout. If this hangs, it can actually
            take down all of the jenkins schedule events.
-           This is 5 minutes expressed as milliseconds. */
-        client.setConnectTimeout(300000);
-        client.setReadTimeout(300000);
+        */
+        int timeout = entry.getTimeout();
+        client.setConnectTimeout(timeout*1000); //in milliseconds
+        client.setReadTimeout(timeout*1000);    //in milliseconds
+
         return client;
     }
 
@@ -337,6 +341,18 @@ public class URLTrigger extends AbstractTrigger {
                 urlTriggerEntry.setPassword(encryptedValue);
             }
 
+            //Process timeout
+            urlTriggerEntry.setTimeout(5 * 60); // 5 minutes by default
+            String timeout = entryObject.getString("timeout");
+            if (timeout != null) {
+                try {
+                    int timeoutSeconds = Integer.parseInt(timeout);
+                    urlTriggerEntry.setTimeout(timeoutSeconds);
+                } catch (NumberFormatException ne) {
+                    //no change default timeout
+                }
+            }
+
             //Process checkStatus
             Object checkStatusObject = entryObject.get("checkStatus");
             if (checkStatusObject != null) {
@@ -406,20 +422,6 @@ public class URLTrigger extends AbstractTrigger {
             return DescriptorExtensionList.createDescriptorList(Hudson.getInstance(), URLTriggerContentType.class);
         }
 
-        public FormValidation doCheckStatus(@QueryParameter String value) {
-
-            if (value == null || value.trim().isEmpty()) {
-                return FormValidation.ok();
-            }
-            try {
-                Integer.parseInt(value);
-                return FormValidation.ok();
-            } catch (Exception e) {
-                return FormValidation.error("You must provide a valid number status such as 200, 301, ...");
-            }
-        }
-
-
         public FormValidation doCheckURL(@QueryParameter String value) {
 
             if (value == null || value.trim().isEmpty()) {
@@ -432,6 +434,33 @@ public class URLTrigger extends AbstractTrigger {
                 return FormValidation.ok();
             } catch (Exception e) {
                 return FormValidation.error(e.getMessage());
+            }
+        }
+
+        public FormValidation doCheckTimeout(@QueryParameter String value) {
+
+            if ((value != null) && (value.trim().length() != 0)) {
+                int timeout = 0;
+                try {
+                    timeout = Integer.parseInt(value);
+                } catch (NumberFormatException ne) {
+                    return FormValidation.error("You must provide a timeout number (in seconds).");
+                }
+            }
+
+            return FormValidation.ok();
+        }
+
+        public FormValidation doCheckStatus(@QueryParameter String value) {
+
+            if (value == null || value.trim().isEmpty()) {
+                return FormValidation.ok();
+            }
+            try {
+                Integer.parseInt(value);
+                return FormValidation.ok();
+            } catch (Exception e) {
+                return FormValidation.error("You must provide a valid number status such as 200, 301, ...");
             }
         }
 
