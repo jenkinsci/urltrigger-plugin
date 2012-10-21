@@ -57,6 +57,12 @@ public class JSONContentType extends URLTriggerContentType {
     @Override
     protected boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
+        if (jsonPaths == null || jsonPaths.size() == 0) {
+            log.error("You must configure at least one JSON Path. Exit with no changes.");
+            return false;
+        }
+
+
         if (results == null) {
             log.info("Capturing URL context. Waiting next schedule to check a change.");
             return false;

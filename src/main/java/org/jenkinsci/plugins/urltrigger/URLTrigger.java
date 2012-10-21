@@ -177,8 +177,8 @@ public class URLTrigger extends AbstractTrigger {
            take down all of the jenkins schedule events.
         */
         int timeout = entry.getTimeout();
-        client.setConnectTimeout(timeout*1000); //in milliseconds
-        client.setReadTimeout(timeout*1000);    //in milliseconds
+        client.setConnectTimeout(timeout * 1000); //in milliseconds
+        client.setReadTimeout(timeout * 1000);    //in milliseconds
 
         return client;
     }
@@ -382,29 +382,20 @@ public class URLTrigger extends AbstractTrigger {
             } else {
                 urlTriggerEntry.setInspectingContent(true);
                 JSONObject inspectingContentJSONObject = entryObject.getJSONObject("inspectingContent");
-                JSON contentTypesJsonElt;
-                try {
-                    contentTypesJsonElt = inspectingContentJSONObject.getJSONArray("contentTypes");
-                } catch (JSONException jsone) {
-                    contentTypesJsonElt = inspectingContentJSONObject.getJSONObject("contentTypes");
-                }
-                if (contentTypesJsonElt != null && !isEmptyJSONElement(contentTypesJsonElt)) {
+                if (inspectingContentJSONObject.size() == 0) {
+                    urlTriggerEntry.setInspectingContent(false);
+                } else {
+                    JSON contentTypesJsonElt;
+                    try {
+                        contentTypesJsonElt = inspectingContentJSONObject.getJSONArray("contentTypes");
+                    } catch (JSONException jsone) {
+                        contentTypesJsonElt = inspectingContentJSONObject.getJSONObject("contentTypes");
+                    }
                     List<URLTriggerContentType> types = req.bindJSONToList(URLTriggerContentType.class, contentTypesJsonElt);
                     urlTriggerEntry.setContentTypes(types.toArray(new URLTriggerContentType[types.size()]));
-                } else {
-                    urlTriggerEntry.setInspectingContent(false);
                 }
-
             }
-
             return urlTriggerEntry;
-        }
-
-        private boolean isEmptyJSONElement(JSON element) {
-            if (element instanceof JSONObject) {
-                return ((JSONObject) element).getString("kind").isEmpty();
-            }
-            return false;
         }
 
         @Override

@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
+import hudson.Util;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.Serializable;
@@ -13,7 +14,10 @@ public class TEXTContentEntry implements Serializable {
 
     @DataBoundConstructor
     public TEXTContentEntry(String regEx) {
-        this.regEx = regEx;
+        this.regEx = Util.fixEmptyAndTrim(regEx);
+        if (this.regEx == null) {
+            this.regEx = ".*";
+        }
     }
 
     public String getRegEx() {

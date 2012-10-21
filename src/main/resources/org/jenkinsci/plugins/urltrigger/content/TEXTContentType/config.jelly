@@ -4,7 +4,7 @@
              help="/descriptor/org.jenkinsci.plugins.urltrigger.content.TEXTContentType/help/type">
         <f:repeatable var="element" items="${instance.regExElements}" add="${%Add a regEx}">
             <table width="100%">
-                <f:entry field="regEx" title="${%Regular Expression}">
+                <f:entry field="regEx" title="${%REGEX}">
                     <f:textbox name="txt.regEx" value="${element.regEx}"/>
                 </f:entry>
             </table>

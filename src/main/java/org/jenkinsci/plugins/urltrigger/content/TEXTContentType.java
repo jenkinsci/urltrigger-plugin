@@ -44,6 +44,11 @@ public class TEXTContentType extends URLTriggerContentType {
     @Override
     protected boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException {
 
+        if (regExElements == null || regExElements.size() == 0) {
+            log.error("You must configure at least one REGEX. Exit with no changes.");
+            return false;
+        }
+
         if (capturedValues == null) {
             log.info("Capturing URL context. Waiting next schedule to check a change.");
             return false;
@@ -102,10 +107,12 @@ public class TEXTContentType extends URLTriggerContentType {
             while ((line = bufferedReader.readLine()) != null) {
                 for (TEXTContentEntry regexEntry : regExElements) {
                     String regEx = regexEntry.getRegEx();
-                    Pattern pattern = Pattern.compile(regEx);
-                    Matcher matcher = pattern.matcher(line);
-                    if (matcher.matches()) {
-                        addMatchedValue(capturedValues, regEx, matcher.group());
+                    if (regEx != null) {
+                        Pattern pattern = Pattern.compile(regEx);
+                        Matcher matcher = pattern.matcher(line);
+                        if (matcher.matches()) {
+                            addMatchedValue(capturedValues, regEx, matcher.group());
+                        }
                     }
                 }
             }
