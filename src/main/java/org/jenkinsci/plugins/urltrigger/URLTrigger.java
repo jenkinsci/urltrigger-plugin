@@ -35,8 +35,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -283,6 +288,7 @@ public class URLTrigger extends AbstractTrigger {
 
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Executors.newSingleThreadExecutor());
 
+        @Override
         public ExecutorService getExecutor() {
             return queue.getExecutors();
         }
@@ -419,9 +425,32 @@ public class URLTrigger extends AbstractTrigger {
                 return FormValidation.error("The url field is mandatory.");
             }
             try {
-                ClientConfig cc = new DefaultClientConfig();
-                Client client = Client.create(cc);
-                client.resource(value).get(ClientResponse.class);
+                URI uri = new URI(value);
+                if (uri.getScheme().equals("ftp")) {
+                    String host = uri.getHost();
+                    int port = uri.getPort();
+                    String userInfo = uri.getUserInfo();                    
+                    FTPClient ftpClient = new FTPClient();
+                    if (port < 0) {
+                        ftpClient.connect(host);
+                    } else {
+                        ftpClient.connect(host, port);
+                    }
+                    if (userInfo != null && !userInfo.isEmpty())
+                    {
+                        int i = userInfo.indexOf(':');
+                        String user = i < 0 ? userInfo : userInfo.substring(0, i);
+                        String pass = i < 0 ? "" : userInfo.substring(i+1, userInfo.length());
+                        if (!ftpClient.login(user, pass)) {
+                            throw new Exception("Authentification failed");
+                        }
+                    }
+                    ftpClient.getModificationTime(uri.getPath());
+                } else {
+                    ClientConfig cc = new DefaultClientConfig();
+                    Client client = Client.create(cc);
+                    client.resource(value).get(ClientResponse.class);
+                }
                 return FormValidation.ok();
             } catch (Exception e) {
                 return FormValidation.error(e.getMessage());
