@@ -258,6 +258,9 @@ public class URLTrigger extends AbstractTrigger {
             for (URLTriggerEntry entry : entries) {
                 Client client = getClientObject(entry, null);
                 String url = getURLValue(entry, null);
+                if (!url.startsWith("http"))
+                    throw new IllegalArgumentException("Only http(s) URLs are supported. For non-http protocols, consider other XTrigger plugins");
+
                 ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
                 if (HttpServletResponse.SC_SERVICE_UNAVAILABLE == clientResponse.getStatus()) {
                     log.info("URL to poll unavailable.");
@@ -418,6 +421,10 @@ public class URLTrigger extends AbstractTrigger {
             if (value == null || value.trim().isEmpty()) {
                 return FormValidation.error("The url field is mandatory.");
             }
+
+            if (!value.startsWith("http"))
+                return FormValidation.error("Only http(s) URLs are supported. For non-http protocols, consider other XTrigger plugins");
+
             try {
                 ClientConfig cc = new DefaultClientConfig();
                 Client client = Client.create(cc);
