@@ -10,7 +10,7 @@
     <artifactId>urltrigger</artifactId>
     <packaging>hpi</packaging>
     <name>Jenkins URLTrigger Plug-in</name>
-    <version>0.27-SNAPSHOT</version>
+    <version>0.28-SNAPSHOT</version>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/URLTrigger+Plugin</url>
 
     <licenses>
@@ -97,6 +97,22 @@
             <version>3.2</version>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <name>Jenkins Repository</name>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>repo.jenkins-ci.org</id>
+            <url>http://repo.jenkins-ci.org/public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
 </project>  
   
 
