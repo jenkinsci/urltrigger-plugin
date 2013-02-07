@@ -24,7 +24,7 @@ public class URLTriggerService {
         return INSTANCE;
     }
 
-    public void initContent(ClientResponse clientResponse, URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
+    public void initContent(URLResponse clientResponse, URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
 
         if (clientResponse == null) {
             throw new NullPointerException("The given clientResponse object is not set.");
@@ -43,7 +43,7 @@ public class URLTriggerService {
 
         if (entry.isInspectingContent()) {
             for (final URLTriggerContentType type : entry.getContentTypes()) {
-                String stringContent = clientResponse.getEntity(String.class);
+                String stringContent = clientResponse.getContent();
                 if (stringContent == null) {
                     throw new XTriggerException("The URL content is empty.");
                 }
@@ -52,7 +52,7 @@ public class URLTriggerService {
         }
     }
 
-    public boolean isSchedulingAndGetRefresh(ClientResponse clientResponse, URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
+    public boolean isSchedulingAndGetRefresh(URLResponse clientResponse, URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
 
         boolean job2Schedule = false;
 
@@ -61,28 +61,28 @@ public class URLTriggerService {
         }
 
         if (entry.isCheckETag()) {
-            EntityTag entityTag = clientResponse.getEntityTag();
-            if (entityTag != null) {
-                job2Schedule = job2Schedule || checkEntityTag(entry, log, entityTag.getValue());
+            String entityTagValue = clientResponse.getEntityTagValue();
+            if (entityTagValue != null) {
+                job2Schedule = job2Schedule || checkEntityTag(entry, log, entityTagValue);
             }
-            refreshETag(entry, entityTag == null ? null : entityTag.getValue());
+            refreshETag(entry, entityTagValue);
         }
 
         if (entry.isCheckLastModificationDate()) {
             Date lastModificationDate = clientResponse.getLastModified();
             job2Schedule = job2Schedule || checkLastModificationDate(entry, log, lastModificationDate);
-            refreshLatModificationDate(entry, lastModificationDate);
+            refreshLastModificationDate(entry, lastModificationDate);
         }
 
         if (entry.isInspectingContent()) {
 
             //The response need to be in the successful family
-            if (!isResponseInSuccessFamily(clientResponse)) {
+            if (clientResponse.isSuccessfullFamily()) {
                 log.info("[WARNING] - Checking content requires success responses (200 status code family)");
                 return false;
             }
 
-            String content = clientResponse.getEntity(String.class);
+            String content = clientResponse.getContent();
             job2Schedule = job2Schedule || checkContent(entry, log, content);
             refreshContent(entry, content, log);
         }
@@ -90,15 +90,11 @@ public class URLTriggerService {
         return job2Schedule;
     }
 
-    private boolean isResponseInSuccessFamily(ClientResponse clientResponse) {
-        return clientResponse.getClientResponseStatus().getFamily() == Response.Status.Family.SUCCESSFUL;
-    }
-
     private void refreshETag(URLTriggerEntry entry, String entityTag) {
         entry.setETag(entityTag);
     }
 
-    private void refreshLatModificationDate(URLTriggerEntry entry, Date lastModificationDate) {
+    private void refreshLastModificationDate(URLTriggerEntry entry, Date lastModificationDate) {
         if (lastModificationDate != null) {
             entry.setLastModificationDate(lastModificationDate.getTime());
         } else {
