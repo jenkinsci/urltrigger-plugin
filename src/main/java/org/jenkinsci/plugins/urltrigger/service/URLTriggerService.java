@@ -77,7 +77,7 @@ public class URLTriggerService {
         if (entry.isInspectingContent()) {
 
             //The response need to be in the successful family
-            if (clientResponse.isSuccessfullFamily()) {
+            if (!clientResponse.isSuccessfullFamily()) {
                 log.info("[WARNING] - Checking content requires success responses (200 status code family)");
                 return false;
             }
