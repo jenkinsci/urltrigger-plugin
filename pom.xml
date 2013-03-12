@@ -91,6 +91,11 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.2</version>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -107,7 +112,6 @@
             <url>http://repo.jenkins-ci.org/public/</url>
         </pluginRepository>
     </pluginRepositories>
-
 
 </project>  
   
