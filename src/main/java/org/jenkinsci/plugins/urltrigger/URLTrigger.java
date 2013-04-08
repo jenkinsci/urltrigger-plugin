@@ -17,12 +17,12 @@ import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
 import hudson.util.StreamTaskListener;
-import java.io.ByteArrayOutputStream;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.net.ftp.FTPClient;
 import org.jenkinsci.lib.envinject.EnvInjectException;
 import org.jenkinsci.lib.envinject.service.EnvVarsResolver;
 import org.jenkinsci.lib.xtrigger.AbstractTrigger;
@@ -31,14 +31,16 @@ import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
+import org.jenkinsci.plugins.urltrigger.service.FTPResponse;
+import org.jenkinsci.plugins.urltrigger.service.HTTPResponse;
+import org.jenkinsci.plugins.urltrigger.service.URLResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
-import org.apache.commons.net.ftp.FTPClient;
-
 import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -50,9 +52,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jenkinsci.plugins.urltrigger.service.FTPResponse;
-import org.jenkinsci.plugins.urltrigger.service.HTTPResponse;
-import org.jenkinsci.plugins.urltrigger.service.URLResponse;
 
 
 /**
@@ -160,14 +159,17 @@ public class URLTrigger extends AbstractTrigger {
         } else {
             try {
                 response = getFTPResponse(getFTPClientObject(entry), entry);
+                if (response == null) {
+                    return false;
+                }
                 log.info("FTP poll result: " + response.getEntityTagValue());
-            } catch (Exception ex) {                
-                log.info("Failed to poll URL: " + ex.toString());            
+            } catch (Exception ex) {
+                log.info("Failed to poll URL: " + ex.toString());
                 log.info("Skipping URLTrigger initialization. Waiting next schedule");
                 return false;
             }
         }
-        
+
         URLTriggerService urlTriggerService = URLTriggerService.getInstance();
         if (urlTriggerService.isSchedulingAndGetRefresh(response, entry, log)) {
             return true;
@@ -282,9 +284,9 @@ public class URLTrigger extends AbstractTrigger {
         try {
             for (URLTriggerEntry entry : entries) {
                 String url = getURLValue(entry, null);
-                if (!url.startsWith("http") && !url.startsWith("ftp"))
+                if (!entry.isHttp() && !entry.isFtp())
                     throw new IllegalArgumentException("Only http(s) and ftp URLs are supported. For non-http/ftp protocols, consider other XTrigger plugins");
-                    
+
                 URLResponse response;
                 if (entry.isHttp()) {
                     Client client = getClientObject(entry, null);
@@ -297,6 +299,9 @@ public class URLTrigger extends AbstractTrigger {
                     response = new HTTPResponse(clientResponse);
                 } else {
                     response = getFTPResponse(getFTPClientObject(entry), entry);
+                    if (response == null) {
+                        return;
+                    }
                     log.info("FTP poll result: " + response.getEntityTagValue());
                 }
                 service.initContent(response, entry, new XTriggerLog((StreamTaskListener) TaskListener.NULL));
@@ -315,44 +320,47 @@ public class URLTrigger extends AbstractTrigger {
     private static FTPClient getFTPClientObject(URLTriggerEntry entry) throws URISyntaxException, IOException {
         return getFTPClientObject(entry.getUrl(), entry.getUsername(), entry.getRealPassword());
     }
-    
+
     private static FTPClient getFTPClientObject(String url, String basicUsername, String basicPassword) throws URISyntaxException, IOException {
         URI uri = new URI(url);
         String host = uri.getHost();
-        int port = uri.getPort();        
+        int port = uri.getPort();
         String userInfo = uri.getUserInfo();
-        
+
         FTPClient ftpClient = new FTPClient();
         if (port < 0) {
             ftpClient.connect(host);
         } else {
             ftpClient.connect(host, port);
         }
-        
+
         if (userInfo != null && !userInfo.isEmpty() || basicUsername != null) {
             String user, pass;
-            
+
             if (userInfo != null && !userInfo.isEmpty()) {
                 int i = userInfo.indexOf(':');
                 user = i < 0 ? userInfo : userInfo.substring(0, i);
-                pass = i < 0 ? "" : userInfo.substring(i+1, userInfo.length());
+                pass = i < 0 ? "" : userInfo.substring(i + 1, userInfo.length());
             } else {
                 user = basicUsername;
                 pass = basicPassword;
             }
-            
+
             if (!ftpClient.login(user, pass)) {
                 throw new java.io.IOException("Authentification failed");
             }
         }
-        
+
         return ftpClient;
     }
-    
+
     private FTPResponse getFTPResponse(FTPClient ftpClient, URLTriggerEntry entry) throws IOException, ParseException, URISyntaxException {
         URI uri = new URI(entry.getUrl());
         FTPResponse response = new FTPResponse();
         String timeResponse = ftpClient.getModificationTime(uri.getPath());
+        if (timeResponse == null) {
+            return null;
+        }
         String[] dateResponse = timeResponse.split(" "); //assume "CODE yyyyMMddhhmmss"
         if (dateResponse.length != 2) {
             throw new IOException("Illegal FTP response");
@@ -361,10 +369,9 @@ public class URLTrigger extends AbstractTrigger {
         response.setLastModified(format.parse(dateResponse[1]));
         response.setStatus(Integer.parseInt(dateResponse[0]));
         response.setEntityTagValue(timeResponse); // I'm not sure what else could be used
-        
-        if (entry.isInspectingContent())
-        {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+
+        if (entry.isInspectingContent()) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ftpClient.retrieveFile(uri.getPath(), baos);
             response.setContent(baos.toString("UTF-8"));
         }
