@@ -12,6 +12,7 @@ import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.ProxyConfiguration;
 import hudson.Util;
+import hudson.console.AnnotatedLargeText;
 import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
@@ -22,6 +23,7 @@ import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.jelly.XMLOutput;
 import org.apache.commons.net.ftp.FTPClient;
 import org.jenkinsci.lib.envinject.EnvInjectException;
 import org.jenkinsci.lib.envinject.service.EnvVarsResolver;
@@ -45,6 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -104,8 +107,66 @@ public class URLTrigger extends AbstractTrigger {
                 }
             }
         }
-        URLTriggerAction action = new URLTriggerAction((AbstractProject) job, getLogFile(), this.getDescriptor().getDisplayName(), subActionTitles);
+
+        /*
+            [JENKINS-18683] Configuration can't be saved.
+
+            'job' variable can be undefined during a saving action. The solution is to postpone 'job' usage until
+            trigger is running. We achieved this by using the URLTriggerAction as nested class (which has access to
+            class members of the URLTrigger class).
+         */
+        URLTriggerAction action = new URLTriggerAction(this.getDescriptor().getDisplayName(), subActionTitles);
         return Collections.singleton(action);
+    }
+
+    public final class URLTriggerAction implements Action {
+        private transient String label;
+        private transient Map<String, String> subActionTitle;
+
+        public URLTriggerAction(String label, Map<String, String> subActionTitle) {
+            this.label = label;
+            this.subActionTitle = subActionTitle;
+        }
+
+        @SuppressWarnings("unused")
+        public AbstractProject<?, ?> getOwner() {
+            return (AbstractProject) job;
+        }
+
+        @SuppressWarnings("unused")
+        public String getLabel() {
+            return label;
+        }
+
+        @SuppressWarnings("unused")
+        public String getIconFileName() {
+            return "clipboard.gif";
+        }
+
+        public String getDisplayName() {
+            return "URLTrigger Log";
+        }
+
+        @SuppressWarnings("unused")
+        public String getUrlName() {
+            return "urltriggerPollLog";
+        }
+
+        @SuppressWarnings("unused")
+        public String getLog() throws IOException {
+            return Util.loadFile(getLogFile());
+        }
+
+        @SuppressWarnings("unused")
+        public Map<String, String> getSubActionTitle() {
+            return subActionTitle;
+        }
+
+        @SuppressWarnings("unused")
+        public void writeLogTo(XMLOutput out) throws IOException {
+            new AnnotatedLargeText<URLTriggerAction>(getLogFile(), Charset.defaultCharset(), true, this).writeHtmlTo(0, out.asWriter());
+        }
+
     }
 
 
