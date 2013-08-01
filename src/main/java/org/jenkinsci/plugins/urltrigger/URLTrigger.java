@@ -115,15 +115,16 @@ public class URLTrigger extends AbstractTrigger {
             trigger is running. We achieved this by using the URLTriggerAction as nested class (which has access to
             class members of the URLTrigger class).
          */
-        URLTriggerAction action = new URLTriggerAction(this.getDescriptor().getDisplayName(), subActionTitles);
+        URLTriggerAction action = new InternalURLTriggerAction(this.getDescriptor().getDisplayName(), subActionTitles);
         return Collections.singleton(action);
     }
 
-    public final class URLTriggerAction implements Action {
+    public final class InternalURLTriggerAction extends URLTriggerAction {
+
         private transient String label;
         private transient Map<String, String> subActionTitle;
 
-        public URLTriggerAction(String label, Map<String, String> subActionTitle) {
+        public InternalURLTriggerAction(String label, Map<String, String> subActionTitle) {
             this.label = label;
             this.subActionTitle = subActionTitle;
         }
@@ -138,16 +139,17 @@ public class URLTrigger extends AbstractTrigger {
             return label;
         }
 
-        @SuppressWarnings("unused")
+        @Override
         public String getIconFileName() {
             return "clipboard.gif";
         }
 
+        @Override
         public String getDisplayName() {
             return "URLTrigger Log";
         }
 
-        @SuppressWarnings("unused")
+        @Override
         public String getUrlName() {
             return "urltriggerPollLog";
         }
@@ -232,11 +234,8 @@ public class URLTrigger extends AbstractTrigger {
         }
 
         URLTriggerService urlTriggerService = URLTriggerService.getInstance();
-        if (urlTriggerService.isSchedulingAndGetRefresh(response, entry, log)) {
-            return true;
-        }
 
-        return false;
+        return urlTriggerService.isSchedulingAndGetRefresh(response, entry, log);
     }
 
     private boolean isServiceUnavailableAndNotExpected(ClientResponse clientResponse, URLTriggerEntry entry) {
@@ -605,9 +604,8 @@ public class URLTrigger extends AbstractTrigger {
         public FormValidation doCheckTimeout(@QueryParameter String value) {
 
             if ((value != null) && (value.trim().length() != 0)) {
-                int timeout = 0;
                 try {
-                    timeout = Integer.parseInt(value);
+                    Integer.parseInt(value);
                 } catch (NumberFormatException ne) {
                     return FormValidation.error("You must provide a timeout number (in seconds).");
                 }
