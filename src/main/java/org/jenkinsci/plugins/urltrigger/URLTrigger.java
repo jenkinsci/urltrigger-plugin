@@ -274,10 +274,7 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     private boolean isHttps(String url) {
-        if (url == null) {
-            return false;
-        }
-        return url.startsWith("https");
+        return url != null && url.startsWith("https");
     }
 
     private Client createClient(boolean isHttps, boolean withProxy) throws XTriggerException {
@@ -321,12 +318,10 @@ public class URLTrigger extends AbstractTrigger {
 
             @Override
             public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws java.security.cert.CertificateException {
-                return;
             }
 
             @Override
             public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws java.security.cert.CertificateException {
-                return;
             }
 
             @Override
