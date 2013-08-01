@@ -7,8 +7,12 @@ import java.util.Date;
  */
 public interface URLResponse {
     public Date getLastModified();
+
     public String getContent();
+
     public int getStatus();
+
     public String getEntityTagValue();
+
     public boolean isSuccessfullFamily();
 }

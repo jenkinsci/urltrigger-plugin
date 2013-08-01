@@ -141,11 +141,11 @@ public class URLTriggerEntry implements Serializable {
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
-    
+
     public boolean isFtp() {
         return url.startsWith("ftp");
     }
-    
+
     public boolean isHttp() {
         return url.startsWith("http");
     }

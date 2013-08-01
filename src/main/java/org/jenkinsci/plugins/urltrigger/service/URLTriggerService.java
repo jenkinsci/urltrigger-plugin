@@ -1,13 +1,10 @@
 package org.jenkinsci.plugins.urltrigger.service;
 
-import com.sun.jersey.api.client.ClientResponse;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.URLTriggerEntry;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 
-import javax.ws.rs.core.EntityTag;
-import javax.ws.rs.core.Response;
 import java.util.Date;
 
 /**
