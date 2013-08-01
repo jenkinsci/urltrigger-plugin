@@ -8,6 +8,7 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
+import com.sun.jersey.client.urlconnection.HTTPSProperties;
 import hudson.DescriptorExtensionList;
 import hudson.Extension;
 import hudson.ProxyConfiguration;
@@ -41,6 +42,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -210,8 +213,8 @@ public class URLTrigger extends AbstractTrigger {
             Client client = getClientObject(entry, log);
             String url = getURLValue(entry, pollingNode);
             log.info(String.format("Invoking the url: \n %s", url));
-
             ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+
             if (isServiceUnavailableAndNotExpected(clientResponse, entry)) {
                 log.info("URL to poll unavailable.");
                 log.info("Skipping URLTrigger initialization. Waiting next schedule");
@@ -253,9 +256,9 @@ public class URLTrigger extends AbstractTrigger {
         return URLTriggerCause.NAME;
     }
 
-    private Client getClientObject(URLTriggerEntry entry, XTriggerLog log) {
+    private Client getClientObject(URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
 
-        Client client = createClient(entry);
+        Client client = createClient(isHttps(entry.getUrl()), entry.isProxyActivated());
         if (isAuthBasic(entry)) {
             addBasicAuth(entry, log, client);
         }
@@ -270,12 +273,19 @@ public class URLTrigger extends AbstractTrigger {
         return client;
     }
 
-    private Client createClient(URLTriggerEntry entry) {
+    private boolean isHttps(String url) {
+        if (url == null) {
+            return false;
+        }
+        return url.startsWith("https");
+    }
+
+    private Client createClient(boolean isHttps, boolean withProxy) throws XTriggerException {
         Client client;
-        if (entry.isProxyActivated()) {
-            client = createClientWithProxy();
+        if (withProxy) {
+            client = createClientWithProxy(isHttps);
         } else {
-            client = createClientWithoutProxy();
+            client = createClientWithoutProxy(isHttps);
         }
         return client;
     }
@@ -288,24 +298,74 @@ public class URLTrigger extends AbstractTrigger {
         client.addFilter(new HTTPBasicAuthFilter(entry.getUsername(), password));
     }
 
-    private Client createClientWithoutProxy() {
-        Client client;
-        ClientConfig cc = new DefaultClientConfig();
-        client = Client.create(cc);
-        return client;
+    private Client createClientWithoutProxy(boolean isHttps) throws XTriggerException {
+        ClientConfig config = new DefaultClientConfig();
+        if (isHttps) {
+            config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(getHostnameVerifier(), getSSLContext()));
+        }
+        return Client.create(config);
     }
 
-    private Client createClientWithProxy() {
+    private HostnameVerifier getHostnameVerifier() {
+        return new HostnameVerifier() {
+
+            @Override
+            public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
+                return true;
+            }
+        };
+    }
+
+    private SSLContext getSSLContext() throws XTriggerException {
+        javax.net.ssl.TrustManager x509 = new javax.net.ssl.X509TrustManager() {
+
+            @Override
+            public void checkClientTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws java.security.cert.CertificateException {
+                return;
+            }
+
+            @Override
+            public void checkServerTrusted(java.security.cert.X509Certificate[] arg0, String arg1) throws java.security.cert.CertificateException {
+                return;
+            }
+
+            @Override
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return null;
+            }
+        };
+
+        SSLContext ctx;
+        try {
+            ctx = SSLContext.getInstance("SSL");
+            ctx.init(null, new javax.net.ssl.TrustManager[]{x509}, null);
+        } catch (java.security.GeneralSecurityException ex) {
+            throw new XTriggerException(ex);
+        }
+
+        return ctx;
+    }
+
+
+    private Client createClientWithProxy(boolean isHttps) throws XTriggerException {
         Client client;
-        DefaultApacheHttpClientConfig cc = new DefaultApacheHttpClientConfig();
+        DefaultApacheHttpClientConfig config = new DefaultApacheHttpClientConfig();
+
+        //-- Proxy
         Hudson h = Hudson.getInstance(); // this code might run on slaves
         ProxyConfiguration p = h != null ? h.proxy : null;
         if (p != null) {
-            cc.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + p.name + ":" + p.port);
+            config.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + p.name + ":" + p.port);
             String password = getProxyPasswordDecrypted(p);
-            cc.getState().setProxyCredentials(AuthScope.ANY_REALM, p.name, p.port, p.getUserName(), Util.fixNull(password));
+            config.getState().setProxyCredentials(AuthScope.ANY_REALM, p.name, p.port, p.getUserName(), Util.fixNull(password));
         }
-        client = ApacheHttpClient.create(cc);
+
+        //-- Https
+        if (isHttps) {
+            config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(getHostnameVerifier(), getSSLContext()));
+        }
+
+        client = ApacheHttpClient.create(config);
         return client;
     }
 
