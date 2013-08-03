@@ -18,7 +18,6 @@ import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
-import hudson.util.StreamTaskListener;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -56,7 +55,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -174,7 +172,6 @@ public class URLTrigger extends AbstractTrigger {
 
     }
 
-
     private String getURLValue(URLTriggerEntry entry, Node node) throws XTriggerException {
         String entryURL = entry.getUrl();
         if (entryURL != null) {
@@ -192,6 +189,7 @@ public class URLTrigger extends AbstractTrigger {
 
     @Override
     protected boolean checkIfModified(Node pollingNode, XTriggerLog log) throws XTriggerException {
+
         if (entries == null || entries.isEmpty()) {
             log.info("No URLs to poll.");
             return false;
@@ -208,37 +206,57 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     private boolean checkIfModifiedEntry(URLTriggerEntry entry, Node pollingNode, XTriggerLog log) throws XTriggerException {
-        URLResponse response;
-        if (entry.isHttp()) {
-            Client client = getClientObject(entry, log);
-            String url = getURLValue(entry, pollingNode);
-            log.info(String.format("Invoking the url: \n %s", url));
-            ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+        String resolvedURL = getURLValue(entry, pollingNode);
+        URLTriggerResolvedEntry resolvedEntry = new URLTriggerResolvedEntry(resolvedURL, entry);
 
-            if (isServiceUnavailableAndNotExpected(clientResponse, entry)) {
-                log.info("URL to poll unavailable.");
-                log.info("Skipping URLTrigger initialization. Waiting next schedule");
-                return false;
-            }
+        if (!resolvedEntry.isURLTriggerValidURL())
+            throw new IllegalArgumentException("Only http(s) and ftp URLs are supported. For non-http/ftp protocols, consider other XTrigger plugins");
 
-            response = new HTTPResponse(clientResponse);
-        } else {
-            try {
-                response = getFTPResponse(getFTPClientObject(entry), entry);
-                if (response == null) {
-                    return false;
-                }
-                log.info("FTP poll result: " + response.getEntityTagValue());
-            } catch (Exception ex) {
-                log.info("Failed to poll URL: " + ex.toString());
-                log.info("Skipping URLTrigger initialization. Waiting next schedule");
-                return false;
-            }
+        if (resolvedEntry.isHttp() || resolvedEntry.isHttps()) {
+            return checkIfModifiedEntryForHttpOrHttpsURL(resolvedEntry, log);
         }
 
-        URLTriggerService urlTriggerService = URLTriggerService.getInstance();
+        return checkIfModifiedEntryFoFTPURL(resolvedEntry, log);
+    }
 
+    private boolean checkIfModifiedEntryForHttpOrHttpsURL(URLTriggerResolvedEntry resolvedEntry, XTriggerLog log) throws XTriggerException {
+
+        Client client = getClientObject(resolvedEntry, log);
+
+        String url = resolvedEntry.getResolvedURL();
+        log.info(String.format("Invoking the url: \n %s", url));
+        ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+
+        URLTriggerEntry entry = resolvedEntry.getEntry();
+
+        if (isServiceUnavailableAndNotExpected(clientResponse, entry)) {
+            log.info("URL to poll unavailable.");
+            log.info("Skipping URLTrigger initialization. Waiting next schedule");
+            return false;
+        }
+
+        URLResponse response = new HTTPResponse(clientResponse);
+        URLTriggerService urlTriggerService = URLTriggerService.getInstance();
         return urlTriggerService.isSchedulingAndGetRefresh(response, entry, log);
+
+    }
+
+    private boolean checkIfModifiedEntryFoFTPURL(URLTriggerResolvedEntry resolvedEntry, XTriggerLog log) throws XTriggerException {
+        URLResponse response;
+        try {
+            response = getFTPResponse(resolvedEntry);
+            if (response == null) {
+                return false;
+            }
+            log.info("FTP poll result: " + response.getEntityTagValue());
+        } catch (Exception ex) {
+            log.info("Failed to poll URL: " + ex.toString());
+            log.info("Skipping URLTrigger initialization. Waiting next schedule");
+            return false;
+        }
+        URLTriggerService urlTriggerService = URLTriggerService.getInstance();
+        return urlTriggerService.isSchedulingAndGetRefresh(response, resolvedEntry.getEntry(), log);
+
     }
 
     private boolean isServiceUnavailableAndNotExpected(ClientResponse clientResponse, URLTriggerEntry entry) {
@@ -256,9 +274,10 @@ public class URLTrigger extends AbstractTrigger {
         return URLTriggerCause.NAME;
     }
 
-    private Client getClientObject(URLTriggerEntry entry, XTriggerLog log) throws XTriggerException {
+    private Client getClientObject(URLTriggerResolvedEntry resolvedEntry, XTriggerLog log) throws XTriggerException {
 
-        Client client = createClient(isHttps(entry.getUrl()), entry.isProxyActivated());
+        URLTriggerEntry entry = resolvedEntry.getEntry();
+        Client client = createClient(resolvedEntry.isHttps(), entry.isProxyActivated());
         if (isAuthBasic(entry)) {
             addBasicAuth(entry, log, client);
         }
@@ -271,10 +290,6 @@ public class URLTrigger extends AbstractTrigger {
         client.setReadTimeout(timeout * 1000);    //in milliseconds
 
         return client;
-    }
-
-    private boolean isHttps(String url) {
-        return url != null && url.startsWith("https");
     }
 
     private Client createClient(boolean isHttps, boolean withProxy) throws XTriggerException {
@@ -395,36 +410,36 @@ public class URLTrigger extends AbstractTrigger {
 
     @Override
     protected void start(Node node, BuildableItem buildableItem, boolean newInstance, XTriggerLog log) {
-        URLTriggerService service = URLTriggerService.getInstance();
-        try {
-            for (URLTriggerEntry entry : entries) {
-                String url = getURLValue(entry, null);
-                if (!entry.isHttp() && !entry.isFtp())
-                    throw new IllegalArgumentException("Only http(s) and ftp URLs are supported. For non-http/ftp protocols, consider other XTrigger plugins");
-
-                URLResponse response;
-                if (entry.isHttp()) {
-                    Client client = getClientObject(entry, null);
-                    ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
-                    if (HttpServletResponse.SC_SERVICE_UNAVAILABLE == clientResponse.getStatus()) {
-                        log.info("URL to poll unavailable.");
-                        log.info("Skipping URLTrigger initialization. Waiting for next schedule.");
-                        return;
-                    }
-                    response = new HTTPResponse(clientResponse);
-                } else {
-                    response = getFTPResponse(getFTPClientObject(entry), entry);
-                    if (response == null) {
-                        return;
-                    }
-                    log.info("FTP poll result: " + response.getEntityTagValue());
-                }
-                service.initContent(response, entry, new XTriggerLog((StreamTaskListener) TaskListener.NULL));
-            }
-        } catch (Throwable t) {
-            LOGGER.log(Level.SEVERE, "Severe error on trigger startup " + t.getMessage());
-            t.printStackTrace();
-        }
+//        URLTriggerService service = URLTriggerService.getInstance();
+//        try {
+//            for (URLTriggerEntry entry : entries) {
+//                String url = getURLValue(entry, node);
+//                if (!entry.isHttp() && !entry.isFtp())
+//                    throw new IllegalArgumentException("Only http(s) and ftp URLs are supported. For non-http/ftp protocols, consider other XTrigger plugins");
+//
+//                URLResponse response;
+//                if (entry.isHttp()) {
+//                    Client client = getClientObject(entry, null);
+//                    ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+//                    if (HttpServletResponse.SC_SERVICE_UNAVAILABLE == clientResponse.getStatus()) {
+//                        log.info("URL to poll unavailable.");
+//                        log.info("Skipping URLTrigger initialization. Waiting for next schedule.");
+//                        return;
+//                    }
+//                    response = new HTTPResponse(clientResponse);
+//                } else {
+//                    response = getFTPResponse(getFTPClientObject(entry), entry);
+//                    if (response == null) {
+//                        return;
+//                    }
+//                    log.info("FTP poll result: " + response.getEntityTagValue());
+//                }
+//                service.initContent(response, entry, new XTriggerLog((StreamTaskListener) TaskListener.NULL));
+//            }
+//        } catch (Throwable t) {
+//            LOGGER.log(Level.SEVERE, "Severe error on trigger startup " + t.getMessage());
+//            t.printStackTrace();
+//        }
     }
 
     @Override
@@ -432,8 +447,9 @@ public class URLTrigger extends AbstractTrigger {
         return (URLTriggerDescriptor) Hudson.getInstance().getDescriptorOrDie(getClass());
     }
 
-    private static FTPClient getFTPClientObject(URLTriggerEntry entry) throws URISyntaxException, IOException {
-        return getFTPClientObject(entry.getUrl(), entry.getUsername(), entry.getRealPassword());
+    private static FTPClient getFTPClientObject(URLTriggerResolvedEntry resolvedEntry) throws URISyntaxException, IOException {
+        URLTriggerEntry entry = resolvedEntry.getEntry();
+        return getFTPClientObject(resolvedEntry.getResolvedURL(), entry.getUsername(), entry.getRealPassword());
     }
 
     private static FTPClient getFTPClientObject(String url, String basicUsername, String basicPassword) throws URISyntaxException, IOException {
@@ -469,8 +485,11 @@ public class URLTrigger extends AbstractTrigger {
         return ftpClient;
     }
 
-    private FTPResponse getFTPResponse(FTPClient ftpClient, URLTriggerEntry entry) throws IOException, ParseException, URISyntaxException {
-        URI uri = new URI(entry.getUrl());
+    private FTPResponse getFTPResponse(URLTriggerResolvedEntry resolvedEntry) throws IOException, ParseException, URISyntaxException {
+
+        FTPClient ftpClient = getFTPClientObject(resolvedEntry);
+
+        URI uri = new URI(resolvedEntry.getResolvedURL());
         FTPResponse response = new FTPResponse();
         String timeResponse = ftpClient.getModificationTime(uri.getPath());
         if (timeResponse == null) {
@@ -485,6 +504,7 @@ public class URLTrigger extends AbstractTrigger {
         response.setStatus(Integer.parseInt(dateResponse[0]));
         response.setEntityTagValue(timeResponse); // I'm not sure what else could be used
 
+        URLTriggerEntry entry = resolvedEntry.getEntry();
         if (entry.isInspectingContent()) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ftpClient.retrieveFile(uri.getPath(), baos);

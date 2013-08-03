@@ -149,4 +149,8 @@ public class URLTriggerEntry implements Serializable {
     public boolean isHttp() {
         return url.startsWith("http");
     }
+
+    public boolean isHttps() {
+        return url.startsWith("https");
+    }
 }
