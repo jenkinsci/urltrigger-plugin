@@ -26,7 +26,7 @@ import java.util.Map;
  */
 public class XMLContentType extends URLTriggerContentType {
 
-    private transient Map<String, Object> results = new HashMap<String, Object>();
+    private transient Map<String, Object> results = null;
 
     private transient Document xmlDocument;
 

@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public class JSONContentType extends URLTriggerContentType {
 
-    private transient Map<String, Object> results = new HashMap<String, Object>();
+    private transient Map<String, Object> results = null;
 
     private List<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
 
