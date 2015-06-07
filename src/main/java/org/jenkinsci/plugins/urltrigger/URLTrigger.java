@@ -55,6 +55,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 
 
@@ -518,7 +519,15 @@ public class URLTrigger extends AbstractTrigger {
     @SuppressWarnings("unused")
     public static class URLTriggerDescriptor extends XTriggerDescriptor {
 
-        private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Executors.newSingleThreadExecutor());
+        private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Executors.newSingleThreadExecutor(new ThreadFactory() {
+            // TODO use NamingThreadFactory since Jenkins 1.541
+            private final ThreadFactory factory = Executors.defaultThreadFactory();
+            public Thread newThread(Runnable r) {
+                Thread thread = factory.newThread(r);
+                thread.setName("URLTrigger queue thread");
+                return thread;
+            }
+        }));
 
         @Override
         public ExecutorService getExecutor() {
