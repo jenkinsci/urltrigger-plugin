@@ -61,40 +61,36 @@
                     </f:entry>
 
                     <f:entry>
-                        <table style="width:100%">
-                            <f:checkbox
-                                    field="checkETag"
-                                    name="urlElements.checkETag"
-                                    checked="${urlElements.checkETag}"
-                                    title="${%Check ETag}">
-                            </f:checkbox>
-                        </table>
+                        <f:checkbox
+                                field="checkETag"
+                                name="urlElements.checkETag"
+                                checked="${urlElements.checkETag}"
+                                title="${%Check ETag}">
+                        </f:checkbox>
                     </f:entry>
 
                     <f:entry>
-                        <table style="width:100%">
-                            <f:checkbox
-                                    field="checkLastModificationDate"
-                                    name="urlElements.checkLastModificationDate"
-                                    checked="${urlElements.checkLastModificationDate}"
-                                    title="${%Check the last modification Date}">
-                            </f:checkbox>
-                        </table>
+                        <f:checkbox
+                                field="checkLastModificationDate"
+                                name="urlElements.checkLastModificationDate"
+                                checked="${urlElements.checkLastModificationDate}"
+                                title="${%Check the last modification Date}">
+                        </f:checkbox>
                     </f:entry>
 
                     <f:entry>
                         <table style="width:100%">
                             <f:optionalBlock
-                                    name="urlElements.inspectingContent"
-                                    field="inspectingContent"
-                                    checked="${urlElements.inspectingContent}"
-                                    title="${%Inspect URL content}">
+                                name="urlElements.inspectingContent"
+                                field="inspectingContent"
+                                checked="${urlElements.inspectingContent}"
+                                title="${%Inspect URL content}">
 
                                 <f:block>
                                     <f:hetero-list name="urlElements.contentTypes"
-                                                   descriptors="${descriptor.listURLTriggerDescriptors}"
-                                                   addCaption="${%Add a content nature}"
-                                                   items="${urlElements.contentTypes}"/>
+                                       descriptors="${descriptor.listURLTriggerDescriptors}"
+                                       addCaption="${%Add a content nature}"
+                                       items="${urlElements.contentTypes}"/>
                                 </f:block>
                             </f:optionalBlock>
                         </table>
