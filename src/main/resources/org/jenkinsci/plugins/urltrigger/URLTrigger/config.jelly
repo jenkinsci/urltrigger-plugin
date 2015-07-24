@@ -65,8 +65,7 @@
                                 field="checkETag"
                                 name="urlElements.checkETag"
                                 checked="${urlElements.checkETag}"
-                                title="${%Check ETag}">
-                        </f:checkbox>
+                                title="${%Check ETag}"/>
                     </f:entry>
 
                     <f:entry>
@@ -74,8 +73,7 @@
                                 field="checkLastModificationDate"
                                 name="urlElements.checkLastModificationDate"
                                 checked="${urlElements.checkLastModificationDate}"
-                                title="${%Check the last modification Date}">
-                        </f:checkbox>
+                                title="${%Check the last modification Date}"/>
                     </f:entry>
 
                     <f:entry>
