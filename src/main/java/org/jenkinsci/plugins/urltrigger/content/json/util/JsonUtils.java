@@ -19,7 +19,7 @@ public class JsonUtils {
             if (currentToken.equals(JsonToken.START_OBJECT)) {
                 validateObject(parser);
             } else if (currentToken.equals(JsonToken.START_ARRAY)) {
-                throw new XTriggerException("Json documents starting with arrays are not supported!");
+                validateArray(parser);
             } else {
                 throw new XTriggerException("Bad Json value starting with: " + currentToken.toString());
             }
