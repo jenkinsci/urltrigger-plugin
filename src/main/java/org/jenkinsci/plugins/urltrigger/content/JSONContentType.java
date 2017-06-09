@@ -19,14 +19,16 @@ import java.util.Map;
  */
 public class JSONContentType extends URLTriggerContentType {
 
+    private static final long serialVersionUID = 1L;
+
     private transient Map<String, Object> results = null;
 
     // TODO; If this can be marked transient, mark transient instead of SW
     @SuppressFBWarnings("SE_BAD_FIELD")
-    private ArrayList<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
+    private List<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
 
     @DataBoundConstructor
-    public JSONContentType(ArrayList<JSONContentEntry> element) {
+    public JSONContentType(List<JSONContentEntry> element) {
         if (element != null) {
             this.jsonPaths = element;
         }

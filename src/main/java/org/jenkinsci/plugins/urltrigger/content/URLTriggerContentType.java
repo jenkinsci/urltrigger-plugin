@@ -15,6 +15,8 @@ import java.io.Serializable;
  */
 public abstract class URLTriggerContentType implements ExtensionPoint, Describable<URLTriggerContentType>, Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     public Descriptor<URLTriggerContentType> getDescriptor() {
         return (URLTriggerContentTypeDescriptor) Jenkins.getActiveInstance().getDescriptor(getClass());
     }

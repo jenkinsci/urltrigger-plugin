@@ -12,6 +12,8 @@ import java.util.Arrays;
  */
 public class URLTriggerEntry implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
 
     private String url;

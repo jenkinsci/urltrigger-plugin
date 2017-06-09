@@ -26,6 +26,8 @@ import java.util.Map;
  */
 public class XMLContentType extends URLTriggerContentType {
 
+    private static final long serialVersionUID = 1L;
+
     private transient Map<String, Object> results = null;
 
     private transient Document xmlDocument;
