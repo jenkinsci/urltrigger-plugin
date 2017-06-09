@@ -1,6 +1,6 @@
 # URL Trigger Plugin
 
-Polls a URL and triggers a build when the content changes.
+Polls a URL and triggers a build when the content changes. Part of the xtrigger plugin suite.
 
 ## Supported Protocols
 
@@ -16,23 +16,23 @@ Plain text is supported, but the following have support for parsed content. For 
 ## Example in Json
 
 This http reponse body will not trigger a build
-```json
+```js
 // initial value
-{status:404}
+{"status":404}
 // new value
 {
-    status : 404
+    "status" : 404
 }
 ```
 
 This reposne body will trigger a build
-```json
+```js
 // old value
 {
-    status : 404
+    "status" : 404
 }
 // new value
 {
-    status : 200
+    "status" : 200
 }
 ```
