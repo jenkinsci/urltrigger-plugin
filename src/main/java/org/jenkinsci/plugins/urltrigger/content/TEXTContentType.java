@@ -72,22 +72,18 @@ public class TEXTContentType extends URLTriggerContentType {
             List<String> oldValues = entry.getValue();
             List<String> newValues = newCapturedValues.get(entry.getKey());
 
-            if (oldValues == null) {
+            if (oldValues == null || newValues == null) {
                 return false;
-            }
-
-            if (newValues == null) {
-                return false;
-            }
-
-            if (newValues.size() != oldValues.size()) {
-                log.info(String.format("The number of values for the regular expression %s is different.", regEx));
-                return true;
-            }
-
-            for (String oldValue : oldValues) {
-                if (!newValues.contains(oldValue)) {
+            } else {
+                if (newValues.size() != oldValues.size()) {
+                    log.info(String.format("The number of values for the regular expression %s is different.", regEx));
                     return true;
+                }
+
+                for (String oldValue : oldValues) {
+                    if (!newValues.contains(oldValue)) {
+                        return true;
+                    }
                 }
             }
         }

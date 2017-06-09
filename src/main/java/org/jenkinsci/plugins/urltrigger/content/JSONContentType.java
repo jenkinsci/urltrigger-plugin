@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import com.jayway.jsonpath.JsonPath;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
@@ -20,10 +21,12 @@ public class JSONContentType extends URLTriggerContentType {
 
     private transient Map<String, Object> results = null;
 
-    private List<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
+    // TODO; If this can be marked transient, mark transient instead of SW
+    @SuppressFBWarnings("SE_BAD_FIELD")
+    private ArrayList<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
 
     @DataBoundConstructor
-    public JSONContentType(List<JSONContentEntry> element) {
+    public JSONContentType(ArrayList<JSONContentEntry> element) {
         if (element != null) {
             this.jsonPaths = element;
         }
@@ -104,7 +107,7 @@ public class JSONContentType extends URLTriggerContentType {
                 return true;
             }
 
-            if (!initValue.equals(newValue)) {
+            if (initValue !=null && !initValue.equals(newValue)) {
                 log.info(String.format("The value for the JSON Path '%s' has changed.", jsonPath));
                 return true;
             }

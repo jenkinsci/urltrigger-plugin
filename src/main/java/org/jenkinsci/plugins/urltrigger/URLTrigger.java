@@ -18,6 +18,7 @@ import hudson.model.*;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
+import jenkins.model.Jenkins;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -225,7 +226,7 @@ public class URLTrigger extends AbstractTrigger {
         Client client = getClientObject(resolvedEntry, log);
 
         String url = resolvedEntry.getResolvedURL();
-        log.info(String.format("Invoking the url: \n %s", url));
+        log.info(String.format("Invoking the url: %n %s", url));
         ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
 
         URLTriggerEntry entry = resolvedEntry.getEntry();
@@ -363,8 +364,7 @@ public class URLTrigger extends AbstractTrigger {
         DefaultApacheHttpClientConfig config = new DefaultApacheHttpClientConfig();
 
         //-- Proxy
-        Hudson h = Hudson.getInstance(); // this code might run on slaves
-        ProxyConfiguration p = h != null ? h.proxy : null;
+        ProxyConfiguration p = Jenkins.getActiveInstance().proxy;
         if (p != null) {
             config.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + p.name + ":" + p.port);
             String password = getProxyPasswordDecrypted(p);
@@ -445,7 +445,7 @@ public class URLTrigger extends AbstractTrigger {
 
     @Override
     public URLTriggerDescriptor getDescriptor() {
-        return (URLTriggerDescriptor) Hudson.getInstance().getDescriptorOrDie(getClass());
+        return (URLTriggerDescriptor) Jenkins.getActiveInstance().getDescriptorOrDie(getClass());
     }
 
     private static FTPClient getFTPClientObject(URLTriggerResolvedEntry resolvedEntry) throws URISyntaxException, IOException {
@@ -479,7 +479,7 @@ public class URLTrigger extends AbstractTrigger {
             }
 
             if (!ftpClient.login(user, pass)) {
-                throw new java.io.IOException("Authentification failed");
+                throw new java.io.IOException("Authentication failed");
             }
         }
 
