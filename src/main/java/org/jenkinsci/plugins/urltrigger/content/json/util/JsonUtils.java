@@ -14,7 +14,7 @@ public class JsonUtils {
 
     public static void validateJson(String content) throws XTriggerException {
         try {
-            JsonParser parser = new JsonFactory().createJsonParser(content.getBytes());
+            JsonParser parser = new JsonFactory().createJsonParser(content.getBytes("UTF-8"));
             JsonToken currentToken = parser.nextToken();
             if (currentToken.equals(JsonToken.START_OBJECT)) {
                 validateObject(parser);

@@ -13,19 +13,20 @@ public class FTPResponse implements URLResponse {
     private String etag;
 
     public FTPResponse(Date modifiedDate, int status) {
-        this.modifiedDate = modifiedDate;
-        this.status = status;
+        setLastModified(modifiedDate);
+        setStatus(status);
     }
 
     public FTPResponse() {
     }
 
     public Date getLastModified() {
-        return modifiedDate;
+        // return immutable date
+        return new Date(modifiedDate.getTime());
     }
 
     public void setLastModified(Date lastModified) {
-        this.modifiedDate = lastModified;
+        this.modifiedDate = new Date(lastModified.getTime());
     }
 
     public String getContent() {

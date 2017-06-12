@@ -5,11 +5,14 @@ import hudson.util.Secret;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 /**
  * @author Gregory Boissinot
  */
 public class URLTriggerEntry implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
 
@@ -111,11 +114,13 @@ public class URLTriggerEntry implements Serializable {
     }
 
     public URLTriggerContentType[] getContentTypes() {
-        return contentTypes;
+        // shallow copy to make immutable
+        return Arrays.copyOf(contentTypes, contentTypes.length);
     }
 
     public void setContentTypes(URLTriggerContentType[] contentTypes) {
-        this.contentTypes = contentTypes;
+        // shallow copy instead of setting externally mutable array
+        this.contentTypes = Arrays.copyOf(contentTypes, contentTypes.length);
     }
 
     public boolean isCheckETag() {

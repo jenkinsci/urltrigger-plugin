@@ -1,3 +1,7 @@
-<div>
-    This plugin makes it possible to poll changes of URLs.
-</div>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" >
+    <div>
+        This plugin makes it possible to poll changes of URLs.
+    </div>
+</j:jelly>
+

@@ -26,6 +26,8 @@ import java.util.Map;
  */
 public class XMLContentType extends URLTriggerContentType {
 
+    private static final long serialVersionUID = 1L;
+
     private transient Map<String, Object> results = null;
 
     private transient Document xmlDocument;
@@ -136,7 +138,7 @@ public class XMLContentType extends URLTriggerContentType {
                 return true;
             }
 
-            if (!initValue.equals(newValue)) {
+            if (initValue !=null && !initValue.equals(newValue)) {
                 log.info(String.format("The value for the expression '%s' has changed.", expression));
                 return true;
             }
