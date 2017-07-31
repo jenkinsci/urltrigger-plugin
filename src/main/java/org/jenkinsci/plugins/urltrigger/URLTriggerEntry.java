@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.urltrigger;
 import com.sun.jersey.api.client.ClientResponse;
 import hudson.util.Secret;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.Serializable;
 
@@ -27,6 +28,26 @@ public class URLTriggerEntry implements Serializable {
 
     private transient String ETag;
     private transient long lastModificationDate;
+
+    public URLTriggerEntry() {
+    }
+
+    @DataBoundConstructor
+    public URLTriggerEntry(String url, String username, String password, boolean proxyActivated, boolean checkStatus, int statusCode, int timeout, boolean checkETag, boolean checkLastModificationDate, boolean inspectingContent, URLTriggerContentType[] contentTypes, String ETag, long lastModificationDate) {
+        this.url = url;
+        this.username = username;
+        this.password = password;
+        this.proxyActivated = proxyActivated;
+        this.checkStatus = checkStatus;
+        this.statusCode = statusCode;
+        this.timeout = timeout;
+        this.checkETag = checkETag;
+        this.checkLastModificationDate = checkLastModificationDate;
+        this.inspectingContent = inspectingContent;
+        this.contentTypes = contentTypes;
+        this.ETag = ETag;
+        this.lastModificationDate = lastModificationDate;
+    }
 
     public String getUrl() {
         return url;
