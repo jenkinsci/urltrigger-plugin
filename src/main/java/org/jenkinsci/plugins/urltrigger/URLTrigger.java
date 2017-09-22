@@ -26,11 +26,11 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.jelly.XMLOutput;
 import org.apache.commons.net.ftp.FTPClient;
 import org.jenkinsci.lib.envinject.EnvInjectException;
-import org.jenkinsci.lib.envinject.service.EnvVarsResolver;
 import org.jenkinsci.lib.xtrigger.AbstractTrigger;
 import org.jenkinsci.lib.xtrigger.XTriggerDescriptor;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
+import org.jenkinsci.plugins.envinjectapi.util.EnvVarsResolver;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
 import org.jenkinsci.plugins.urltrigger.service.FTPResponse;
@@ -132,8 +132,8 @@ public class URLTrigger extends AbstractTrigger {
         }
 
         @SuppressWarnings("unused")
-        public AbstractProject<?, ?> getOwner() {
-            return (AbstractProject) job;
+        public Job<?, ?> getOwner() {
+            return (Job<?, ?>) job;
         }
 
         @SuppressWarnings("unused")
@@ -176,10 +176,9 @@ public class URLTrigger extends AbstractTrigger {
     private String getURLValue(URLTriggerEntry entry, Node node) throws XTriggerException {
         String entryURL = entry.getUrl();
         if (entryURL != null) {
-            EnvVarsResolver varsRetriever = new EnvVarsResolver();
             Map<String, String> envVars;
             try {
-                envVars = varsRetriever.getPollingEnvVars((AbstractProject) job, node);
+                envVars = EnvVarsResolver.getPollingEnvVars((Job<?, ?>) job, node);
             } catch (EnvInjectException e) {
                 throw new XTriggerException(e);
             }
