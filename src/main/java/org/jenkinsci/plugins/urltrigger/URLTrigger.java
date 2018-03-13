@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.urltrigger;
 import antlr.ANTLRException;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
@@ -10,11 +11,16 @@ import com.sun.jersey.client.apache.ApacheHttpClient;
 import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
 import com.sun.jersey.client.urlconnection.HTTPSProperties;
 import hudson.DescriptorExtensionList;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.ProxyConfiguration;
 import hudson.Util;
 import hudson.console.AnnotatedLargeText;
 import hudson.model.*;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
+import hudson.slaves.NodeProperty;
+import hudson.slaves.NodePropertyDescriptor;
+import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
@@ -37,6 +43,7 @@ import org.jenkinsci.plugins.urltrigger.service.FTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.HTTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
+import org.jfree.util.Log;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -173,13 +180,30 @@ public class URLTrigger extends AbstractTrigger {
 
     }
 
-    private String getURLValue(URLTriggerEntry entry, Node node) throws XTriggerException {
+    private String getURLValue(URLTriggerEntry entry, Node node , XTriggerLog log) throws XTriggerException {
         String entryURL = entry.getUrl();
         if (entryURL != null) {
             EnvVarsResolver varsRetriever = new EnvVarsResolver();
             Map<String, String> envVars;
             try {
-                envVars = varsRetriever.getPollingEnvVars((AbstractProject) job, node);
+            	if( entry.isUseGlobalEnvVars() ) {
+            		log.info( "Resolving environment variables using global values" );
+            		envVars = new EnvVars() ;
+                    Hudson hudson = Hudson.getInstance();
+                    if (hudson != null) {
+                        DescribableList<NodeProperty<?>, NodePropertyDescriptor> globalNodeProperties = hudson.getGlobalNodeProperties();
+                        if (globalNodeProperties != null) {
+                            for (NodeProperty nodeProperty : globalNodeProperties) {
+                                if (nodeProperty != null && nodeProperty instanceof EnvironmentVariablesNodeProperty) {
+                                    envVars.putAll(((EnvironmentVariablesNodeProperty) nodeProperty).getEnvVars());
+                                }
+                            }
+                        }
+                    }
+            	} else {
+            		log.info( "Resolving environment variables using last build values" );
+            		envVars = varsRetriever.getPollingEnvVars((AbstractProject) job, node);           		
+            	}
             } catch (EnvInjectException e) {
                 throw new XTriggerException(e);
             }
@@ -187,6 +211,7 @@ public class URLTrigger extends AbstractTrigger {
         }
         return null;
     }
+
 
     @Override
     protected boolean checkIfModified(Node pollingNode, XTriggerLog log) throws XTriggerException {
@@ -207,12 +232,18 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     private boolean checkIfModifiedEntry(URLTriggerEntry entry, Node pollingNode, XTriggerLog log) throws XTriggerException {
-        String resolvedURL = getURLValue(entry, pollingNode);
+        String resolvedURL = getURLValue(entry, pollingNode , log);
         URLTriggerResolvedEntry resolvedEntry = new URLTriggerResolvedEntry(resolvedURL, entry);
 
         if (!resolvedEntry.isURLTriggerValidURL())
             throw new IllegalArgumentException("Only http(s) and ftp URLs are supported. For non-http/ftp protocols, consider other XTrigger plugins");
 
+        if( resolvedEntry.getResolvedURL().contains( "$" ) ) {
+        		log.info( "URL contains unresolved environment variables." ) ;
+            log.info( "Skipping URLTrigger initialization. Waiting next schedule" ) ;
+            return false ;
+        }
+        
         if (resolvedEntry.isHttp() || resolvedEntry.isHttps()) {
             return checkIfModifiedEntryForHttpOrHttpsURL(resolvedEntry, log);
         }
@@ -225,12 +256,23 @@ public class URLTrigger extends AbstractTrigger {
         Client client = getClientObject(resolvedEntry, log);
 
         String url = resolvedEntry.getResolvedURL();
+        WebResource.Builder webResourceBuilder = client.resource(url).getRequestBuilder() ;
+        
+        List< URLTriggerRequestHeader > requestHeaders = resolvedEntry.getEntry().getRequestHeaders() ;
+        if( requestHeaders.size() > 0 ) {
+        	for( URLTriggerRequestHeader requestHeader : requestHeaders ) {
+        		log.info("Adding header - " + requestHeader.headerName + ":" + requestHeader.headerValue) ;
+        		webResourceBuilder = webResourceBuilder.header(requestHeader.headerName, requestHeader.headerValue) ;
+        	}
+        }
+        
         log.info(String.format("Invoking the url: \n %s", url));
-        ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
+        ClientResponse clientResponse = webResourceBuilder.get(ClientResponse.class);
 
         URLTriggerEntry entry = resolvedEntry.getEntry();
 
-        if (isServiceUnavailableAndNotExpected(clientResponse, entry)) {
+        if (isServiceUnavailableAndNotExpected(clientResponse, entry)
+        		|| isURLNotFoundAndNotExpected( clientResponse , entry )) {
             log.info("URL to poll unavailable.");
             log.info("Skipping URLTrigger initialization. Waiting next schedule");
             return false;
@@ -265,6 +307,11 @@ public class URLTrigger extends AbstractTrigger {
                 && entry.getStatusCode() != HttpServletResponse.SC_SERVICE_UNAVAILABLE;
     }
 
+    private boolean isURLNotFoundAndNotExpected( ClientResponse clientResponse , URLTriggerEntry entry ) {
+    		return HttpServletResponse.SC_NOT_FOUND == clientResponse.getStatus()
+    				&& entry.getStatusCode() != HttpServletResponse.SC_NOT_FOUND ;
+    }
+    
     @Override
     public String getCause() {
         return URLTriggerCause.CAUSE;
@@ -516,7 +563,6 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     @Extension
-    @SuppressWarnings("unused")
     public static class URLTriggerDescriptor extends XTriggerDescriptor {
 
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Executors.newSingleThreadExecutor(new ThreadFactory() {
@@ -580,6 +626,7 @@ public class URLTrigger extends AbstractTrigger {
             URLTriggerEntry urlTriggerEntry = new URLTriggerEntry();
             urlTriggerEntry.setUrl(entryObject.getString("url"));
             urlTriggerEntry.setProxyActivated(entryObject.getBoolean("proxyActivated"));
+            urlTriggerEntry.setUseGlobalEnvVars(entryObject.getBoolean("useGlobalEnvVars"));
             String username = Util.fixEmpty(entryObject.getString("username"));
             if (username != null) {
                 urlTriggerEntry.setUsername(username);
@@ -620,6 +667,30 @@ public class URLTrigger extends AbstractTrigger {
 
             //Process checkLastModifiedDate
             urlTriggerEntry.setCheckLastModificationDate(entryObject.getBoolean("checkLastModificationDate"));
+            
+            //Process requestHeaders
+            List< URLTriggerRequestHeader > requestHeaders = new ArrayList<URLTriggerRequestHeader>() ;
+            Object requestHeaderListObject = entryObject.get("urlRequestHeaders") ;
+            if( requestHeaderListObject instanceof JSONObject ) {
+            	JSONObject requestHeaderItem = (JSONObject) requestHeaderListObject ;
+            	String headerName = Util.fixEmpty(requestHeaderItem.getString("headerName")) ;
+            	String headerValue = Util.fixEmpty(requestHeaderItem.getString("headerValue" )) ;
+            	if( headerName != null && headerValue != null ) {
+            		requestHeaders.add( new URLTriggerRequestHeader( headerName , headerValue ) ) ;
+            	}
+            } else {
+            	JSONArray requestHeaderListArray = (JSONArray) requestHeaderListObject ;
+            	if( requestHeaderListArray != null ) {
+            		for( Object requestHeaderItemObject : requestHeaderListArray ) {
+                    	JSONObject requestHeaderItem = (JSONObject) requestHeaderItemObject ;
+                    	String headerName = Util.fixEmpty(requestHeaderItem.getString("headerName")) ;
+                    	String headerValue = Util.fixEmpty(requestHeaderItem.getString("headerValue" )) ;
+                    	if( headerName != null && headerValue != null ) {
+                    		requestHeaders.add( new URLTriggerRequestHeader( headerName , headerValue ) ) ;
+                    	}            		}
+            	}
+            }
+            urlTriggerEntry.setRequestHeaders(requestHeaders);
 
             //Process inspectingContent
             Object inspectingContentObject = entryObject.get("inspectingContent");
@@ -668,6 +739,10 @@ public class URLTrigger extends AbstractTrigger {
 
             if (!value.startsWith("http") && !value.startsWith("ftp"))
                 return FormValidation.error("Only http(s) and ftp URLs are supported. For non-http/ftp protocols, consider other XTrigger plugins");
+
+            if ( value.contains( "$" ) ) {
+            	return FormValidation.warning( "URL is parameterised and cannot be fully validated" ) ;
+            }
 
             try {
                 URI uri = new URI(value);
