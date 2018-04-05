@@ -10,7 +10,7 @@
                                checkUrl="'${rootURL}/trigger/URLTrigger/checkURL?value='+encodeURIComponent(this.value)"
                                value="${urlElements.url}"/>
                 </f:entry>
-
+                
                 <f:advanced>
 
                     <f:entry field="proxyActivated">
@@ -21,7 +21,15 @@
                                 title="${%Activate the Jenkins Proxy}"/>
                     </f:entry>
 
-                    <f:section title="${%Client parameters}">
+                    <f:entry field="useGlobalEnvVars">
+                        <f:checkbox
+                                field="useGlobalEnvVars"
+                                name="urlElements.useGlobalEnvVars"
+                                checked="${urlElements.useGlobalEnvVars}"
+                                title="${%Use global variables to resolve URL}"/>
+                    </f:entry>
+
+                     <f:section title="${%Client parameters}">
                         <f:entry field="timeout" title="${%Timeout}">
                             <f:textbox name="timeout"
                                        checkUrl="'${rootURL}/trigger/URLTrigger/checkTimeout?value='+encodeURIComponent(this.value)"
@@ -39,6 +47,27 @@
                                         value="${urlElements.realPassword}"/>
                         </f:entry>
                     </f:section>
+
+					<f:section title="${%Request Headers}">
+		                <f:entry title="">
+	    		            <f:repeatable var="urlRequestHeaders" items="${urlElements.requestHeaders}" add="${%Add request header}" minimum="0">
+	            		    	<table width="100%">
+	                				<f:entry title="${%Header name}" field="headerName">
+				                		<f:textbox value="${urlRequestHeaders.headerName}"/>
+	        			        	</f:entry>
+	                				<f:entry title="${%Header value}" field="headerValue">
+				                		<f:textbox value="${urlRequestHeaders.headerValue}"/>
+	        			        	</f:entry>
+                					<f:entry title="">
+					                    <div align="right">
+					                        <f:repeatableDeleteButton/>
+                    					</div>
+					                </f:entry>
+	                			</table>
+		    	            </f:repeatable>
+    			        </f:entry>
+    	        	</f:section>
+
                 </f:advanced>
 
                 <f:section title="${%URL Response Check}">

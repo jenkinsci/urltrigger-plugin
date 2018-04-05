@@ -1,16 +1,24 @@
 package org.jenkinsci.plugins.urltrigger;
 
 import com.sun.jersey.api.client.ClientResponse;
+
+import hudson.Extension;
+import hudson.model.Describable;
+import hudson.model.Descriptor;
 import hudson.util.Secret;
+
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Gregory Boissinot
  */
-public class URLTriggerEntry implements Serializable {
+@SuppressWarnings("serial")
+public class URLTriggerEntry implements Serializable , Describable< URLTriggerEntry> {
 
     public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
 
@@ -24,7 +32,9 @@ public class URLTriggerEntry implements Serializable {
     private boolean checkETag;
     private boolean checkLastModificationDate;
     private boolean inspectingContent;
+    private boolean useGlobalEnvVars;
     private URLTriggerContentType[] contentTypes;
+    private List<URLTriggerRequestHeader> requestHeaders = new ArrayList<URLTriggerRequestHeader>() ;
 
     private transient String ETag;
     private transient long lastModificationDate;
@@ -173,5 +183,36 @@ public class URLTriggerEntry implements Serializable {
 
     public boolean isHttps() {
         return url.startsWith("https");
+    }
+
+	public List<URLTriggerRequestHeader> getRequestHeaders() {
+		return requestHeaders;
+	}
+
+	public void setRequestHeaders(List<URLTriggerRequestHeader> requestHeaders) {
+		this.requestHeaders = requestHeaders;
+	}
+	
+    public Descriptor<URLTriggerEntry> getDescriptor() {
+        return DESCRIPTOR;
+    }
+
+    public boolean isUseGlobalEnvVars() {
+		return useGlobalEnvVars;
+	}
+
+	public void setUseGlobalEnvVars(boolean useGlobalEnvVars) {
+		this.useGlobalEnvVars = useGlobalEnvVars;
+	}
+
+    @Extension
+    public final static DescriptorImpl DESCRIPTOR = new DescriptorImpl();
+
+
+    public static class DescriptorImpl extends Descriptor<URLTriggerEntry> {
+        @Override
+        public String getDisplayName() {
+          return "UrlTriggerEntry";
+        }
     }
 }
