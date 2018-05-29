@@ -743,21 +743,8 @@ public class URLTrigger extends AbstractTrigger {
             if ( value.contains( "$" ) ) {
             	return FormValidation.warning( "URL is parameterised and cannot be fully validated" ) ;
             }
-
-            try {
-                URI uri = new URI(value);
-                if (uri.getScheme().equals("ftp")) {
-                    FTPClient ftpClient = getFTPClientObject(value, null, null);
-                    ftpClient.getModificationTime(uri.getPath());
-                } else {
-                    ClientConfig cc = new DefaultClientConfig();
-                    Client client = Client.create(cc);
-                    client.resource(value).get(ClientResponse.class);
-                }
-                return FormValidation.ok();
-            } catch (Exception e) {
-                return FormValidation.error(e.getMessage());
-            }
+            
+            return FormValidation.ok();
         }
 
         public FormValidation doCheckTimeout(@QueryParameter String value) {
