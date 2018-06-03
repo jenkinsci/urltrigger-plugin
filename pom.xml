@@ -46,6 +46,21 @@
         <tag>HEAD</tag>
     </scm>
 
+    <distributionManagement>
+      <repository>
+        <id>maven.jenkins-ci.org</id>
+        <url>http://maven.jenkins-ci.org/content/repositories/releases</url>
+      </repository>
+      <snapshotRepository>
+        <id>maven.jenkins-ci.org</id>
+        <url>http://maven.jenkins-ci.org/content/repositories/snapshots</url>
+      </snapshotRepository>
+      <site>
+        <id>github-pages</id>
+        <url>gitsite:git@github.com/jenkinsci/maven-site.git:plugin-parent/urltrigger</url>
+      </site>
+    </distributionManagement>
+  
     <dependencies>
 
         <dependency>
