@@ -190,7 +190,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
 	}
 
 	public void setRequestHeaders(List<URLTriggerRequestHeader> requestHeaders) {
-		this.requestHeaders = requestHeaders;
+		this.requestHeaders = new ArrayList<URLTriggerRequestHeader>(requestHeaders);
 	}
 	
     public Descriptor<URLTriggerEntry> getDescriptor() {
