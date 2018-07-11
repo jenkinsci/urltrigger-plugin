@@ -162,6 +162,7 @@ public class URLTriggerService {
             if (type != null) {
                 boolean isTriggering = type.isTriggering(content, log);
                 if (isTriggering) {
+                    log.info("The content has changed.");
                     return true;
                 }
             }
