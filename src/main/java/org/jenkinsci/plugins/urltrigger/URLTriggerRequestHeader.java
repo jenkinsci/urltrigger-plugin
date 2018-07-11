@@ -7,11 +7,12 @@ import org.kohsuke.stapler.export.Exported;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 
+import java.io.Serializable;
 
 /**
  * @author  Tony Noble
  */
-public class URLTriggerRequestHeader implements Describable<URLTriggerRequestHeader>{
+public class URLTriggerRequestHeader implements Serializable, Describable<URLTriggerRequestHeader>{
     @Exported public String headerName = "";
     @Exported public String headerValue = "";
     

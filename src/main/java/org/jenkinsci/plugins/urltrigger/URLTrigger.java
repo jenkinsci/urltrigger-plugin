@@ -24,6 +24,7 @@ import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
+import jenkins.model.*;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -71,7 +72,9 @@ import java.util.logging.Logger;
  */
 public class URLTrigger extends AbstractTrigger {
 
-    private static Logger LOGGER = Logger.getLogger(URLTrigger.class.getName());
+	private static final long serialVersionUID = 4770775641674010339L;
+
+	private static Logger LOGGER = Logger.getLogger(URLTrigger.class.getName());
 
     private List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
 
@@ -140,7 +143,7 @@ public class URLTrigger extends AbstractTrigger {
 
         @SuppressWarnings("unused")
         public AbstractProject<?, ?> getOwner() {
-            return (AbstractProject) job;
+            return (AbstractProject< ?, ?>) job;
         }
 
         @SuppressWarnings("unused")
@@ -189,7 +192,7 @@ public class URLTrigger extends AbstractTrigger {
             	if( entry.isUseGlobalEnvVars() ) {
             		log.info( "Resolving environment variables using global values" );
             		envVars = new EnvVars() ;
-                    Hudson hudson = Hudson.getInstance();
+                    Jenkins hudson = Jenkins.getInstance();
                     if (hudson != null) {
                         DescribableList<NodeProperty<?>, NodePropertyDescriptor> globalNodeProperties = hudson.getGlobalNodeProperties();
                         if (globalNodeProperties != null) {
@@ -266,7 +269,7 @@ public class URLTrigger extends AbstractTrigger {
         	}
         }
         
-        log.info(String.format("Invoking the url: \n %s", url));
+        log.info(String.format("Invoking the url: %n %s", url));
         ClientResponse clientResponse = webResourceBuilder.get(ClientResponse.class);
 
         URLTriggerEntry entry = resolvedEntry.getEntry();
@@ -410,7 +413,7 @@ public class URLTrigger extends AbstractTrigger {
         DefaultApacheHttpClientConfig config = new DefaultApacheHttpClientConfig();
 
         //-- Proxy
-        Hudson h = Hudson.getInstance(); // this code might run on slaves
+        Jenkins h = Jenkins.getInstance(); // this code might run on slaves
         ProxyConfiguration p = h != null ? h.proxy : null;
         if (p != null) {
             config.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + p.name + ":" + p.port);
@@ -492,7 +495,7 @@ public class URLTrigger extends AbstractTrigger {
 
     @Override
     public URLTriggerDescriptor getDescriptor() {
-        return (URLTriggerDescriptor) Hudson.getInstance().getDescriptorOrDie(getClass());
+        return (URLTriggerDescriptor) Jenkins.getActiveInstance().getDescriptorOrDie(this.getClass());
     }
 
     private static FTPClient getFTPClientObject(URLTriggerResolvedEntry resolvedEntry) throws URISyntaxException, IOException {

@@ -20,7 +20,9 @@ import java.util.regex.Pattern;
  */
 public class TEXTContentType extends URLTriggerContentType {
 
-    private List<TEXTContentEntry> regExElements = new ArrayList<TEXTContentEntry>();
+	private static final long serialVersionUID = 3560292914545953855L;
+
+	private List<TEXTContentEntry> regExElements = new ArrayList<TEXTContentEntry>();
 
     private transient Map<String, List<String>> capturedValues;
 

@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.urltrigger;
 
 import com.sun.jersey.api.client.ClientResponse;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
@@ -17,10 +18,11 @@ import java.util.List;
 /**
  * @author Gregory Boissinot
  */
-@SuppressWarnings("serial")
 public class URLTriggerEntry implements Serializable , Describable< URLTriggerEntry> {
 
-    public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
+	private static final long serialVersionUID = -7232627326475916056L;
+
+	public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
 
     private String url;
     private String username;
@@ -36,7 +38,10 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     private URLTriggerContentType[] contentTypes;
     private List<URLTriggerRequestHeader> requestHeaders = new ArrayList<URLTriggerRequestHeader>() ;
 
+    @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")    
     private transient String ETag;
+    
+    @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")
     private transient long lastModificationDate;
 
     public URLTriggerEntry() {
@@ -54,7 +59,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         this.checkETag = checkETag;
         this.checkLastModificationDate = checkLastModificationDate;
         this.inspectingContent = inspectingContent;
-        this.contentTypes = contentTypes;
+        this.contentTypes = contentTypes.clone();
         this.ETag = ETag;
         this.lastModificationDate = lastModificationDate;
     }
@@ -142,11 +147,11 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     }
 
     public URLTriggerContentType[] getContentTypes() {
-        return contentTypes;
+        return contentTypes.clone();
     }
 
     public void setContentTypes(URLTriggerContentType[] contentTypes) {
-        this.contentTypes = contentTypes;
+        this.contentTypes = contentTypes.clone();
     }
 
     public boolean isCheckETag() {

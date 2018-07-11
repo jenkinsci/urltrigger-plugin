@@ -26,7 +26,9 @@ import java.util.Map;
  */
 public class XMLContentType extends URLTriggerContentType {
 
-    private transient Map<String, Object> results = null;
+	private static final long serialVersionUID = -4046882821684993469L;
+
+	private transient Map<String, Object> results = null;
 
     private transient Document xmlDocument;
 
@@ -120,22 +122,25 @@ public class XMLContentType extends URLTriggerContentType {
             String expression = entry.getKey();
             Object initValue = entry.getValue();
             Object newValue = newResults.get(expression);
+            
+            boolean initValueIsNull = ( initValue == null ) ;
+            boolean newValueIsNull = ( newValue == null ) ;
 
-            if (initValue == null && newValue == null) {
+            if (initValueIsNull && newValueIsNull) {
                 log.info(String.format("There is no matching for the expression '%s'.", expression));
                 continue;
-            }
-
-            if (initValue == null && newValue != null) {
+            } 
+            
+            if (initValueIsNull && newValueIsNull) {
                 log.info(String.format("There was no value and now there is a new value for the expression '%s'.", expression));
                 return true;
-            }
-
-            if (initValue != null && newValue == null) {
+            } 
+            
+            if (initValueIsNull && newValueIsNull) {
                 log.info(String.format("There was a value and now there is no value for the expression '%s'.", expression));
                 return true;
-            }
-
+            } 
+            
             if (!initValue.equals(newValue)) {
                 log.info(String.format("The value for the expression '%s' has changed.", expression));
                 return true;

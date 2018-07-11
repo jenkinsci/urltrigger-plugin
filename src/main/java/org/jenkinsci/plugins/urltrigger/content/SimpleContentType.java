@@ -11,7 +11,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 public class SimpleContentType extends URLTriggerContentType {
 
-    private transient String md5;
+	private static final long serialVersionUID = 6181433290922523995L;
+	private transient String md5;
 
     @DataBoundConstructor
     @SuppressWarnings("unused")

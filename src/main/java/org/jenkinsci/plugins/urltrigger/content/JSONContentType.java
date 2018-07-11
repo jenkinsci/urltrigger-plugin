@@ -18,7 +18,9 @@ import java.util.Map;
  */
 public class JSONContentType extends URLTriggerContentType {
 
-    private transient Map<String, Object> results = null;
+	private static final long serialVersionUID = 9089691686677107132L;
+
+	private transient Map<String, Object> results = null;
 
     private List<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
 
@@ -88,23 +90,20 @@ public class JSONContentType extends URLTriggerContentType {
             String jsonPath = entry.getKey();
             Object initValue = entry.getValue();
             Object newValue = newResults.get(jsonPath);
+            
+            boolean initValueNull = ( initValue == null );
+            boolean newValueNull = ( newValue == null );
 
-            if (initValue == null && newValue == null) {
+            if (initValueNull && newValueNull) {
                 log.info(String.format("There is no matching for the JSON Path '%s'.", jsonPath));
                 continue;
-            }
-
-            if (initValue == null && newValue != null) {
+            } else if (initValueNull && ! newValueNull) {
                 log.info(String.format("There was no value and now there is a new value for the JSON Path '%s'.", jsonPath));
                 return true;
-            }
-
-            if (initValue != null && newValue == null) {
+            } else if (! initValueNull && newValueNull) {
                 log.info(String.format("There was a value and now there is no value for the JSON Path '%s'.", jsonPath));
                 return true;
-            }
-
-            if (!initValue.equals(newValue)) {
+            } else if (!initValue.equals(newValue)) {
                 log.info(String.format("The value for the JSON Path '%s' has changed.", jsonPath));
                 return true;
             }
