@@ -191,7 +191,11 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     }
 
 	public List<URLTriggerRequestHeader> getRequestHeaders() {
-		return requestHeaders;
+		if( requestHeaders == null ) {
+			return new ArrayList<URLTriggerRequestHeader>() ;
+		} else {
+			return requestHeaders;
+		}
 	}
 
 	public void setRequestHeaders(List<URLTriggerRequestHeader> requestHeaders) {
