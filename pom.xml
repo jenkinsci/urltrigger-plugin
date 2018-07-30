@@ -10,7 +10,7 @@
     <artifactId>urltrigger</artifactId>
     <packaging>hpi</packaging>
     <name>Jenkins URLTrigger Plug-in</name>
-    <version>0.44</version>
+    <version>0.45-SNAPSHOT</version>
     <url>http://wiki.jenkins-ci.org/display/JENKINS/URLTrigger+Plugin</url>
 
     <licenses>
@@ -43,7 +43,7 @@
     <scm>
         <connection>scm:git:git://github.com/jenkinsci/urltrigger-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/urltrigger-plugin.git</developerConnection>
-        <tag>urltrigger-0.44</tag>
+        <tag>HEAD</tag>
     </scm>
 
   <distributionManagement>
