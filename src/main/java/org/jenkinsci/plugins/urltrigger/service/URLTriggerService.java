@@ -123,7 +123,7 @@ public class URLTriggerService {
         boolean isTriggering = false;
         if (entityTag != null) {
             String previousETag = entry.getETag();
-            if (!entityTag.equals(previousETag)) {
+            if ( previousETag != null && !entityTag.equals(previousETag)) {
                 log.info("The ETag header has changed.");
                 isTriggering = true;
             }
