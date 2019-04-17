@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Extension;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -42,6 +43,11 @@ public class XMLContentType extends URLTriggerContentType {
     @SuppressWarnings("unused")
     public List<XMLContentEntry> getXPaths() {
         return xPaths;
+    }
+
+    @SuppressWarnings("unused")
+    public List<XMLContentEntry> getElement() {
+        return getXPaths();
     }
 
     @Override
@@ -147,6 +153,8 @@ public class XMLContentType extends URLTriggerContentType {
     }
 
     @Extension
+    @Symbol("xmlContentType")
+
     @SuppressWarnings("unused")
     public static class XMLContentDescriptor extends URLTriggerContentTypeDescriptor<XMLContentType> {
 

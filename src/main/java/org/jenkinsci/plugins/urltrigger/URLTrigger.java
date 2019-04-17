@@ -31,19 +31,16 @@ import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.jelly.XMLOutput;
 import org.apache.commons.net.ftp.FTPClient;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.envinject.EnvInjectException;
-import org.jenkinsci.lib.envinject.service.EnvVarsResolver;
-import org.jenkinsci.lib.xtrigger.AbstractTrigger;
-import org.jenkinsci.lib.xtrigger.XTriggerDescriptor;
-import org.jenkinsci.lib.xtrigger.XTriggerException;
-import org.jenkinsci.lib.xtrigger.XTriggerLog;
+import org.jenkinsci.lib.envinject.service.EnvVarsPipelinedResolver;
+import org.jenkinsci.lib.xtrigger.*;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentTypeDescriptor;
 import org.jenkinsci.plugins.urltrigger.service.FTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.HTTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
-import org.jfree.util.Log;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -69,7 +66,7 @@ import java.util.logging.Logger;
 /**
  * @author Gregory Boissinot
  */
-public class URLTrigger extends AbstractTrigger {
+public class URLTrigger extends AbstractPipelineTrigger {
 
     private static Logger LOGGER = Logger.getLogger(URLTrigger.class.getName());
 
@@ -85,6 +82,10 @@ public class URLTrigger extends AbstractTrigger {
         super(cronTabSpec, triggerLabel);
         this.entries = entries;
         this.labelRestriction = labelRestriction;
+    }
+
+    public String getCronTabSpec() {
+        return spec;
     }
 
     @SuppressWarnings("unused")
@@ -139,8 +140,8 @@ public class URLTrigger extends AbstractTrigger {
         }
 
         @SuppressWarnings("unused")
-        public AbstractProject<?, ?> getOwner() {
-            return (AbstractProject) job;
+        public Job<?, ?> getOwner() {
+            return job;
         }
 
         @SuppressWarnings("unused")
@@ -183,11 +184,11 @@ public class URLTrigger extends AbstractTrigger {
     private String getURLValue(URLTriggerEntry entry, Node node , XTriggerLog log) throws XTriggerException {
         String entryURL = entry.getUrl();
         if (entryURL != null) {
-            EnvVarsResolver varsRetriever = new EnvVarsResolver();
             Map<String, String> envVars;
             try {
             	if( entry.isUseGlobalEnvVars() ) {
-            		log.info( "Resolving environment variables using global values" );
+                    LOGGER.fine( "Resolving environment variables using global values" );
+                    log.info( "Resolving environment variables using global values" );
             		envVars = new EnvVars() ;
                     Hudson hudson = Hudson.getInstance();
                     if (hudson != null) {
@@ -201,8 +202,10 @@ public class URLTrigger extends AbstractTrigger {
                         }
                     }
             	} else {
-            		log.info( "Resolving environment variables using last build values" );
-            		envVars = varsRetriever.getPollingEnvVars((AbstractProject) job, node);           		
+                    LOGGER.fine( "Resolving environment variables using last build values" );
+                    log.info( "Resolving environment variables using last build values" );
+                    // TODO: get rid of deprecated EnvVarsResolver and EnvVarsPipelinedResolver and reenable access-modifier-checker enforcement
+                    envVars = new EnvVarsPipelinedResolver().getPollingEnvVars(job, node);
             	}
             } catch (EnvInjectException e) {
                 throw new XTriggerException(e);
@@ -217,6 +220,7 @@ public class URLTrigger extends AbstractTrigger {
     protected boolean checkIfModified(Node pollingNode, XTriggerLog log) throws XTriggerException {
 
         if (entries == null || entries.isEmpty()) {
+            LOGGER.fine("No URLs to poll.");
             log.info("No URLs to poll.");
             return false;
         }
@@ -239,7 +243,9 @@ public class URLTrigger extends AbstractTrigger {
             throw new IllegalArgumentException("Only http(s) and ftp URLs are supported. For non-http/ftp protocols, consider other XTrigger plugins");
 
         if( resolvedEntry.getResolvedURL().contains( "$" ) ) {
-        		log.info( "URL contains unresolved environment variables." ) ;
+            LOGGER.fine( "URL contains unresolved environment variables." ) ;
+            LOGGER.fine( "Skipping URLTrigger initialization. Waiting next schedule" ) ;
+            log.info( "URL contains unresolved environment variables." ) ;
             log.info( "Skipping URLTrigger initialization. Waiting next schedule" ) ;
             return false ;
         }
@@ -252,7 +258,7 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     private boolean checkIfModifiedEntryForHttpOrHttpsURL(URLTriggerResolvedEntry resolvedEntry, XTriggerLog log) throws XTriggerException {
-
+        LOGGER.fine(String.format("checking http(s) at: %s", resolvedEntry.getResolvedURL())) ;
         Client client = getClientObject(resolvedEntry, log);
 
         String url = resolvedEntry.getResolvedURL();
@@ -261,11 +267,12 @@ public class URLTrigger extends AbstractTrigger {
         List< URLTriggerRequestHeader > requestHeaders = resolvedEntry.getEntry().getRequestHeaders() ;
         if( requestHeaders.size() > 0 ) {
         	for( URLTriggerRequestHeader requestHeader : requestHeaders ) {
-        		log.info("Adding header - " + requestHeader.headerName + ":" + requestHeader.headerValue) ;
-        		webResourceBuilder = webResourceBuilder.header(requestHeader.headerName, requestHeader.headerValue) ;
+                LOGGER.fine("Adding header - " + requestHeader.headerName + ":" + requestHeader.headerValue) ;
+                log.info("Adding header - " + requestHeader.headerName + ":" + requestHeader.headerValue) ;
+                webResourceBuilder = webResourceBuilder.header(requestHeader.headerName, requestHeader.headerValue) ;
         	}
         }
-        
+        LOGGER.fine(String.format("Invoking the url: %s", url));
         log.info(String.format("Invoking the url: \n %s", url));
         ClientResponse clientResponse = webResourceBuilder.get(ClientResponse.class);
 
@@ -285,14 +292,18 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     private boolean checkIfModifiedEntryFoFTPURL(URLTriggerResolvedEntry resolvedEntry, XTriggerLog log) throws XTriggerException {
+        LOGGER.fine(String.format("checking ftp at: %s", resolvedEntry.getResolvedURL())) ;
         URLResponse response;
         try {
             response = getFTPResponse(resolvedEntry);
             if (response == null) {
                 return false;
             }
+            LOGGER.fine("FTP poll result: " + response.getEntityTagValue());
             log.info("FTP poll result: " + response.getEntityTagValue());
         } catch (Exception ex) {
+            LOGGER.fine("Failed to poll URL: " + ex.toString());
+            LOGGER.fine("Skipping URLTrigger initialization. Waiting next schedule");
             log.info("Failed to poll URL: " + ex.toString());
             log.info("Skipping URLTrigger initialization. Waiting next schedule");
             return false;
@@ -457,7 +468,7 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     @Override
-    protected void start(Node node, BuildableItem buildableItem, boolean newInstance, XTriggerLog log) {
+    protected void start(Node node, Job<?,?> buildableItem, boolean newInstance, XTriggerLog log) {
 //        URLTriggerService service = URLTriggerService.getInstance();
 //        try {
 //            for (URLTriggerEntry entry : entries) {
@@ -563,6 +574,7 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     @Extension
+    @Symbol("urlTrigger")
     public static class URLTriggerDescriptor extends XTriggerDescriptor {
 
         private transient final SequentialExecutionQueue queue = new SequentialExecutionQueue(Executors.newSingleThreadExecutor(new ThreadFactory() {
@@ -581,8 +593,8 @@ public class URLTrigger extends AbstractTrigger {
         }
 
         @Override
-        public boolean isApplicable(Item item) {
-            return true;
+        public boolean isApplicable(final Item item) {
+            return Job.class.isAssignableFrom(item.getClass());
         }
 
         @Override
