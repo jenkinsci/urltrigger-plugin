@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.urltrigger.content;
 
 import com.jayway.jsonpath.JsonPath;
 import hudson.Extension;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.content.json.util.JsonUtils;
@@ -32,6 +33,11 @@ public class JSONContentType extends URLTriggerContentType {
     @SuppressWarnings("unused")
     public List<JSONContentEntry> getJsonPaths() {
         return jsonPaths;
+    }
+
+    @SuppressWarnings("unused")
+    public List<JSONContentEntry> getElement() {
+        return getJsonPaths();
     }
 
     @Override
@@ -114,6 +120,8 @@ public class JSONContentType extends URLTriggerContentType {
     }
 
     @Extension
+    @Symbol("jsonContentType")
+
     @SuppressWarnings("unused")
     public static class JSONContentDescriptor extends URLTriggerContentTypeDescriptor<XMLContentType> {
 

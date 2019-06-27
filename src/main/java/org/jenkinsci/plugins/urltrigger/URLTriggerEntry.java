@@ -75,6 +75,9 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         this.username = username;
     }
 
+    public String getPassword() {
+        return getRealPassword();
+    }
     @SuppressWarnings("unused")
     public String getRealPassword() {
         if (password == null) {
