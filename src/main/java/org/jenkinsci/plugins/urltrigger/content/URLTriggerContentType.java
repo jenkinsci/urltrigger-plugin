@@ -17,7 +17,7 @@ import java.io.Serializable;
 public abstract class URLTriggerContentType implements ExtensionPoint, Describable<URLTriggerContentType>, Serializable {
 
     public Descriptor<URLTriggerContentType> getDescriptor() {
-        return (URLTriggerContentTypeDescriptor) Jenkins.getActiveInstance().getDescriptor(this.getClass());
+        return (URLTriggerContentTypeDescriptor) Jenkins.get().getDescriptor(this.getClass());
     }
 
     public void initForContent(String content, XTriggerLog log) throws XTriggerException {
@@ -36,6 +36,10 @@ public abstract class URLTriggerContentType implements ExtensionPoint, Describab
 
     /**
      * These methods have to be overridden in each trigger implementation
+     * 
+     * @param content
+     * @param log
+     * @throws XTriggerException
      */
     protected abstract void initForContentType(String content, XTriggerLog log) throws XTriggerException;
 

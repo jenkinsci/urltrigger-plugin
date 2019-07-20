@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Extension;
+
+import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -35,9 +37,9 @@ public class XMLContentType extends URLTriggerContentType {
     private List<XMLContentEntry> xPaths = new ArrayList<XMLContentEntry>();
 
     @DataBoundConstructor
-    public XMLContentType(List<XMLContentEntry> element) {
-        if (element != null) {
-            this.xPaths = element;
+    public XMLContentType(List<XMLContentEntry> xPaths) {
+        if (xPaths != null) {
+            this.xPaths = xPaths;
         }
     }
 
@@ -46,7 +48,7 @@ public class XMLContentType extends URLTriggerContentType {
         return xPaths;
     }
 
-    @Override
+	@Override
     protected void initForContentType(String content, XTriggerLog log) throws XTriggerException {
         xmlDocument = initXMLFile(content);
         results = readXMLPath(xmlDocument);
@@ -153,6 +155,7 @@ public class XMLContentType extends URLTriggerContentType {
 
     @Extension
     @SuppressWarnings("unused")
+    @Symbol( "XMLContent" )
     public static class XMLContentDescriptor extends URLTriggerContentTypeDescriptor<XMLContentType> {
 
         @Override

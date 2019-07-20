@@ -2,6 +2,8 @@ package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Extension;
 import hudson.Util;
+
+import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -43,6 +45,7 @@ public class SimpleContentType extends URLTriggerContentType {
 
     @Extension
     @SuppressWarnings("unused")
+    @Symbol( "MD5Sum" )
     public static class SimpleFileContentDescriptor extends URLTriggerContentTypeDescriptor<SimpleContentType> {
 
         @Override

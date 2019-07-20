@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Extension;
+
+import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -24,12 +26,12 @@ public class TEXTContentType extends URLTriggerContentType {
 
 	private List<TEXTContentEntry> regExElements = new ArrayList<TEXTContentEntry>();
 
-    private transient Map<String, List<String>> capturedValues;
+	private transient Map<String, List<String>> capturedValues;
 
-    @DataBoundConstructor
-    public TEXTContentType(List<TEXTContentEntry> element) {
-        if (element != null) {
-            this.regExElements = element;
+	@DataBoundConstructor
+    public TEXTContentType(List<TEXTContentEntry> regExElements) {
+        if (regExElements != null) {
+            this.regExElements = regExElements;
         }
     }
 
@@ -150,6 +152,7 @@ public class TEXTContentType extends URLTriggerContentType {
 
     @Extension
     @SuppressWarnings("unused")
+    @Symbol( "TextContent" )
     public static class TEXTContentDescriptor extends URLTriggerContentTypeDescriptor<TEXTContentType> {
 
         @Override

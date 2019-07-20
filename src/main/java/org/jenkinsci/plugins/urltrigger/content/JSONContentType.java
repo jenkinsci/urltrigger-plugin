@@ -2,6 +2,8 @@ package org.jenkinsci.plugins.urltrigger.content;
 
 import com.jayway.jsonpath.JsonPath;
 import hudson.Extension;
+
+import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.content.json.util.JsonUtils;
@@ -25,9 +27,9 @@ public class JSONContentType extends URLTriggerContentType {
     private List<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
 
     @DataBoundConstructor
-    public JSONContentType(List<JSONContentEntry> element) {
-        if (element != null) {
-            this.jsonPaths = element;
+    public JSONContentType(List<JSONContentEntry> jsonPaths) {
+        if (jsonPaths != null) {
+            this.jsonPaths = jsonPaths;
         }
     }
 
@@ -36,10 +38,15 @@ public class JSONContentType extends URLTriggerContentType {
         return jsonPaths;
     }
 
-    @Override
+	@Override
     protected void initForContentType(String content, XTriggerLog log) throws XTriggerException {
-        JsonUtils.validateJson(content);
-        results = readJsonPath(content);
+		try {
+			JsonUtils.validateJson(content);
+			results = readJsonPath(content);
+		} catch( XTriggerException pe ) {
+			log.error( "An error occurred when parsing the document - may not be valid JSON?" ) ;
+			throw pe ;
+		}
     }
 
     private Map<String, Object> readJsonPath(String content) throws XTriggerException {
@@ -114,6 +121,7 @@ public class JSONContentType extends URLTriggerContentType {
 
     @Extension
     @SuppressWarnings("unused")
+    @Symbol( "JsonContent" )
     public static class JSONContentDescriptor extends URLTriggerContentTypeDescriptor<XMLContentType> {
 
         @Override
