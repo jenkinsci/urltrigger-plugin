@@ -29,6 +29,11 @@
 			<name>Gregory Boissinot</name>
 			<timezone>+1</timezone>
 		</developer>
+		<developer>
+			<id>TonyNoble</id>
+			<name>Tony Noble</name>
+			<timezone>+0</timezone>
+		</developer>
 	</developers>
 
 	<properties>
