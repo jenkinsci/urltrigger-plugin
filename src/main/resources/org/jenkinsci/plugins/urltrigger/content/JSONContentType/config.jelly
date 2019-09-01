@@ -3,10 +3,10 @@
 
     <f:entry title="${descriptor.label}"
              help="/descriptor/org.jenkinsci.plugins.urltrigger.content.JSONContentType/help/type">
-        <f:repeatable var="element" items="${instance.jsonPaths}" add="${%Add a Json Path}">
+        <f:repeatable var="jsonPaths" items="${instance.jsonPaths}" add="${%Add a Json Path}">
             <table width="100%">
                 <f:entry field="jsonPath" title="${%JsonPath}">
-                    <f:textbox name="json.jsonPath" value="${element.jsonPath}"/>
+                    <f:textbox name="json.jsonPath" value="${jsonPaths.jsonPath}"/>
                 </f:entry>
             </table>
         </f:repeatable>

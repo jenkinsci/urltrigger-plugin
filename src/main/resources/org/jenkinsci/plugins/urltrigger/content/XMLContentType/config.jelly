@@ -3,10 +3,10 @@
 
     <f:entry title="${descriptor.label}"
              help="/descriptor/org.jenkinsci.plugins.urltrigger.content.XMLContentType/help/type">
-        <f:repeatable var="element" items="${instance.xPaths}" add="${%Add an XPath}">
+        <f:repeatable var="xPaths" items="${instance.xPaths}" add="${%Add an XPath}">
             <table width="100%">
                 <f:entry field="xPath" title="${%XPath}">
-                    <f:textbox name="xml.xPath" value="${element.xPath}"/>
+                    <f:textbox name="xml.xPath" value="${xPaths.xPath}"/>
                 </f:entry>
             </table>
         </f:repeatable>

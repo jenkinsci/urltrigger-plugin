@@ -3,10 +3,10 @@
 
     <f:entry title="${descriptor.label}"
              help="/descriptor/org.jenkinsci.plugins.urltrigger.content.TEXTContentType/help/type">
-        <f:repeatable var="element" items="${instance.regExElements}" add="${%Add a regEx}">
+        <f:repeatable var="regExElements" items="${instance.regExElements}" add="${%Add a regEx}">
             <table width="100%">
                 <f:entry field="regEx" title="${%REGEX}">
-                    <f:textbox name="txt.regEx" value="${element.regEx}"/>
+                    <f:textbox name="txt.regEx" value="${regExElements.regEx}"/>
                 </f:entry>
             </table>
         </f:repeatable>
