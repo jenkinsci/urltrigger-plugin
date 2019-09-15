@@ -141,7 +141,6 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     @DataBoundSetter
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode ;
-        setCheckStatus( true ) ;
     }
 
     public boolean isCheckLastModificationDate() {

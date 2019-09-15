@@ -18,6 +18,7 @@ pipeline {
                     username: 'myuser',
                     password: 'mypassword',
                     checkETag: false,
+                    checkStatus: true,
                     statusCode: 403,
                     checkLastModificationDate: true,
                     timeout: 200,
