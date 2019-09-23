@@ -2,13 +2,16 @@ package org.jenkinsci.plugins.urltrigger;
 
 import com.sun.jersey.api.client.ClientResponse;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
 import hudson.util.Secret;
 
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,32 +20,46 @@ import java.util.List;
 /**
  * @author Gregory Boissinot
  */
-@SuppressWarnings("serial")
 public class URLTriggerEntry implements Serializable , Describable< URLTriggerEntry> {
 
-    public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
+	private static final long serialVersionUID = -7232627326475916056L;
+
+	public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
 
     private String url;
     private String username;
     private String password;
-    private boolean proxyActivated;
-    private boolean checkStatus;
+    private boolean proxyActivated = false ;
+    private boolean checkStatus = false ;
     private int statusCode;
     private int timeout; //in seconds
-    private boolean checkETag;
-    private boolean checkLastModificationDate;
-    private boolean inspectingContent;
-    private boolean useGlobalEnvVars;
-    private URLTriggerContentType[] contentTypes;
+    private boolean checkETag = false ;
+    private boolean checkLastModificationDate = false ;
+    private boolean inspectingContent = false ;
+    private boolean useGlobalEnvVars = false ;
+    private URLTriggerContentType[] contentTypes = new URLTriggerContentType[0] ;
     private List<URLTriggerRequestHeader> requestHeaders = new ArrayList<URLTriggerRequestHeader>() ;
 
+    @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")    
     private transient String ETag;
+    
+    @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")
     private transient long lastModificationDate;
 
     public URLTriggerEntry() {
     }
-
+    
+    /**
+     * Default data-bound constructor.
+     * Given no other variables than a URL, we assume we're simply inspecting content
+     * and monitoring for changes.
+     * @param url
+     */
     @DataBoundConstructor
+    public URLTriggerEntry( String url ) {
+    	this.url = url ;
+    }
+  
     public URLTriggerEntry(String url, String username, String password, boolean proxyActivated, boolean checkStatus, int statusCode, int timeout, boolean checkETag, boolean checkLastModificationDate, boolean inspectingContent, URLTriggerContentType[] contentTypes, String ETag, long lastModificationDate) {
         this.url = url;
         this.username = username;
@@ -54,7 +71,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         this.checkETag = checkETag;
         this.checkLastModificationDate = checkLastModificationDate;
         this.inspectingContent = inspectingContent;
-        this.contentTypes = contentTypes;
+        this.contentTypes = contentTypes.clone();
         this.ETag = ETag;
         this.lastModificationDate = lastModificationDate;
     }
@@ -71,6 +88,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         return username;
     }
 
+    @DataBoundSetter
     public void setUsername(String username) {
         this.username = username;
     }
@@ -89,6 +107,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         return Secret.toString(secret);
     }
 
+    @DataBoundSetter
     public void setPassword(String password) {
         this.password = password;
     }
@@ -97,6 +116,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         return proxyActivated;
     }
 
+    @DataBoundSetter
     public void setProxyActivated(boolean proxyActivated) {
         this.proxyActivated = proxyActivated;
     }
@@ -109,6 +129,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         return inspectingContent;
     }
 
+    @DataBoundSetter
     public void setCheckStatus(boolean checkStatus) {
         this.checkStatus = checkStatus;
     }
@@ -117,14 +138,16 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         return statusCode;
     }
 
+    @DataBoundSetter
     public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
+        this.statusCode = statusCode ;
     }
 
     public boolean isCheckLastModificationDate() {
         return checkLastModificationDate;
     }
 
+    @DataBoundSetter
     public void setCheckLastModificationDate(boolean checkLastModifiedDate) {
         this.checkLastModificationDate = checkLastModifiedDate;
     }
@@ -133,6 +156,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         return lastModificationDate;
     }
 
+    @DataBoundSetter
     public void setInspectingContent(boolean inspectingContent) {
         this.inspectingContent = inspectingContent;
     }
@@ -142,17 +166,20 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     }
 
     public URLTriggerContentType[] getContentTypes() {
-        return contentTypes;
+        return contentTypes.clone();
     }
 
+    @DataBoundSetter
     public void setContentTypes(URLTriggerContentType[] contentTypes) {
-        this.contentTypes = contentTypes;
+        this.contentTypes = contentTypes.clone() ;
+        this.setInspectingContent( true ) ;
     }
 
     public boolean isCheckETag() {
         return checkETag;
     }
 
+    @DataBoundSetter
     public void setCheckETag(boolean checkETag) {
         this.checkETag = checkETag;
     }
@@ -169,6 +196,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
         return timeout;
     }
 
+    @DataBoundSetter
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
@@ -193,6 +221,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
 		}
 	}
 
+    @DataBoundSetter
 	public void setRequestHeaders(List<URLTriggerRequestHeader> requestHeaders) {
 		this.requestHeaders = new ArrayList<URLTriggerRequestHeader>(requestHeaders);
 	}
@@ -205,6 +234,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
 		return useGlobalEnvVars;
 	}
 
+    @DataBoundSetter
 	public void setUseGlobalEnvVars(boolean useGlobalEnvVars) {
 		this.useGlobalEnvVars = useGlobalEnvVars;
 	}
@@ -213,6 +243,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     public final static DescriptorImpl DESCRIPTOR = new DescriptorImpl();
 
 
+    @Symbol( "URLTriggerEntry" )
     public static class DescriptorImpl extends Descriptor<URLTriggerEntry> {
         @Override
         public String getDisplayName() {

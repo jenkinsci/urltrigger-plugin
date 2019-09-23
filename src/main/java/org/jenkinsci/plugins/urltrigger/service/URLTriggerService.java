@@ -112,7 +112,7 @@ public class URLTriggerService {
 
     private boolean checkStatus(URLTriggerEntry entry, XTriggerLog log, int status) throws XTriggerException {
         if (status == entry.getStatusCode()) {
-            log.info(String.format("The returned status matches the expected status: \n %s", entry.getUrl()));
+            log.info(String.format("The returned status matches the expected status: %n %s", entry.getUrl()));
             return true;
         }
         return false;
@@ -152,7 +152,7 @@ public class URLTriggerService {
         }
 
         URLTriggerContentType[] contentTypes = entry.getContentTypes();
-        if (contentTypes == null) {
+        if (contentTypes.length == 0) {
             log.info("You have to add at least one content nature type to check.");
             return false;
         }

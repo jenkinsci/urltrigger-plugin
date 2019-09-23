@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Extension;
+
+import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -20,14 +22,16 @@ import java.util.regex.Pattern;
  */
 public class TEXTContentType extends URLTriggerContentType {
 
-    private List<TEXTContentEntry> regExElements = new ArrayList<TEXTContentEntry>();
+	private static final long serialVersionUID = 3560292914545953855L;
 
-    private transient Map<String, List<String>> capturedValues;
+	private List<TEXTContentEntry> regExElements = new ArrayList<TEXTContentEntry>();
 
-    @DataBoundConstructor
-    public TEXTContentType(List<TEXTContentEntry> element) {
-        if (element != null) {
-            this.regExElements = element;
+	private transient Map<String, List<String>> capturedValues;
+
+	@DataBoundConstructor
+    public TEXTContentType(List<TEXTContentEntry> regExElements) {
+        if (regExElements != null) {
+            this.regExElements = regExElements;
         }
     }
 
@@ -148,6 +152,7 @@ public class TEXTContentType extends URLTriggerContentType {
 
     @Extension
     @SuppressWarnings("unused")
+    @Symbol( "TextContent" )
     public static class TEXTContentDescriptor extends URLTriggerContentTypeDescriptor<TEXTContentType> {
 
         @Override

@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.urltrigger;
 
 import antlr.ANTLRException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -24,6 +26,7 @@ import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import hudson.util.Secret;
 import hudson.util.SequentialExecutionQueue;
+import jenkins.model.*;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -31,6 +34,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.jelly.XMLOutput;
 import org.apache.commons.net.ftp.FTPClient;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.envinject.EnvInjectException;
 import org.jenkinsci.lib.envinject.service.EnvVarsResolver;
 import org.jenkinsci.lib.xtrigger.AbstractTrigger;
@@ -43,8 +47,8 @@ import org.jenkinsci.plugins.urltrigger.service.FTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.HTTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
-import org.jfree.util.Log;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -63,7 +67,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-import java.util.logging.Logger;
 
 
 /**
@@ -71,7 +74,7 @@ import java.util.logging.Logger;
  */
 public class URLTrigger extends AbstractTrigger {
 
-    private static Logger LOGGER = Logger.getLogger(URLTrigger.class.getName());
+	private static final long serialVersionUID = 4770775641674010339L;
 
     private List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
 
@@ -79,25 +82,46 @@ public class URLTrigger extends AbstractTrigger {
 
     @DataBoundConstructor
     public URLTrigger(String cronTabSpec,
-                      List<URLTriggerEntry> entries,
-                      boolean labelRestriction,
                       String triggerLabel) throws ANTLRException {
         super(cronTabSpec, triggerLabel);
-        this.entries = entries;
-        this.labelRestriction = labelRestriction;
     }
 
+    // This constructor is required (probably) to maintain compatibility
+    // with the old freestyle job configs.
+    public URLTrigger(String cronTabSpec,
+            List<URLTriggerEntry> entries,
+            boolean labelRestriction,
+            String triggerLabel) throws ANTLRException {
+    	super(cronTabSpec, triggerLabel);
+    	this.entries = entries;
+    	this.labelRestriction = labelRestriction;
+    }
+
+    public String getCronTabSpec() {
+    	return this.spec ;
+    }
+    
     @SuppressWarnings("unused")
     public List<URLTriggerEntry> getEntries() {
         return entries;
     }
+    
+    @DataBoundSetter
+    public void setEntries(List<URLTriggerEntry> entries) {
+		this.entries = entries;
+	}
 
-    @SuppressWarnings("unused")
+	@SuppressWarnings("unused")
     public boolean isLabelRestriction() {
         return labelRestriction;
     }
 
-    @Override
+	@DataBoundSetter
+    public void setLabelRestriction(boolean labelRestriction) {
+		this.labelRestriction = labelRestriction;
+	}
+
+	@Override
     public Collection<? extends Action> getProjectActions() {
 
         Map<String, String> subActionTitles = null;
@@ -139,8 +163,8 @@ public class URLTrigger extends AbstractTrigger {
         }
 
         @SuppressWarnings("unused")
-        public AbstractProject<?, ?> getOwner() {
-            return (AbstractProject) job;
+        public BuildableItem getOwner() {
+            return job;
         }
 
         @SuppressWarnings("unused")
@@ -174,6 +198,7 @@ public class URLTrigger extends AbstractTrigger {
         }
 
         @SuppressWarnings("unused")
+        @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED")
         public void writeLogTo(XMLOutput out) throws IOException {
             new AnnotatedLargeText<URLTriggerAction>(getLogFile(), Charset.defaultCharset(), true, this).writeHtmlTo(0, out.asWriter());
         }
@@ -183,30 +208,30 @@ public class URLTrigger extends AbstractTrigger {
     private String getURLValue(URLTriggerEntry entry, Node node , XTriggerLog log) throws XTriggerException {
         String entryURL = entry.getUrl();
         if (entryURL != null) {
-            EnvVarsResolver varsRetriever = new EnvVarsResolver();
+            //EnvVarsResolver varsRetriever = new EnvVarsResolver();
             Map<String, String> envVars;
-            try {
-            	if( entry.isUseGlobalEnvVars() ) {
+            //try {
+            	//if( entry.isUseGlobalEnvVars() ) {
             		log.info( "Resolving environment variables using global values" );
             		envVars = new EnvVars() ;
-                    Hudson hudson = Hudson.getInstance();
+                    Jenkins hudson = Jenkins.getInstanceOrNull();
                     if (hudson != null) {
                         DescribableList<NodeProperty<?>, NodePropertyDescriptor> globalNodeProperties = hudson.getGlobalNodeProperties();
                         if (globalNodeProperties != null) {
-                            for (NodeProperty nodeProperty : globalNodeProperties) {
+                            for (NodeProperty<?> nodeProperty : globalNodeProperties) {
                                 if (nodeProperty != null && nodeProperty instanceof EnvironmentVariablesNodeProperty) {
                                     envVars.putAll(((EnvironmentVariablesNodeProperty) nodeProperty).getEnvVars());
                                 }
                             }
                         }
                     }
-            	} else {
-            		log.info( "Resolving environment variables using last build values" );
-            		envVars = varsRetriever.getPollingEnvVars((AbstractProject) job, node);           		
-            	}
-            } catch (EnvInjectException e) {
-                throw new XTriggerException(e);
-            }
+            	//} else {
+            	//	log.info( "Resolving environment variables using last build values" );
+            	//	envVars = varsRetriever.getPollingEnvVars((AbstractProject) job, node);           		
+            	//}
+            //} catch (EnvInjectException e) {
+            //    throw new XTriggerException(e);
+            //}
             return Util.replaceMacro(entryURL, envVars);
         }
         return null;
@@ -266,7 +291,7 @@ public class URLTrigger extends AbstractTrigger {
         	}
         }
         
-        log.info(String.format("Invoking the url: \n %s", url));
+        log.info(String.format("Invoking the url: %n %s", url));
         ClientResponse clientResponse = webResourceBuilder.get(ClientResponse.class);
 
         URLTriggerEntry entry = resolvedEntry.getEntry();
@@ -410,8 +435,8 @@ public class URLTrigger extends AbstractTrigger {
         DefaultApacheHttpClientConfig config = new DefaultApacheHttpClientConfig();
 
         //-- Proxy
-        Hudson h = Hudson.getInstance(); // this code might run on slaves
-        ProxyConfiguration p = h != null ? h.proxy : null;
+        Jenkins h = Jenkins.get(); // this code might run on slaves
+        ProxyConfiguration p = h.proxy ;
         if (p != null) {
             config.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + p.name + ":" + p.port);
             String password = getProxyPasswordDecrypted(p);
@@ -443,7 +468,11 @@ public class URLTrigger extends AbstractTrigger {
 
     @Override
     protected File getLogFile() {
-        return new File(job.getRootDir(), "trigger-script-polling.log");
+    	if( job != null ) {
+    		return new File(job.getRootDir(), "trigger-script-polling.log");
+    	} else {
+    		return null ;
+    	}
     }
 
     @Override
@@ -456,43 +485,14 @@ public class URLTrigger extends AbstractTrigger {
         return false;
     }
 
-    @Override
-    protected void start(Node node, BuildableItem buildableItem, boolean newInstance, XTriggerLog log) {
-//        URLTriggerService service = URLTriggerService.getInstance();
-//        try {
-//            for (URLTriggerEntry entry : entries) {
-//                String url = getURLValue(entry, node);
-//                if (!entry.isHttp() && !entry.isFtp())
-//                    throw new IllegalArgumentException("Only http(s) and ftp URLs are supported. For non-http/ftp protocols, consider other XTrigger plugins");
-//
-//                URLResponse response;
-//                if (entry.isHttp()) {
-//                    Client client = getClientObject(entry, null);
-//                    ClientResponse clientResponse = client.resource(url).get(ClientResponse.class);
-//                    if (HttpServletResponse.SC_SERVICE_UNAVAILABLE == clientResponse.getStatus()) {
-//                        log.info("URL to poll unavailable.");
-//                        log.info("Skipping URLTrigger initialization. Waiting for next schedule.");
-//                        return;
-//                    }
-//                    response = new HTTPResponse(clientResponse);
-//                } else {
-//                    response = getFTPResponse(getFTPClientObject(entry), entry);
-//                    if (response == null) {
-//                        return;
-//                    }
-//                    log.info("FTP poll result: " + response.getEntityTagValue());
-//                }
-//                service.initContent(response, entry, new XTriggerLog((StreamTaskListener) TaskListener.NULL));
-//            }
-//        } catch (Throwable t) {
-//            LOGGER.log(Level.SEVERE, "Severe error on trigger startup " + t.getMessage());
-//            t.printStackTrace();
-//        }
-    }
+//    @Override
+//   protected void start(Node node, BuildableItem buildableItem, boolean newInstance, XTriggerLog log) {
+//    }
 
+    
     @Override
     public URLTriggerDescriptor getDescriptor() {
-        return (URLTriggerDescriptor) Hudson.getInstance().getDescriptorOrDie(getClass());
+        return (URLTriggerDescriptor) Jenkins.get().getDescriptorOrDie(this.getClass());
     }
 
     private static FTPClient getFTPClientObject(URLTriggerResolvedEntry resolvedEntry) throws URISyntaxException, IOException {
@@ -562,6 +562,7 @@ public class URLTrigger extends AbstractTrigger {
         return response;
     }
 
+    @Symbol( "URLTrigger")
     @Extension
     public static class URLTriggerDescriptor extends XTriggerDescriptor {
 
@@ -726,9 +727,8 @@ public class URLTrigger extends AbstractTrigger {
             return "/plugin/urltrigger/help.html";
         }
 
-        @SuppressWarnings("unchecked")
-        public DescriptorExtensionList getListURLTriggerDescriptors() {
-            return DescriptorExtensionList.createDescriptorList(Hudson.getInstance(), URLTriggerContentType.class);
+        public DescriptorExtensionList<URLTriggerContentType, Descriptor<URLTriggerContentType>> getListURLTriggerDescriptors() {
+            return DescriptorExtensionList.createDescriptorList(Jenkins.get(), URLTriggerContentType.class);
         }
 
         public FormValidation doCheckURL(@QueryParameter String value) {
@@ -774,5 +774,4 @@ public class URLTrigger extends AbstractTrigger {
         }
 
     }
-
 }

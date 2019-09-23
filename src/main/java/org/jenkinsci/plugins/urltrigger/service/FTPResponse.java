@@ -13,7 +13,7 @@ public class FTPResponse implements URLResponse {
     private String etag;
 
     public FTPResponse(Date modifiedDate, int status) {
-        this.modifiedDate = modifiedDate;
+        this.modifiedDate = (Date) modifiedDate.clone();
         this.status = status;
     }
 
@@ -21,11 +21,11 @@ public class FTPResponse implements URLResponse {
     }
 
     public Date getLastModified() {
-        return modifiedDate;
+        return (Date) modifiedDate.clone() ;
     }
 
     public void setLastModified(Date lastModified) {
-        this.modifiedDate = lastModified;
+        this.modifiedDate = (Date) lastModified.clone();
     }
 
     public String getContent() {
