@@ -172,7 +172,9 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     @DataBoundSetter
     public void setContentTypes(URLTriggerContentType[] contentTypes) {
         this.contentTypes = contentTypes.clone() ;
-        this.setInspectingContent( true ) ;
+        if( this.contentTypes.length > 0 ) {
+        	this.setInspectingContent( true ) ;
+        }
     }
 
     public boolean isCheckETag() {
