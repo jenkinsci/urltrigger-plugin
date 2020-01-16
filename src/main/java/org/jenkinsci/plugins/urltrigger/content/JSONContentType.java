@@ -58,9 +58,9 @@ public class JSONContentType extends URLTriggerContentType {
 				Object result = JsonPath.read(content, jsonPath);
 				results.put(jsonPath, result);
 			} catch (PathNotFoundException pe) {
-				results.put(jsonPath, "");
-				// result will be empty
-//            throw new XTriggerException(pe);
+				// As suggested by Tony Noble, just apply null to the jsonPath result
+				// to enable the mechanism to detect jsonPath could not be found in the document.
+				results.put(jsonPath, null); 
 			}
 		}
 		return results;
