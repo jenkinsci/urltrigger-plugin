@@ -1,14 +1,14 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:u="/lib/urltrigger">
 
     <f:entry title="${descriptor.label}"
              help="/descriptor/org.jenkinsci.plugins.urltrigger.content.XMLContentType/help/type">
         <f:repeatable var="xPaths" items="${instance.xPaths}" add="${%Add an XPath}">
-            <table width="100%">
+            <u:blockWrapper>
                 <f:entry field="xPath" title="${%XPath}">
                     <f:textbox name="xml.xPath" value="${xPaths.xPath}"/>
                 </f:entry>
-            </table>
+            </u:blockWrapper>
         </f:repeatable>
     </f:entry>
 

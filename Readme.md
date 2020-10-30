@@ -1,5 +1,46 @@
 # UrlTrigger Plugin
 
+URLTrigger plug-in makes it possible to monitor changes of the response
+got from an URL invocation.
+
+## Features
+
+Jenkins can be configured to poll URL changes.  
+The plug-in makes it possible to check the last modification date
+response and the response content of a URL invocation.  
+For the response content, you can check:
+
+-   a simple response content (the content nature is not interpreted; a
+    MD5 is used)
+-   a TXT response content (the returned values from the evaluation of
+    regular expressions are checked)
+-   an XML response content (the returned values from the evaluation of
+    XPath expressions are checked)
+-   a JSON response content (the returned values from the evaluation of
+    JSONPath expressions are checked)
+
+![diagram](docs/images/urltrigger.png)
+
+# Some Use cases
+
+* Enables users to check if new artifacts (such as
+binaries) have been deployed in a repository (managed for example by a
+repository manager such as Sonatype Nexus, JFrog Artifactory, Apache
+Archiva and so on).
+* Know if a stage of a pipeline (for a
+continuous testing, a continous delivery or a continuous deployment) has
+to be executed.
+
+# Known Limitations
+
+Only http(s) and ftp URLs are supported. For non-http protocols,
+consider other XTrigger plugins such as the [FSTrigger
+Plugin](https://plugins.jenkins.io/fstrigger/)
+
+# Configuration
+
+![configuration screen](docs/images/URLTRIGGER_CONF_1.png)
+
 ## Declarative Pipeline Syntax
 Example:
 
