@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>3.47</version>
+		<version>4.12</version>
 	</parent>
 
 	<artifactId>urltrigger</artifactId>
 	<packaging>hpi</packaging>
 	<name>Jenkins URLTrigger Plug-in</name>
-	<version>0.48-SNAPSHOT</version>
-	<url>http://wiki.jenkins-ci.org/display/JENKINS/URLTrigger+Plugin</url>
+	<version>${revision}${changelist}</version>
+	<url>https://github.com/jenkinsci/urltrigger-plugin</url>
 
 	<licenses>
 		<license>
@@ -35,6 +35,9 @@
 	</developers>
 
 	<properties>
+		<revision>0.48</revision>
+		<changelist>-SNAPSHOT</changelist>
+		<gitHubRepo>jenkinsci/urltrigger-plugin</gitHubRepo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -44,15 +47,15 @@
 		<jersey.client.version>1.19.4</jersey.client.version>
 		<json.path.version>2.4.0</json.path.version>
 		<jackson.mapper.as1.version>1.8.3</jackson.mapper.as1.version>
-		<junit.version>4.12</junit.version>
 		<mockito.version>1.8.5</mockito.version>
-		<jenkins.version>2.176</jenkins.version>
+		<jenkins.version>2.204.6</jenkins.version>
 	</properties>
 
 	<scm>
-		<connection>scm:git:git://github.com/jenkinsci/urltrigger-plugin.git</connection>
-		<developerConnection>scm:git:git@github.com:jenkinsci/urltrigger-plugin.git</developerConnection>
-		<tag>HEAD</tag>
+		<connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
+		<developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
+		<url>https://github.com/${gitHubRepo}</url>
+		<tag>${scmTag}</tag>
 	</scm>
 
 	<distributionManagement>
@@ -66,12 +69,23 @@
 		</snapshotRepository>
 	</distributionManagement>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.jenkins.tools.bom</groupId>
+				<artifactId>bom-2.204.x</artifactId>
+				<version>16</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>structs</artifactId>
-			<version>1.5</version>
 		</dependency>
 
 
@@ -84,7 +98,6 @@
 		<dependency>
 			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>matrix-project</artifactId>
-			<version>1.3</version>
 		</dependency>
 
 		<dependency>
@@ -102,18 +115,15 @@
 		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
-			<version>3.1-jenkins-1</version>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.9</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jenkins-ci.plugins.workflow</groupId>
 			<artifactId>workflow-job</artifactId>
-			<version>2.15</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -138,13 +148,11 @@
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
-			<version>2.6</version>
 		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 
