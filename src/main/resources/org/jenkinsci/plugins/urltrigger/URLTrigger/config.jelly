@@ -1,10 +1,10 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:u="/lib/urltrigger">
 
     <f:entry>
 
         <f:repeatable var="urlElements" items="${instance.entries}" add="${%Add URL to monitor}">
-            <table width="100%">
+            <u:blockWrapper>
 
                 <f:entry field="url" title="${%URL}">
                     <f:textbox name="url"
@@ -52,7 +52,7 @@
 					<f:section title="${%Request Headers}">
 		                <f:entry title="">
 	    		            <f:repeatable var="urlRequestHeaders" items="${urlElements.requestHeaders}" add="${%Add request header}" minimum="0">
-	            		    	<table width="100%">
+	            		    	<u:blockWrapper>
 	                				<f:entry title="${%Header name}" field="headerName">
 				                		<f:textbox value="${urlRequestHeaders.headerName}"/>
 	        			        	</f:entry>
@@ -64,7 +64,7 @@
 					                        <f:repeatableDeleteButton/>
                     					</div>
 					                </f:entry>
-	                			</table>
+	                			</u:blockWrapper>
 		    	            </f:repeatable>
     			        </f:entry>
     	        	</f:section>
@@ -73,7 +73,7 @@
 
                 <f:section title="${%URL Response Check}">
                     <f:entry>
-                        <table style="width:100%">
+                        <u:blockWrapper>
                             <f:optionalBlock
                                     field="checkStatus"
                                     name="urlElements.checkStatus"
@@ -87,7 +87,7 @@
                                 </f:entry>
 
                             </f:optionalBlock>
-                        </table>
+                        </u:blockWrapper>
                     </f:entry>
 
                     <f:entry>
@@ -107,7 +107,7 @@
                     </f:entry>
 
                     <f:entry>
-                        <table style="width:100%">
+                        <u:blockWrapper>
                             <f:optionalBlock
                                 name="urlElements.inspectingContent"
                                 field="inspectingContent"
@@ -121,7 +121,7 @@
                                        items="${urlElements.contentTypes}"/>
                                 </f:block>
                             </f:optionalBlock>
-                        </table>
+                        </u:blockWrapper>
                     </f:entry>
                 </f:section>
 
@@ -131,13 +131,13 @@
                     </div>
                 </f:entry>
 
-            </table>
+            </u:blockWrapper>
         </f:repeatable>
     </f:entry>
 
     <f:entry title="${%Polling Node}">
         <f:entry>
-            <table style="width:100%">
+            <u:blockWrapper>
                 <f:optionalBlock
                         name="labelRestriction"
                         field="labelRestriction"
@@ -151,7 +151,7 @@
                         </f:entry>
                     </f:block>
                 </f:optionalBlock>
-            </table>
+            </u:blockWrapper>
         </f:entry>
     </f:entry>
 
