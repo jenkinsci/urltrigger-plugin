@@ -249,7 +249,6 @@ public class URLTrigger extends AbstractTrigger {
         for (URLTriggerEntry entry : entries) {
             boolean modified = checkIfModifiedEntry(entry, pollingNode, log);
             if (modified) {
-                URLTriggerCause.setUrlTrigger(entry.getUrl());
                 return true;
             }
         }
