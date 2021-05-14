@@ -7,6 +7,7 @@ import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.StreamBuildListener;
 import org.jenkinsci.plugins.urltrigger.URLTriggerCause;
+import org.jenkinsci.plugins.urltrigger.URLTriggerCauseTest;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -34,20 +35,20 @@ public class URLTriggerEnvironmentContributorTest {
     @Test
     public void freeStyleProjectTest() throws IOException, InterruptedException, ExecutionException {
         FreeStyleProject p = jenkins.createFreeStyleProject();
-        URLTriggerCause cause = new URLTriggerCause();
-        URLTriggerCause.setUrlTrigger("http://test.com");
+        URLTriggerCause cause = new URLTriggerCauseTest( URLTriggerCause.NAME , URLTriggerCause.CAUSE , true );
+        cause.setUrlTrigger("http://test.com");
         FreeStyleBuild b = p.scheduleBuild2(0, cause).get();
         EnvVars env = b.getEnvironment(listener);
 
-        assertEquals("http://test.com", env.get("URL_TRIGGER"));
+        assertEquals("http://test.com", env.get("URL_TRIGGER_CAUSE"));
     }
 
     @Test
     public void matrixProjectTest() throws IOException, InterruptedException, ExecutionException {
         EnvVars env;
         MatrixProject p = jenkins.jenkins.createProject(MatrixProject.class, "matrixbuild");
-        URLTriggerCause cause = new URLTriggerCause();
-        URLTriggerCause.setUrlTrigger("http://test.com");
+        URLTriggerCause cause = new URLTriggerCauseTest(URLTriggerCause.NAME , URLTriggerCause.CAUSE , true );
+        cause.setUrlTrigger("http://test.com");
         // set up 2x2 matrix
         AxisList axes = new AxisList();
         axes.add(new TextAxis("db","mysql","oracle"));
@@ -59,7 +60,7 @@ public class URLTriggerEnvironmentContributorTest {
         for (MatrixRun run : runs) {
             env = run.getEnvironment(listener);
             assertNotNull(env.get("db"));
-            assertEquals("http://test.com", env.get("URL_TRIGGER"));
+            assertEquals("http://test.com", env.get("URL_TRIGGER_CAUSE"));
         }
     }
 

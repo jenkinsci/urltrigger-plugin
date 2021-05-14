@@ -29,7 +29,7 @@ public class URLTriggerEnvironmentContributor extends EnvironmentContributor {
             cause = (URLTriggerCause) r.getCause(URLTriggerCause.class);
         }
         if (cause != null) {
-            envs.override("URL_TRIGGER", cause.getUrlTrigger());
+            envs.override("URL_TRIGGER_CAUSE", cause.getUrlTrigger());
         }
     }
 }

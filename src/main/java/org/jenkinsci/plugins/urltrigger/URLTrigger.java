@@ -38,6 +38,7 @@ import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.envinject.EnvInjectException;
 import org.jenkinsci.lib.envinject.service.EnvVarsResolver;
 import org.jenkinsci.lib.xtrigger.AbstractTrigger;
+import org.jenkinsci.lib.xtrigger.XTriggerCause;
 import org.jenkinsci.lib.xtrigger.XTriggerDescriptor;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
@@ -47,6 +48,7 @@ import org.jenkinsci.plugins.urltrigger.service.FTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.HTTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
+import org.jenkinsci.plugins.urltrigger.environment.URLTriggerEnvironmentContributor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -79,6 +81,8 @@ public class URLTrigger extends AbstractTrigger {
     private List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
 
     private boolean labelRestriction;
+    
+    private URLTriggerCause buildCause = null ;
 
     @DataBoundConstructor
     public URLTrigger(String cronTabSpec,
@@ -249,7 +253,8 @@ public class URLTrigger extends AbstractTrigger {
         for (URLTriggerEntry entry : entries) {
             boolean modified = checkIfModifiedEntry(entry, pollingNode, log);
             if (modified) {
-                URLTriggerCause.setUrlTrigger(entry.getUrl());
+            	this.buildCause = new URLTriggerCause( true ) ;
+                this.buildCause.setUrlTrigger(entry.getUrl());
                 return true;
             }
         }
@@ -341,6 +346,11 @@ public class URLTrigger extends AbstractTrigger {
     @Override
     public String getCause() {
         return URLTriggerCause.CAUSE;
+    }
+    
+    @Override
+    protected XTriggerCause getBuildCause() {
+    	return this.buildCause ;
     }
 
     @Override

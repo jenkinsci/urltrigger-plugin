@@ -59,7 +59,9 @@ public class XMLContentType extends URLTriggerContentType {
         try {
             StringReader stringReader = new StringReader(content);
             InputSource inputSource = new InputSource(stringReader);
-            xmlDocument = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(inputSource);
+            DocumentBuilderFactory xmlDocFactory = DocumentBuilderFactory.newInstance() ;
+            xmlDocFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true) ;
+            xmlDocument = xmlDocFactory.newDocumentBuilder().parse(inputSource);
             stringReader.close();
         } catch (SAXException e) {
             throw new XTriggerException(e);

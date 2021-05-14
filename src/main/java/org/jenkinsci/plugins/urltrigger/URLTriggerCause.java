@@ -1,17 +1,38 @@
 package org.jenkinsci.plugins.urltrigger;
 
+import java.io.Serializable;
+
+import org.jenkinsci.lib.xtrigger.XTriggerCause;
+
 import hudson.model.Cause;
 
 /**
  * @author Gregory Boissinot
  */
-public class URLTriggerCause extends Cause {
+public class URLTriggerCause extends XTriggerCause implements Serializable {
 
-    public static final String NAME = "URLTrigger";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	public static final String NAME = "URLTrigger";
     public static final String CAUSE = "A change within the response URL invocation";
-    public static String urlTrigger;
+    private String urlTrigger;
 
-    public static void setUrlTrigger(String url) {
+    protected URLTriggerCause() {
+    	super(NAME , CAUSE) ;
+    }
+
+    protected URLTriggerCause( boolean logEnabled ) {
+    	super(NAME , CAUSE , logEnabled) ;
+    }
+
+    protected URLTriggerCause(String triggerName, String causeFrom, boolean logEnabled) {
+    	super( triggerName , causeFrom , logEnabled ) ;
+    }
+
+    public void setUrlTrigger(String url) {
         urlTrigger = url;
     }
 
