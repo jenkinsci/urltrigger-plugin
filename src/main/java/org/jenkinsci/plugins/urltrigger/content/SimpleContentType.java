@@ -3,10 +3,14 @@ package org.jenkinsci.plugins.urltrigger.content;
 import hudson.Extension;
 import hudson.Util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Gregory Boissinot
@@ -24,6 +28,13 @@ public class SimpleContentType extends URLTriggerContentType {
     @Override
     protected void initForContentType(String content, XTriggerLog log) throws XTriggerException {
         this.md5 = Util.getDigestOf(content);
+    }
+
+    @Override
+    public Map<String, String> getTriggeringResponse() {
+        Map<String, String> payload = new HashMap<>();
+        payload.put("MD5", md5 != null ? md5 : "");
+        return payload;
     }
 
     @Override

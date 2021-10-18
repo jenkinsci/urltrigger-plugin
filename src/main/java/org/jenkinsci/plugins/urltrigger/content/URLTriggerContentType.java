@@ -3,13 +3,13 @@ package org.jenkinsci.plugins.urltrigger.content;
 import hudson.ExtensionPoint;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
 import jenkins.model.Jenkins;
 
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author Gregory Boissinot
@@ -33,7 +33,6 @@ public abstract class URLTriggerContentType implements ExtensionPoint, Describab
         initForContentType(content, log);
     }
 
-
     /**
      * These methods have to be overridden in each trigger implementation
      * 
@@ -46,6 +45,8 @@ public abstract class URLTriggerContentType implements ExtensionPoint, Describab
     public boolean isTriggering(String content, XTriggerLog log) throws XTriggerException {
         return isTriggeringBuildForContent(content, log);
     }
+
+    public abstract Map<String, String> getTriggeringResponse();
 
     protected abstract boolean isTriggeringBuildForContent(String content, XTriggerLog log) throws XTriggerException;
 }

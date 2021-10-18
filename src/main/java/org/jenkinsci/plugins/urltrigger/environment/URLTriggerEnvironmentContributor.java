@@ -30,6 +30,7 @@ public class URLTriggerEnvironmentContributor extends EnvironmentContributor {
         }
         if (cause != null) {
             envs.override("URL_TRIGGER_CAUSE", cause.getUrlTrigger());
+            envs.override("URL_TRIGGER_RESPONSE", cause.getTriggerResponse());
         }
     }
 }

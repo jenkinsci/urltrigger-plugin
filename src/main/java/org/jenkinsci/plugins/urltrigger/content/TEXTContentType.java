@@ -2,6 +2,7 @@ package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Extension;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
 import org.jenkinsci.lib.xtrigger.XTriggerLog;
@@ -24,7 +25,7 @@ public class TEXTContentType extends URLTriggerContentType {
 
 	private static final long serialVersionUID = 3560292914545953855L;
 
-	private List<TEXTContentEntry> regExElements = new ArrayList<TEXTContentEntry>();
+	private List<TEXTContentEntry> regExElements = new ArrayList<>();
 
 	private transient Map<String, List<String>> capturedValues;
 
@@ -43,6 +44,15 @@ public class TEXTContentType extends URLTriggerContentType {
     @Override
     protected void initForContentType(String content, XTriggerLog log) throws XTriggerException {
         capturedValues = getMatchedValue(content);
+    }
+
+    @Override
+    public Map<String, String> getTriggeringResponse() {
+        Map<String, String> payload = new HashMap<>();
+        if (capturedValues != null) {
+            capturedValues.forEach((key, value) -> payload.put(key, StringUtils.joinWith(",", value)));
+        }
+        return payload;
     }
 
     @Override
@@ -100,7 +110,7 @@ public class TEXTContentType extends URLTriggerContentType {
 
     private Map<String, List<String>> getMatchedValue(String content) throws XTriggerException {
 
-        Map<String, List<String>> capturedValues = new HashMap<String, List<String>>();
+        Map<String, List<String>> capturedValues = new HashMap<>();
 
         StringReader stringReader = null;
         BufferedReader bufferedReader = null;
@@ -140,7 +150,7 @@ public class TEXTContentType extends URLTriggerContentType {
     private Map<String, List<String>> addMatchedValue(Map<String, List<String>> capturedValues, String regEx, String group) {
         List<String> values = capturedValues.get(regEx);
         if (values == null) {
-            values = new ArrayList<String>();
+            values = new ArrayList<>();
             values.add(group);
             capturedValues.put(regEx, values);
             return capturedValues;
