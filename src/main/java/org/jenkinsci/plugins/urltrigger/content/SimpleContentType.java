@@ -4,8 +4,8 @@ import hudson.Extension;
 import hudson.Util;
 
 import org.jenkinsci.Symbol;
-import org.jenkinsci.lib.xtrigger.XTriggerException;
-import org.jenkinsci.lib.xtrigger.XTriggerLog;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**

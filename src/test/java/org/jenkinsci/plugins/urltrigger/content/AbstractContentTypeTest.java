@@ -1,7 +1,7 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.Util;
-import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

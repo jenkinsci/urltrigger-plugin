@@ -88,7 +88,7 @@ NPE in URLTrigger when saving project configuration
 
 * Fix
 [JENKINS-17641](https://issues.jenkins-ci.org/browse/JENKINS-17641) -
-Unknown field 'logEnabled' in org.jenkinsci.lib.xtrigger.XTriggerCause
+Unknown field 'logEnabled' in org.jenkinsci.plugins.xtriggerapi.XTriggerCause
 
 ## Release 0.30
 

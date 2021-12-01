@@ -3,6 +3,7 @@ package org.jenkinsci.plugins.urltrigger.service;
 import com.sun.jersey.api.client.ClientResponse;
 
 import javax.ws.rs.core.EntityTag;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.util.Date;
 
@@ -27,6 +28,10 @@ public class HTTPResponse implements URLResponse {
 
     public int getStatus() {
         return baseResponse.getStatus();
+    }
+    
+    public MultivaluedMap<String, String> getResponseHeaders() {
+    	return baseResponse.getHeaders() ;
     }
 
     public String getEntityTagValue() {

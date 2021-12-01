@@ -2,9 +2,7 @@ package org.jenkinsci.plugins.urltrigger;
 
 import java.io.Serializable;
 
-import org.jenkinsci.lib.xtrigger.XTriggerCause;
-
-import hudson.model.Cause;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerCause;
 
 /**
  * @author Gregory Boissinot
@@ -40,7 +38,7 @@ public class URLTriggerCause extends XTriggerCause implements Serializable {
     public String getShortDescription() {
         return String.format("[%s] - %s of %s", NAME, CAUSE, urlTrigger);
     }
-
+    
     public String getUrlTrigger() {
         return urlTrigger;
     }

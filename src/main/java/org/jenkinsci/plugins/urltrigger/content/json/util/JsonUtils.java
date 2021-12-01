@@ -3,7 +3,7 @@ package org.jenkinsci.plugins.urltrigger.content.json.util;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
-import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
