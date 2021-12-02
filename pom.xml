@@ -11,7 +11,7 @@
 	<artifactId>urltrigger</artifactId>
 	<packaging>hpi</packaging>
 	<name>Jenkins URLTrigger Plug-in</name>
-	<version>0.50</version>
+	<version>${revision}${changelist}</version>
 	<url>https://github.com/jenkinsci/urltrigger-plugin</url>
 
 	<licenses>
@@ -35,7 +35,7 @@
 	</developers>
 
 	<properties>
-		<revision>0.50</revision>
+		<revision>0.51</revision>
 		<changelist>-SNAPSHOT</changelist>
 		<gitHubRepo>jenkinsci/urltrigger-plugin</gitHubRepo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -54,7 +54,7 @@
 		<connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
 		<developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
 		<url>https://github.com/${gitHubRepo}</url>
-		<tag>urltrigger-0.50</tag>
+		<tag>${scmTag}</tag>
 	</scm>
 
 	<distributionManagement>
