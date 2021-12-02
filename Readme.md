@@ -41,6 +41,14 @@ Plugin](https://plugins.jenkins.io/fstrigger/)
 
 ![configuration screen](docs/images/URLTRIGGER_CONF_1.png)
 
+## Notes
+
+To determine the URL caused invocation - use the environment variable
+`URL_TRIGGER_CAUSE` - e.g. `${env.URL_TRIGGER_CAUSE}`
+
+To determine the response caused invocation - use the environment variable
+`URL_TRIGGER_RESPONSE` - e.g. `${env.URL_TRIGGER_RESPONSE}`
+
 ## Declarative Pipeline Syntax
 Example:
 

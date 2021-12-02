@@ -255,6 +255,9 @@ public class URLTrigger extends AbstractTrigger {
             if (modified) {
             	this.buildCause = new URLTriggerCause( true ) ;
                 this.buildCause.setUrlTrigger(entry.getUrl());
+                for(final URLTriggerContentType contentType: entry.getContentTypes()) {
+                    this.buildCause.addTriggerResponse(contentType.getTriggeringResponse());
+                }
                 return true;
             }
         }

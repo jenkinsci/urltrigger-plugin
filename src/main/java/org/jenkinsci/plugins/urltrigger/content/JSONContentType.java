@@ -25,7 +25,7 @@ public class JSONContentType extends URLTriggerContentType {
 
 	private transient Map<String, Object> results = null;
 
-	private List<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
+	private List<JSONContentEntry> jsonPaths = new ArrayList<>();
 
 	@DataBoundConstructor
 	public JSONContentType(List<JSONContentEntry> jsonPaths) {
@@ -51,7 +51,7 @@ public class JSONContentType extends URLTriggerContentType {
 	}
 
 	private Map<String, Object> readJsonPath(String content) throws XTriggerException {
-		Map<String, Object> results = new HashMap<String, Object>(jsonPaths.size());
+		Map<String, Object> results = new HashMap<>(jsonPaths.size());
 		for (JSONContentEntry jsonContentEntry : jsonPaths) {
 			String jsonPath = jsonContentEntry.getJsonPath();
 			try {
@@ -64,6 +64,15 @@ public class JSONContentType extends URLTriggerContentType {
 			}
 		}
 		return results;
+	}
+
+	@Override
+	public Map<String, String> getTriggeringResponse() {
+		Map<String, String> payload = new HashMap<>();
+		if (results != null) {
+			results.forEach((key, value) -> payload.put(key, value.toString()));
+		}
+		return payload;
 	}
 
 	@Override
@@ -96,7 +105,6 @@ public class JSONContentType extends URLTriggerContentType {
 		}
 
 		for (Map.Entry<String, Object> entry : results.entrySet()) {
-
 			String jsonPath = entry.getKey();
 			Object initValue = entry.getValue();
 			Object newValue = newResults.get(jsonPath);

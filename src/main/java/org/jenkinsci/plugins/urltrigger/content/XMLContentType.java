@@ -32,9 +32,7 @@ public class XMLContentType extends URLTriggerContentType {
 
 	private transient Map<String, Object> results = null;
 
-    private transient Document xmlDocument;
-
-    private List<XMLContentEntry> xPaths = new ArrayList<XMLContentEntry>();
+    private List<XMLContentEntry> xPaths = new ArrayList<>();
 
     @DataBoundConstructor
     public XMLContentType(List<XMLContentEntry> xPaths) {
@@ -50,7 +48,7 @@ public class XMLContentType extends URLTriggerContentType {
 
 	@Override
     protected void initForContentType(String content, XTriggerLog log) throws XTriggerException {
-        xmlDocument = initXMLFile(content);
+        Document xmlDocument = initXMLFile(content);
         results = readXMLPath(xmlDocument);
     }
 
@@ -63,18 +61,14 @@ public class XMLContentType extends URLTriggerContentType {
             xmlDocFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true) ;
             xmlDocument = xmlDocFactory.newDocumentBuilder().parse(inputSource);
             stringReader.close();
-        } catch (SAXException e) {
-            throw new XTriggerException(e);
-        } catch (IOException e) {
-            throw new XTriggerException(e);
-        } catch (ParserConfigurationException e) {
+        } catch (SAXException | IOException | ParserConfigurationException e) {
             throw new XTriggerException(e);
         }
         return xmlDocument;
     }
 
     private Map<String, Object> readXMLPath(Document document) throws XTriggerException {
-        Map<String, Object> results = new HashMap<String, Object>(xPaths.size());
+        Map<String, Object> results = new HashMap<>(xPaths.size());
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
         try {
@@ -88,6 +82,15 @@ public class XMLContentType extends URLTriggerContentType {
             throw new XTriggerException(xpe);
         }
         return results;
+    }
+
+    @Override
+    public Map<String, String> getTriggeringResponse() {
+        Map<String, String> payload = new HashMap<>();
+        if (results != null) {
+            results.forEach((key, value) -> payload.put(key, value.toString()));
+        }
+        return payload;
     }
 
     @Override
