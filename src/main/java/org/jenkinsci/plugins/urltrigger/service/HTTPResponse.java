@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.urltrigger.service;
 
-import com.sun.jersey.api.client.ClientResponse;
+import org.glassfish.jersey.client.ClientResponse;
 
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
@@ -22,7 +22,7 @@ public class HTTPResponse implements URLResponse {
     }
 
     public String getContent() {
-        return baseResponse.getEntity(String.class);
+        return baseResponse.readEntity(String.class);
     }
 
     public int getStatus() {
@@ -38,7 +38,7 @@ public class HTTPResponse implements URLResponse {
     }
 
     public boolean isSuccessfullFamily() {
-        return baseResponse.getClientResponseStatus().getFamily() == Response.Status.Family.SUCCESSFUL;
+        return baseResponse.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL;
     }
 
 }

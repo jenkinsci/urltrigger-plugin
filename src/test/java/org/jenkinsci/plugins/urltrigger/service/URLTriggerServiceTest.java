@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.urltrigger.service;
 
-import com.sun.jersey.api.client.ClientResponse;
+import org.glassfish.jersey.client.ClientResponse;
 import hudson.model.TaskListener;
 import hudson.util.StreamTaskListener;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
@@ -37,7 +37,7 @@ public class URLTriggerServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
         urlTriggerService = URLTriggerService.getInstance();
-        when(clientResponseMock.getClientResponseStatus()).thenReturn(ClientResponse.Status.OK);
+        when(clientResponseMock.getStatusInfo()).thenReturn(Response.Status.OK);
     }
 
     @Test
@@ -68,7 +68,7 @@ public class URLTriggerServiceTest {
         when(urlTriggerEntryMock.isInspectingContent()).thenReturn(true);
         URLTriggerContentType urlTriggerContentTypeMock = mock(URLTriggerContentType.class);
         when(urlTriggerEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{urlTriggerContentTypeMock});
-        when(clientResponseMock.getEntity(String.class)).thenReturn(null);
+        when(clientResponseMock.readEntity(String.class)).thenReturn(null);
 
         urlTriggerService.initContent(new HTTPResponse(clientResponseMock), urlTriggerEntryMock, log);
     }
@@ -86,7 +86,7 @@ public class URLTriggerServiceTest {
         when(urlTriggerEntryMock.isInspectingContent()).thenReturn(true);
         URLTriggerContentType urlTriggerContentTypeMock = mock(URLTriggerContentType.class);
         when(urlTriggerEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{urlTriggerContentTypeMock});
-        when(clientResponseMock.getEntity(String.class)).thenReturn(contentStub);
+        when(clientResponseMock.readEntity(String.class)).thenReturn(contentStub);
 
         urlTriggerService.initContent(new HTTPResponse(clientResponseMock), urlTriggerEntryMock, log);
 
@@ -127,7 +127,7 @@ public class URLTriggerServiceTest {
     private void verifyIsSchedulingForURLEntryCheckLastModificationDate(URLTriggerEntry urlEntryMock, Date responseDate) {
         verify(clientResponseMock, never()).getStatus();
         verify(clientResponseMock, times(1)).getLastModified();
-        verify(clientResponseMock, never()).getEntity(String.class);
+        verify(clientResponseMock, never()).readEntity(String.class);
 
         verify(urlEntryMock, times(1)).isCheckStatus();
         verify(urlEntryMock, never()).getStatusCode();
@@ -186,7 +186,7 @@ public class URLTriggerServiceTest {
 
         verify(clientResponseMock, never()).getStatus();
         verify(clientResponseMock, never()).getLastModified();
-        verify(clientResponseMock, times(1)).getEntity(String.class);
+        verify(clientResponseMock, times(1)).readEntity(String.class);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class URLTriggerServiceTest {
         when(urlEntryMock.isCheckLastModificationDate()).thenReturn(false);
         when(urlEntryMock.isInspectingContent()).thenReturn(true);
         when(urlEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{contentTypeMock});
-        when(clientResponseMock.getEntity(Matchers.any(Class.class))).thenReturn(null);
+        when(clientResponseMock.readEntity(Matchers.any(Class.class))).thenReturn(null);
 
         urlTriggerService.isSchedulingAndGetRefresh(new HTTPResponse(clientResponseMock), urlEntryMock, mock(XTriggerLog.class));
         Assert.assertFalse(false);
@@ -212,7 +212,7 @@ public class URLTriggerServiceTest {
 
         verify(clientResponseMock, never()).getStatus();
         verify(clientResponseMock, never()).getLastModified();
-        verify(clientResponseMock, times(1)).getEntity(String.class);
+        verify(clientResponseMock, times(1)).readEntity(String.class);
 
         verify(contentTypeMock, never()).isTriggering(anyString(), any(XTriggerLog.class));
     }
@@ -225,7 +225,7 @@ public class URLTriggerServiceTest {
         when(urlEntryMock.isCheckLastModificationDate()).thenReturn(false);
         when(urlEntryMock.isInspectingContent()).thenReturn(true);
         when(urlEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{contentTypeMock});
-        when(clientResponseMock.getEntity(Matchers.any(Class.class))).thenReturn("S");
+        when(clientResponseMock.readEntity(Matchers.any(Class.class))).thenReturn("S");
         when(contentTypeMock.isTriggering(Matchers.any(String.class), Matchers.any(XTriggerLog.class))).thenReturn(isTriggeringBuildContent);
 
         boolean result = urlTriggerService.isSchedulingAndGetRefresh(new HTTPResponse(clientResponseMock), urlEntryMock, mock(XTriggerLog.class));
@@ -240,7 +240,7 @@ public class URLTriggerServiceTest {
 
         verify(clientResponseMock, never()).getStatus();
         verify(clientResponseMock, never()).getLastModified();
-        verify(clientResponseMock, times(1)).getEntity(String.class);
+        verify(clientResponseMock, times(1)).readEntity(String.class);
 
         verify(contentTypeMock, times(1)).isTriggering(anyString(), any(XTriggerLog.class));
     }
