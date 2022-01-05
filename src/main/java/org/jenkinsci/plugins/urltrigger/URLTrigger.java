@@ -24,6 +24,8 @@ import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.jelly.XMLOutput;
 import org.apache.commons.net.ftp.FTPClient;
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.ClientResponse;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -451,6 +453,7 @@ public class URLTrigger extends AbstractTrigger {
             config.property(ClientProperties.PROXY_USERNAME, p.getUserName());
             String password = getProxyPasswordDecrypted(p);
             config.property(ClientProperties.PROXY_PASSWORD, Util.fixNull(password));
+            config.withConfig(new ClientConfig().connectorProvider(new ApacheConnectorProvider()));
         }
 
         //-- Https
