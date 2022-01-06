@@ -1,7 +1,5 @@
 package org.jenkinsci.plugins.urltrigger.service;
 
-import org.glassfish.jersey.client.ClientResponse;
-
 import javax.ws.rs.core.EntityTag;
 import javax.ws.rs.core.Response;
 import java.util.Date;
@@ -11,9 +9,9 @@ import java.util.Date;
  */
 public class HTTPResponse implements URLResponse {
 
-    private ClientResponse baseResponse;
+    private Response baseResponse;
 
-    public HTTPResponse(ClientResponse clientResponse) {
+    public HTTPResponse(Response clientResponse) {
         baseResponse = clientResponse;
     }
 

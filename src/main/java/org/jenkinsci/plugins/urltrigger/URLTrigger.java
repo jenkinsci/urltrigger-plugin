@@ -27,7 +27,6 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
-import org.glassfish.jersey.client.ClientResponse;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.envinject.EnvInjectException;
@@ -55,6 +54,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -297,7 +298,7 @@ public class URLTrigger extends AbstractTrigger {
         }
         
         log.info(String.format("Invoking the url: %n %s", url));
-        ClientResponse clientResponse = webResourceBuilder.get(ClientResponse.class);
+        Response clientResponse = webResourceBuilder.get();
 
         URLTriggerEntry entry = resolvedEntry.getEntry();
 
@@ -332,12 +333,12 @@ public class URLTrigger extends AbstractTrigger {
 
     }
 
-    private boolean isServiceUnavailableAndNotExpected(ClientResponse clientResponse, URLTriggerEntry entry) {
+    private boolean isServiceUnavailableAndNotExpected(Response clientResponse, URLTriggerEntry entry) {
         return HttpServletResponse.SC_SERVICE_UNAVAILABLE == clientResponse.getStatus()
                 && entry.getStatusCode() != HttpServletResponse.SC_SERVICE_UNAVAILABLE;
     }
 
-    private boolean isURLNotFoundAndNotExpected( ClientResponse clientResponse , URLTriggerEntry entry ) {
+    private boolean isURLNotFoundAndNotExpected(Response clientResponse , URLTriggerEntry entry ) {
     		return HttpServletResponse.SC_NOT_FOUND == clientResponse.getStatus()
     				&& entry.getStatusCode() != HttpServletResponse.SC_NOT_FOUND ;
     }

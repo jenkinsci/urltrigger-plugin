@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.urltrigger.service;
 
-import org.glassfish.jersey.client.ClientResponse;
 import hudson.model.TaskListener;
 import hudson.util.StreamTaskListener;
 import org.jenkinsci.lib.xtrigger.XTriggerException;
@@ -27,7 +26,7 @@ import static org.mockito.Mockito.*;
 public class URLTriggerServiceTest {
 
     @Mock
-    private ClientResponse clientResponseMock;
+    private Response clientResponseMock;
 
     private XTriggerLog log = new XTriggerLog((StreamTaskListener) TaskListener.NULL);
 
