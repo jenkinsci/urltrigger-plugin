@@ -9,7 +9,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.urltrigger.URLTriggerCause;
 
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import java.io.IOException;
 
 /**
@@ -18,7 +18,7 @@ import java.io.IOException;
 @Extension
 public class URLTriggerEnvironmentContributor extends EnvironmentContributor {
     @Override
-    public void buildEnvironmentFor(@Nonnull Run r, @Nonnull EnvVars envs, @Nonnull TaskListener listener) throws IOException, InterruptedException {
+    public void buildEnvironmentFor(@NonNull Run r, @NonNull EnvVars envs, @NonNull TaskListener listener) throws IOException, InterruptedException {
         URLTriggerCause cause = null;
         if (r instanceof MatrixRun) {
             MatrixBuild parent = ((MatrixRun) r).getParentBuild();
