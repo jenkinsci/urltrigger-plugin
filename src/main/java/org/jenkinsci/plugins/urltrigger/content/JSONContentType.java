@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jenkinsci.Symbol;
-import org.jenkinsci.lib.xtrigger.XTriggerException;
-import org.jenkinsci.lib.xtrigger.XTriggerLog;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.content.json.util.JsonUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 

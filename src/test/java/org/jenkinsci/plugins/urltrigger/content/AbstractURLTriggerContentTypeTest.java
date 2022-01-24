@@ -1,8 +1,8 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
 import hudson.util.StreamTaskListener;
-import org.jenkinsci.lib.xtrigger.XTriggerException;
-import org.jenkinsci.lib.xtrigger.XTriggerLog;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerLog;
 
 /**
  * @author Gregory Boissinot

@@ -3,8 +3,8 @@ package org.jenkinsci.plugins.urltrigger.content;
 import hudson.Extension;
 
 import org.jenkinsci.Symbol;
-import org.jenkinsci.lib.xtrigger.XTriggerException;
-import org.jenkinsci.lib.xtrigger.XTriggerLog;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;

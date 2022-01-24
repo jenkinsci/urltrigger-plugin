@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
-import org.jenkinsci.lib.xtrigger.XTriggerException;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
 import org.junit.Test;
 
 import java.io.IOException;

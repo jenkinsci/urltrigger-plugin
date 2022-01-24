@@ -35,14 +35,14 @@
 	</developers>
 
 	<properties>
-		<revision>0.52</revision>
+		<revision>1.00</revision>
 		<changelist>-SNAPSHOT</changelist>
 		<gitHubRepo>jenkinsci/urltrigger-plugin</gitHubRepo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<java.level>8</java.level>
-		<xtrigger.lib.version>0.36</xtrigger.lib.version>
+		<xtrigger.api.version>0.1</xtrigger.api.version>
 		<json.path.version>2.6.0</json.path.version>
 		<mockito.version>1.8.5</mockito.version>
 		<jenkins.version>2.263.4</jenkins.version>
@@ -87,9 +87,9 @@
 
 
 		<dependency>
-			<groupId>org.jenkins-ci.lib</groupId>
-			<artifactId>xtrigger-lib</artifactId>
-			<version>${xtrigger.lib.version}</version>
+			<groupId>org.jenkins-ci.plugins</groupId>
+			<artifactId>xtrigger-api</artifactId>
+			<version>${xtrigger.api.version}</version>
 		</dependency>
 
 		<dependency>
