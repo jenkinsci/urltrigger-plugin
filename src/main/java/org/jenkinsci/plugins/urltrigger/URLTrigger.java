@@ -3,15 +3,6 @@ package org.jenkinsci.plugins.urltrigger;
 import antlr.ANTLRException;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import com.sun.jersey.client.apache.ApacheHttpClient;
-import com.sun.jersey.client.apache.config.DefaultApacheHttpClientConfig;
-import com.sun.jersey.client.urlconnection.HTTPSProperties;
 import hudson.DescriptorExtensionList;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -31,9 +22,12 @@ import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.jelly.XMLOutput;
 import org.apache.commons.net.ftp.FTPClient;
+import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.jenkinsci.Symbol;
 import org.jenkinsci.lib.envinject.EnvInjectException;
 import org.jenkinsci.lib.envinject.service.EnvVarsResolver;
@@ -57,6 +51,11 @@ import org.kohsuke.stapler.StaplerRequest;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -69,6 +68,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -287,7 +287,7 @@ public class URLTrigger extends AbstractTrigger {
         Client client = getClientObject(resolvedEntry, log);
 
         String url = resolvedEntry.getResolvedURL();
-        WebResource.Builder webResourceBuilder = client.resource(url).getRequestBuilder() ;
+        Invocation.Builder webResourceBuilder = client.target(url).request();
         
         List< URLTriggerRequestHeader > requestHeaders = resolvedEntry.getEntry().getRequestHeaders() ;
         if( requestHeaders.size() > 0 ) {
@@ -298,7 +298,7 @@ public class URLTrigger extends AbstractTrigger {
         }
         
         log.info(String.format("Invoking the url: %n %s", url));
-        ClientResponse clientResponse = webResourceBuilder.get(ClientResponse.class);
+        Response clientResponse = webResourceBuilder.get();
 
         URLTriggerEntry entry = resolvedEntry.getEntry();
 
@@ -333,12 +333,12 @@ public class URLTrigger extends AbstractTrigger {
 
     }
 
-    private boolean isServiceUnavailableAndNotExpected(ClientResponse clientResponse, URLTriggerEntry entry) {
+    private boolean isServiceUnavailableAndNotExpected(Response clientResponse, URLTriggerEntry entry) {
         return HttpServletResponse.SC_SERVICE_UNAVAILABLE == clientResponse.getStatus()
                 && entry.getStatusCode() != HttpServletResponse.SC_SERVICE_UNAVAILABLE;
     }
 
-    private boolean isURLNotFoundAndNotExpected( ClientResponse clientResponse , URLTriggerEntry entry ) {
+    private boolean isURLNotFoundAndNotExpected(Response clientResponse , URLTriggerEntry entry ) {
     		return HttpServletResponse.SC_NOT_FOUND == clientResponse.getStatus()
     				&& entry.getStatusCode() != HttpServletResponse.SC_NOT_FOUND ;
     }
@@ -361,27 +361,20 @@ public class URLTrigger extends AbstractTrigger {
     private Client getClientObject(URLTriggerResolvedEntry resolvedEntry, XTriggerLog log) throws XTriggerException {
 
         URLTriggerEntry entry = resolvedEntry.getEntry();
-        Client client = createClient(resolvedEntry.isHttps(), entry.isProxyActivated());
+        Client client = createClient(resolvedEntry.isHttps(), entry.isProxyActivated(), entry.getTimeout());
         if (isAuthBasic(entry)) {
             addBasicAuth(entry, log, client);
         }
 
-        /* Set a connect and read timeout. If this hangs, it can actually
-           take down all of the jenkins schedule events.
-        */
-        int timeout = entry.getTimeout();
-        client.setConnectTimeout(timeout * 1000); //in milliseconds
-        client.setReadTimeout(timeout * 1000);    //in milliseconds
-
         return client;
     }
 
-    private Client createClient(boolean isHttps, boolean withProxy) throws XTriggerException {
+    private Client createClient(boolean isHttps, boolean withProxy, int timeout) throws XTriggerException {
         Client client;
         if (withProxy) {
-            client = createClientWithProxy(isHttps);
+            client = createClientWithProxy(isHttps, timeout);
         } else {
-            client = createClientWithoutProxy(isHttps);
+            client = createClientWithoutProxy(isHttps, timeout);
         }
         return client;
     }
@@ -391,15 +384,24 @@ public class URLTrigger extends AbstractTrigger {
             log.info(String.format("Using Basic Authentication with the user '%s'", entry.getUsername()));
         }
         String password = entry.getRealPassword();
-        client.addFilter(new HTTPBasicAuthFilter(entry.getUsername(), password));
+        client.register(HttpAuthenticationFeature.basic(entry.getUsername(), password));
     }
 
-    private Client createClientWithoutProxy(boolean isHttps) throws XTriggerException {
-        ClientConfig config = new DefaultClientConfig();
+    private Client createClientWithoutProxy(boolean isHttps, int timeout) throws XTriggerException {
+        ClientBuilder config = ClientBuilder.newBuilder();
         if (isHttps) {
-            config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(getHostnameVerifier(), getSSLContext()));
+            config.sslContext(getSSLContext());
+            config.hostnameVerifier(getHostnameVerifier());
         }
-        return Client.create(config);
+
+        /*
+         * Set a connect and read timeout. If this hangs, it can actually
+         * take down all of the Jenkins schedule events.
+         */
+        config.connectTimeout(timeout, TimeUnit.SECONDS);
+        config.readTimeout(timeout, TimeUnit.SECONDS);
+
+        return config.build();
     }
 
     private HostnameVerifier getHostnameVerifier() {
@@ -441,26 +443,34 @@ public class URLTrigger extends AbstractTrigger {
     }
 
 
-    private Client createClientWithProxy(boolean isHttps) throws XTriggerException {
-        Client client;
-        DefaultApacheHttpClientConfig config = new DefaultApacheHttpClientConfig();
+    private Client createClientWithProxy(boolean isHttps, int timeout) throws XTriggerException {
+        ClientBuilder config = ClientBuilder.newBuilder();
 
         //-- Proxy
         Jenkins h = Jenkins.get(); // this code might run on slaves
         ProxyConfiguration p = h.proxy ;
         if (p != null) {
-            config.getProperties().put(DefaultApacheHttpClientConfig.PROPERTY_PROXY_URI, "http://" + p.name + ":" + p.port);
+            config.property(ClientProperties.PROXY_URI, "http://" + p.name + ":" + p.port);
+            config.property(ClientProperties.PROXY_USERNAME, p.getUserName());
             String password = getProxyPasswordDecrypted(p);
-            config.getState().setProxyCredentials(AuthScope.ANY_REALM, p.name, p.port, p.getUserName(), Util.fixNull(password));
+            config.property(ClientProperties.PROXY_PASSWORD, Util.fixNull(password));
+            config.withConfig(new ClientConfig().connectorProvider(new ApacheConnectorProvider()));
         }
 
         //-- Https
         if (isHttps) {
-            config.getProperties().put(HTTPSProperties.PROPERTY_HTTPS_PROPERTIES, new HTTPSProperties(getHostnameVerifier(), getSSLContext()));
+            config.sslContext(getSSLContext());
+            config.hostnameVerifier(getHostnameVerifier());
         }
 
-        client = ApacheHttpClient.create(config);
-        return client;
+        /*
+         * Set a connect and read timeout. If this hangs, it can actually
+         * take down all of the Jenkins schedule events.
+         */
+        config.connectTimeout(timeout, TimeUnit.SECONDS);
+        config.readTimeout(timeout, TimeUnit.SECONDS);
+
+        return config.build();
     }
 
     private String getProxyPasswordDecrypted(ProxyConfiguration p) {
