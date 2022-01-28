@@ -1,5 +1,22 @@
 # Changelog
 
+## Release 0.51
+
+Fix for issues #45 and #46
+
+## Release 0.50
+
+Fix triggering of parameterised jobs with default parameters
+
+## Release 0.49
+
+Inject the URL that triggered the job as an environment variable
+
+## Release 0.48
+
+Modernisation and multiple dependency updates
+Some JSON handling fixes
+
 ## Release 0.47
 
 Bugfix for the 'inspect content' checkbox being incorrectly set

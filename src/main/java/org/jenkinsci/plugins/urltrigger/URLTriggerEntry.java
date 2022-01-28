@@ -1,7 +1,5 @@
 package org.jenkinsci.plugins.urltrigger;
 
-import com.sun.jersey.api.client.ClientResponse;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.model.Describable;
@@ -17,6 +15,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response;
+
 /**
  * @author Gregory Boissinot
  */
@@ -24,7 +24,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
 
 	private static final long serialVersionUID = -7232627326475916056L;
 
-	public static final int DEFAULT_STATUS_CODE = ClientResponse.Status.OK.getStatusCode();
+	public static final int DEFAULT_STATUS_CODE = Response.Status.OK.getStatusCode();
 
     private String url;
     private String username;
