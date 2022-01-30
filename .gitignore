@@ -1,6 +1,8 @@
 target
-work
-*.iml
+.classpath
+.project
+.settings
 *.ipr
 *.iws
-/bin/
+*.iml
+work
