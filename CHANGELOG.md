@@ -1,5 +1,15 @@
 # Changelog
 
+## Release 1.00
+
+Architectural change - now uses XTrigger-API plugin instead of XTrigger-lib to
+provide base trigger functionality.  This also in turn deprecates the use of EnvInject-lib
+in favour of EnvInject-API Plugin
+
+## Release 0.52
+
+Fix for proxy issue introduced in 0.51 changes
+
 ## Release 0.51
 
 Fix for issues #45 and #46

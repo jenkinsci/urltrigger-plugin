@@ -2,7 +2,7 @@ package org.jenkinsci.plugins.urltrigger;
 
 import java.io.Serializable;
 
-import org.jenkinsci.lib.xtrigger.XTriggerCause;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerCause;
 
 import hudson.model.Cause;
 

@@ -6,8 +6,8 @@ import hudson.model.Descriptor;
 import hudson.model.Hudson;
 import jenkins.model.Jenkins;
 
-import org.jenkinsci.lib.xtrigger.XTriggerException;
-import org.jenkinsci.lib.xtrigger.XTriggerLog;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
+import org.jenkinsci.plugins.xtriggerapi.XTriggerLog;
 
 import java.io.Serializable;
 
