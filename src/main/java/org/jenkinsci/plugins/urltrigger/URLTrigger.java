@@ -450,11 +450,11 @@ public class URLTrigger extends AbstractTrigger {
         Jenkins h = Jenkins.get(); // this code might run on slaves
         ProxyConfiguration p = h.proxy ;
         if (p != null) {
-            config.property(ClientProperties.PROXY_URI, "http://" + p.name + ":" + p.port);
+            config.withConfig(new ClientConfig().connectorProvider(new ApacheConnectorProvider()));
+	    config.property(ClientProperties.PROXY_URI, "http://" + p.name + ":" + p.port);
             config.property(ClientProperties.PROXY_USERNAME, p.getUserName());
             String password = getProxyPasswordDecrypted(p);
             config.property(ClientProperties.PROXY_PASSWORD, Util.fixNull(password));
-            config.withConfig(new ClientConfig().connectorProvider(new ApacheConnectorProvider()));
         }
 
         //-- Https
