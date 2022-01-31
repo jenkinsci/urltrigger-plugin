@@ -4,6 +4,7 @@ import hudson.Util;
 import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
 
@@ -46,6 +47,8 @@ public abstract class AbstractContentTypeTest extends AbstractURLTriggerContentT
         initForContent(null);
     }
 
+    @Ignore("TODO test currently fails")
+    @Test
     public void testInitForContentEmptyType() throws Exception {
         initForContent(getEmptyTypeContent());
         Assert.assertTrue(true);
