@@ -1,5 +1,10 @@
 # Changelog
 
+## Release 1.01
+
+Apply updates supplied by @Basil for parent pom and Jenkins bom
+Update XTrigger-API dependency to 0.2
+
 ## Release 1.00
 
 Architectural change - now uses XTrigger-API plugin instead of XTrigger-lib to
