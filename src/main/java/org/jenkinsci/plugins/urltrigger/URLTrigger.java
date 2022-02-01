@@ -29,8 +29,6 @@ import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.jenkinsci.Symbol;
-import org.jenkinsci.lib.envinject.EnvInjectException;
-import org.jenkinsci.lib.envinject.service.EnvVarsResolver;
 import org.jenkinsci.plugins.xtriggerapi.AbstractTrigger;
 import org.jenkinsci.plugins.xtriggerapi.XTriggerCause;
 import org.jenkinsci.plugins.xtriggerapi.XTriggerDescriptor;
@@ -42,7 +40,6 @@ import org.jenkinsci.plugins.urltrigger.service.FTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.HTTPResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLResponse;
 import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
-import org.jenkinsci.plugins.urltrigger.environment.URLTriggerEnvironmentContributor;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
@@ -54,7 +51,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -78,7 +74,7 @@ public class URLTrigger extends AbstractTrigger {
 
 	private static final long serialVersionUID = 4770775641674010339L;
 
-    private List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
+    private List<URLTriggerEntry> entries = new ArrayList<>();
 
     private boolean labelRestriction;
     
@@ -133,12 +129,12 @@ public class URLTrigger extends AbstractTrigger {
             String url = entry.getUrl();
             URLTriggerContentType[] urlTriggerContentTypes = entry.getContentTypes();
             if (entry.getContentTypes() != null) {
-                subActionTitles = new HashMap<String, String>(urlTriggerContentTypes.length);
+                subActionTitles = new HashMap<>(urlTriggerContentTypes.length);
                 for (URLTriggerContentType fsTriggerContentFileType : urlTriggerContentTypes) {
                     if (fsTriggerContentFileType != null) {
                         Descriptor<URLTriggerContentType> descriptor = fsTriggerContentFileType.getDescriptor();
                         if (descriptor instanceof URLTriggerContentTypeDescriptor) {
-                            subActionTitles.put(url, ((URLTriggerContentTypeDescriptor) descriptor).getLabel());
+                            subActionTitles.put(url, ((URLTriggerContentTypeDescriptor<?>) descriptor).getLabel());
                         }
                     }
                 }
@@ -324,7 +320,7 @@ public class URLTrigger extends AbstractTrigger {
             }
             log.info("FTP poll result: " + response.getEntityTagValue());
         } catch (Exception ex) {
-            log.info("Failed to poll URL: " + ex.toString());
+            log.info("Failed to poll URL: " + ex);
             log.info("Skipping URLTrigger initialization. Waiting next schedule");
             return false;
         }
@@ -405,13 +401,7 @@ public class URLTrigger extends AbstractTrigger {
     }
 
     private HostnameVerifier getHostnameVerifier() {
-        return new HostnameVerifier() {
-
-            @Override
-            public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
-                return true;
-            }
-        };
+        return (hostname, sslSession) -> true;
     }
 
     private SSLContext getSSLContext() throws XTriggerException {
@@ -540,7 +530,7 @@ public class URLTrigger extends AbstractTrigger {
             if (userInfo != null && !userInfo.isEmpty()) {
                 int i = userInfo.indexOf(':');
                 user = i < 0 ? userInfo : userInfo.substring(0, i);
-                pass = i < 0 ? "" : userInfo.substring(i + 1, userInfo.length());
+                pass = i < 0 ? "" : userInfo.substring(i + 1);
             } else {
                 user = basicUsername;
                 pass = basicPassword;
@@ -621,7 +611,7 @@ public class URLTrigger extends AbstractTrigger {
 
             Object entryObject = formData.get("urlElements");
 
-            List<URLTriggerEntry> entries = new ArrayList<URLTriggerEntry>();
+            List<URLTriggerEntry> entries = new ArrayList<>();
             if (entryObject instanceof JSONObject) {
                 entries.add(fillAndGetEntry(req, (JSONObject) entryObject));
             } else {
@@ -691,7 +681,7 @@ public class URLTrigger extends AbstractTrigger {
             urlTriggerEntry.setCheckLastModificationDate(entryObject.getBoolean("checkLastModificationDate"));
             
             //Process requestHeaders
-            List< URLTriggerRequestHeader > requestHeaders = new ArrayList<URLTriggerRequestHeader>() ;
+            List< URLTriggerRequestHeader > requestHeaders = new ArrayList<>() ;
             Object requestHeaderListObject = entryObject.get("urlRequestHeaders") ;
             if( requestHeaderListObject instanceof JSONObject ) {
             	JSONObject requestHeaderItem = (JSONObject) requestHeaderListObject ;
@@ -732,7 +722,7 @@ public class URLTrigger extends AbstractTrigger {
                         contentTypesJsonElt = inspectingContentJSONObject.getJSONObject("contentTypes");
                     }
                     List<URLTriggerContentType> types = req.bindJSONToList(URLTriggerContentType.class, contentTypesJsonElt);
-                    urlTriggerEntry.setContentTypes(types.toArray(new URLTriggerContentType[types.size()]));
+                    urlTriggerEntry.setContentTypes(types.toArray(new URLTriggerContentType[0]));
                 }
             }
             return urlTriggerEntry;

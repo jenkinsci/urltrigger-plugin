@@ -14,7 +14,7 @@ public class XMLContentTypeWithExpressionsTest extends AbstractXMLContentTypeTes
 
     public XMLContentTypeWithExpressionsTest() {
         XMLContentEntry[] expressions = new XMLContentEntry[]{new XMLContentEntry("/employees/employee[1]/name")};
-        type = new XMLContentType(Arrays.<XMLContentEntry>asList(expressions));
+        type = new XMLContentType(Arrays.asList(expressions));
     }
 
     protected String getOldContentNotEmpty() throws IOException, URISyntaxException {

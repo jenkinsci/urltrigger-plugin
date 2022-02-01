@@ -25,7 +25,7 @@ public class JSONContentType extends URLTriggerContentType {
 
 	private transient Map<String, Object> results = null;
 
-	private List<JSONContentEntry> jsonPaths = new ArrayList<JSONContentEntry>();
+	private List<JSONContentEntry> jsonPaths = new ArrayList<>();
 
 	@DataBoundConstructor
 	public JSONContentType(List<JSONContentEntry> jsonPaths) {
@@ -51,7 +51,7 @@ public class JSONContentType extends URLTriggerContentType {
 	}
 
 	private Map<String, Object> readJsonPath(String content) throws XTriggerException {
-		Map<String, Object> results = new HashMap<String, Object>(jsonPaths.size());
+		Map<String, Object> results = new HashMap<>(jsonPaths.size());
 		for (JSONContentEntry jsonContentEntry : jsonPaths) {
 			String jsonPath = jsonContentEntry.getJsonPath();
 			try {
@@ -106,7 +106,6 @@ public class JSONContentType extends URLTriggerContentType {
 
 			if (initValueNull && newValueNull) {
 				log.info(String.format("There is no matching for the JSON Path '%s'.", jsonPath));
-				continue;
 			} else if (initValueNull && !newValueNull) {
 				log.info(String.format("There was no value and now there is a new value for the JSON Path '%s'.",
 						jsonPath));

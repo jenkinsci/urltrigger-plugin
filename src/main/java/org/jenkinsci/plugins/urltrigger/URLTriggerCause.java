@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 import org.jenkinsci.plugins.xtriggerapi.XTriggerCause;
 
-import hudson.model.Cause;
-
 /**
  * @author Gregory Boissinot
  */

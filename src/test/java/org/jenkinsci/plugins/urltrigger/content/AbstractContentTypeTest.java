@@ -1,8 +1,11 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+
 import hudson.Util;
 import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
-import org.junit.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -17,9 +20,16 @@ import java.net.URISyntaxException;
  */
 public abstract class AbstractContentTypeTest extends AbstractURLTriggerContentTypeTest {
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        closeable.close();
     }
 
     protected String readContentAsString(String relativeFilePath) throws URISyntaxException, IOException {
@@ -27,7 +37,7 @@ public abstract class AbstractContentTypeTest extends AbstractURLTriggerContentT
     }
 
     protected String getEmptyContent() {
-        return new String();
+        return "";
     }
 
     protected abstract String getAnyContent() throws IOException, URISyntaxException;
@@ -42,42 +52,40 @@ public abstract class AbstractContentTypeTest extends AbstractURLTriggerContentT
     //--- INIT CONTENT TESTS
     //---
 
-    @Test(expected = Throwable.class)
-    public void testInitForContentNull() throws XTriggerException {
-        initForContent(null);
+    @Test
+    public void testInitForContentNull() {
+        assertThrows(XTriggerException.class, () -> initForContent(null));
     }
 
     @Ignore("TODO test currently fails")
     @Test
     public void testInitForContentEmptyType() throws Exception {
         initForContent(getEmptyTypeContent());
-        Assert.assertTrue(true);
     }
 
     @Test
     public void testInitForContentAnyXML() throws Exception {
         initForContent(getAnyContent());
-        Assert.assertTrue(true);
     }
 
     //---
     //--- IS TRIGGERED TEST
     //---
 
-    @Test(expected = Throwable.class)
+    @Test
     public void testIsTriggeringBuildForContentWithChange_NullPreviousContent() throws Exception {
         String oldContent = null;
         String newContent = getNewContent();
-        initForContent(oldContent);
-        Assert.assertFalse(isTriggeringBuildForContent(newContent));
+        assertThrows(XTriggerException.class, () -> initForContent(oldContent));
+        assertFalse(isTriggeringBuildForContent(newContent));
     }
 
-    @Test(expected = XTriggerException.class)
+    @Test
     public void testIsTriggeringBuildForContentWithChange_EmptyPreviousContent() throws Exception {
         String oldContent = getEmptyContent();
         String newContent = getNewContent();
-        initForContent(oldContent);
-        Assert.assertFalse(isTriggeringBuildForContent(newContent));
+        assertThrows(XTriggerException.class, () -> initForContent(oldContent));
+        assertFalse(isTriggeringBuildForContent(newContent));
     }
 
     protected boolean isTriggeringBuildForContentWithChange_EmptyTypePreviousContent() throws Exception {

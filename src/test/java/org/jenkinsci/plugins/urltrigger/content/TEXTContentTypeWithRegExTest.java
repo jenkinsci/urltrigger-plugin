@@ -1,7 +1,9 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
 import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -15,17 +17,17 @@ public class TEXTContentTypeWithRegExTest extends AbstractContentTypeTest {
 
     public TEXTContentTypeWithRegExTest() {
         TEXTContentEntry[] regExElements = new TEXTContentEntry[]{new TEXTContentEntry("^ERROR\\w+$")};
-        type = new TEXTContentType(Arrays.<TEXTContentEntry>asList(regExElements));
+        type = new TEXTContentType(Arrays.asList(regExElements));
     }
 
     @Override
-    protected String getAnyContent() throws IOException, URISyntaxException {
-        return new String("ANY CONTENT TXT");
+    protected String getAnyContent() {
+        return "ANY CONTENT TXT";
     }
 
     @Override
-    protected String getEmptyTypeContent() throws IOException, URISyntaxException {
-        return new String();
+    protected String getEmptyTypeContent() {
+        return "";
     }
 
     @Override
@@ -38,19 +40,19 @@ public class TEXTContentTypeWithRegExTest extends AbstractContentTypeTest {
         return readContentAsString("txt/matches/newLog.txt");
     }
 
-    @Test(expected = XTriggerException.class)
-    public void testInitForContentEmpty() throws Exception {
-        initForContent(getEmptyContent());
+    @Test
+    public void testInitForContentEmpty() {
+        assertThrows(XTriggerException.class, () -> initForContent(getEmptyContent()));
     }
 
-    @Test(expected = XTriggerException.class)
-    public void testIsTriggeringMatchingNewContentWithEmptyPreviousContent() throws Exception {
-        Assert.assertTrue(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
+    @Test
+    public void testIsTriggeringMatchingNewContentWithEmptyPreviousContent() {
+        assertThrows(XTriggerException.class, this::isTriggeringBuildForContentWithChange_EmptyTypePreviousContent);
     }
 
     @Test
     public void testIsTriggeringMatchingNewContentWithMatchingPreviousContent() throws Exception {
-        Assert.assertTrue(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
+        assertTrue(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
     }
 
 }

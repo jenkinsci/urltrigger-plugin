@@ -1,7 +1,10 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertFalse;
+
 import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
-import org.junit.Assert;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.MockitoAnnotations;
@@ -11,76 +14,81 @@ import org.mockito.MockitoAnnotations;
  */
 public class TEXTContentTypeNoRegExTest extends AbstractURLTriggerContentTypeTest {
 
+    private AutoCloseable closeable;
+
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         type = new TEXTContentType(null);
     }
 
-    @Test(expected = XTriggerException.class)
-    public void testInitForContentNull() throws XTriggerException {
-        initForContent(null);
+    @After
+    public void tearDown() throws Exception {
+        closeable.close();
     }
 
-    @Test(expected = XTriggerException.class)
-    public void testInitForContentEmpty() throws XTriggerException {
-        initForContent(new String());
-        Assert.assertTrue(true);
+    @Test
+    public void testInitForContentNull() {
+        assertThrows(XTriggerException.class, () -> initForContent(null));
+    }
+
+    @Test
+    public void testInitForContentEmpty() {
+        assertThrows(XTriggerException.class, () -> initForContent(""));
     }
 
     @Test
     public void testInitForContentAnyString() throws XTriggerException {
-        initForContent(new String("Any string"));
-        Assert.assertTrue(true);
+        initForContent("Any string");
     }
 
-    @Test(expected = XTriggerException.class)
+    @Test
     public void testIsTriggeringBuildForContentWithNoChange_NullPreviousContent() throws XTriggerException {
         String content = null;
-        initForContent(content);
-        Assert.assertTrue(isTriggeringBuildForContent(content));
+        assertThrows(XTriggerException.class, () -> initForContent(content));
+        assertFalse(isTriggeringBuildForContent(content));
     }
 
-    @Test(expected = XTriggerException.class)
+    @Test
     public void testIsTriggeringBuildForContentWithNoChange_EmptyPreviousContent() throws XTriggerException {
-        String content = new String();
-        initForContent(content);
-        Assert.assertFalse(isTriggeringBuildForContent(content));
+        String content = "";
+        assertThrows(XTriggerException.class, () -> initForContent(content));
+        assertFalse(isTriggeringBuildForContent(content));
     }
 
     @Test
     public void testIsTriggeringBuildForContentWithNoChange_AnyStringPreviousContent() throws XTriggerException {
-        String content = new String("AnyString");
+        String content = "AnyString";
         initForContent(content);
-        Assert.assertFalse(isTriggeringBuildForContent(content));
+        assertFalse(isTriggeringBuildForContent(content));
     }
 
     private String getNewAnyContent(String oldContent) {
         return oldContent + "AddedAnyContent";
     }
 
-    @Test(expected = XTriggerException.class)
+    @Test
     public void testIsTriggeringBuildForAnyContent_NullPreviousContent() throws XTriggerException {
         String oldContent = null;
         String newContent = getNewAnyContent(oldContent);
-        initForContent(oldContent);
-        Assert.assertFalse(isTriggeringBuildForContent(newContent));
+        assertThrows(XTriggerException.class, () -> initForContent(oldContent));
+        assertFalse(isTriggeringBuildForContent(newContent));
     }
 
-    @Test(expected = XTriggerException.class)
+    @Test
     public void testIsTriggeringBuildForAnyContent_EmptyPreviousContent() throws XTriggerException {
-        String oldContent = new String();
+        String oldContent = "";
         String newContent = getNewAnyContent(oldContent);
-        initForContent(oldContent);
-        Assert.assertFalse(isTriggeringBuildForContent(newContent));
+        assertThrows(XTriggerException.class, () -> initForContent(oldContent));
+        assertFalse(isTriggeringBuildForContent(newContent));
     }
 
     @Test
     public void testIsTriggeringBuildForAnyNewContent_AnyPreviousContent() throws XTriggerException {
-        String oldContent = new String("AnyString");
+        String oldContent = "AnyString";
         String newContent = getNewAnyContent(oldContent);
         initForContent(oldContent);
-        Assert.assertFalse(isTriggeringBuildForContent(newContent));
+        assertFalse(isTriggeringBuildForContent(newContent));
     }
 
 }

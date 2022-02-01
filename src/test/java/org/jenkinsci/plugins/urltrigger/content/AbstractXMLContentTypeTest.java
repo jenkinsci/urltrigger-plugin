@@ -1,5 +1,7 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
+import static org.junit.Assert.assertThrows;
+
 import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
 import org.junit.Test;
 
@@ -19,14 +21,14 @@ public abstract class AbstractXMLContentTypeTest extends AbstractContentTypeTest
         return readContentAsString("xml/emptyXml.xml");
     }
 
-    @Test(expected = XTriggerException.class)
-    public void testInitForContentEmpty() throws Exception {
-        initForContent(getEmptyContent());
+    @Test
+    public void testInitForContentEmpty() {
+        assertThrows(XTriggerException.class, () -> initForContent(getEmptyContent()));
     }
 
-    @Test(expected = Throwable.class)
-    public void testInitForContentNoXML() throws XTriggerException {
-        initForContent(new String("NO XML"));
+    @Test
+    public void testInitForContentNoXML() {
+        assertThrows(XTriggerException.class, () -> initForContent("NO XML"));
     }
 
 }

@@ -3,7 +3,6 @@ package org.jenkinsci.plugins.urltrigger.content;
 import hudson.ExtensionPoint;
 import hudson.model.Describable;
 import hudson.model.Descriptor;
-import hudson.model.Hudson;
 import jenkins.model.Jenkins;
 
 import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
@@ -17,7 +16,7 @@ import java.io.Serializable;
 public abstract class URLTriggerContentType implements ExtensionPoint, Describable<URLTriggerContentType>, Serializable {
 
     public Descriptor<URLTriggerContentType> getDescriptor() {
-        return (URLTriggerContentTypeDescriptor) Jenkins.get().getDescriptor(this.getClass());
+        return (URLTriggerContentTypeDescriptor<?>) Jenkins.get().getDescriptor(this.getClass());
     }
 
     public void initForContent(String content, XTriggerLog log) throws XTriggerException {
@@ -36,10 +35,6 @@ public abstract class URLTriggerContentType implements ExtensionPoint, Describab
 
     /**
      * These methods have to be overridden in each trigger implementation
-     * 
-     * @param content
-     * @param log
-     * @throws XTriggerException
      */
     protected abstract void initForContentType(String content, XTriggerLog log) throws XTriggerException;
 

@@ -6,6 +6,7 @@ import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
 import org.jenkinsci.plugins.xtriggerapi.XTriggerLog;
 import org.jenkinsci.plugins.urltrigger.URLTriggerEntry;
 import org.jenkinsci.plugins.urltrigger.content.URLTriggerContentType;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -20,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -35,11 +37,18 @@ public class URLTriggerServiceTest {
 
     private URLTriggerService urlTriggerService;
 
+    private AutoCloseable closeable;
+
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        closeable = MockitoAnnotations.openMocks(this);
         urlTriggerService = URLTriggerService.getInstance();
         when(clientResponseMock.getStatusInfo()).thenReturn(Response.Status.OK);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        closeable.close();
     }
 
     @Test
@@ -61,8 +70,8 @@ public class URLTriggerServiceTest {
         verify(urlTriggerEntryMock, never()).getContentTypes();
     }
 
-    @Test(expected = XTriggerException.class)
-    public void startStageCheckInternalContentCallWithNoContent() throws XTriggerException {
+    @Test
+    public void startStageCheckInternalContentCallWithNoContent() {
         Date stubDate = Calendar.getInstance().getTime();
         URLTriggerEntry urlTriggerEntryMock = mock(URLTriggerEntry.class);
 
@@ -72,7 +81,7 @@ public class URLTriggerServiceTest {
         when(urlTriggerEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{urlTriggerContentTypeMock});
         when(clientResponseMock.readEntity(String.class)).thenReturn(null);
 
-        urlTriggerService.initContent(new HTTPResponse(clientResponseMock), urlTriggerEntryMock, log);
+        assertThrows(XTriggerException.class, () -> urlTriggerService.initContent(new HTTPResponse(clientResponseMock), urlTriggerEntryMock, log));
     }
 
 
