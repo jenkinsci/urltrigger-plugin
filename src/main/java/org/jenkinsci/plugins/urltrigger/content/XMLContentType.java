@@ -18,6 +18,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,7 @@ public class XMLContentType extends URLTriggerContentType {
 
     private transient Document xmlDocument;
 
-    private List<XMLContentEntry> xPaths = new ArrayList<XMLContentEntry>();
+    private List<XMLContentEntry> xPaths = new ArrayList<>();
 
     @DataBoundConstructor
     public XMLContentType(List<XMLContentEntry> xPaths) {
@@ -56,25 +57,21 @@ public class XMLContentType extends URLTriggerContentType {
 
     private Document initXMLFile(String content) throws XTriggerException {
         Document xmlDocument;
-        try {
-            StringReader stringReader = new StringReader(content);
+        try (StringReader stringReader = new StringReader(content)) {
             InputSource inputSource = new InputSource(stringReader);
             DocumentBuilderFactory xmlDocFactory = DocumentBuilderFactory.newInstance() ;
             xmlDocFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true) ;
             xmlDocument = xmlDocFactory.newDocumentBuilder().parse(inputSource);
-            stringReader.close();
-        } catch (SAXException e) {
-            throw new XTriggerException(e);
         } catch (IOException e) {
-            throw new XTriggerException(e);
-        } catch (ParserConfigurationException e) {
+            throw new UncheckedIOException(e);
+        } catch (SAXException | ParserConfigurationException e) {
             throw new XTriggerException(e);
         }
         return xmlDocument;
     }
 
     private Map<String, Object> readXMLPath(Document document) throws XTriggerException {
-        Map<String, Object> results = new HashMap<String, Object>(xPaths.size());
+        Map<String, Object> results = new HashMap<>(xPaths.size());
         XPathFactory xPathFactory = XPathFactory.newInstance();
         XPath xPath = xPathFactory.newXPath();
         try {

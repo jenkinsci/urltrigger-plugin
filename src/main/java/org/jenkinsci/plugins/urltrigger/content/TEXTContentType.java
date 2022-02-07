@@ -10,6 +10,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,7 @@ public class TEXTContentType extends URLTriggerContentType {
 
 	private static final long serialVersionUID = 3560292914545953855L;
 
-	private List<TEXTContentEntry> regExElements = new ArrayList<TEXTContentEntry>();
+	private List<TEXTContentEntry> regExElements = new ArrayList<>();
 
 	private transient Map<String, List<String>> capturedValues;
 
@@ -100,13 +101,9 @@ public class TEXTContentType extends URLTriggerContentType {
 
     private Map<String, List<String>> getMatchedValue(String content) throws XTriggerException {
 
-        Map<String, List<String>> capturedValues = new HashMap<String, List<String>>();
+        Map<String, List<String>> capturedValues = new HashMap<>();
 
-        StringReader stringReader = null;
-        BufferedReader bufferedReader = null;
-        try {
-            stringReader = new StringReader(content);
-            bufferedReader = new BufferedReader(stringReader);
+        try (StringReader stringReader = new StringReader(content); BufferedReader bufferedReader = new BufferedReader(stringReader)) {
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 for (TEXTContentEntry regexEntry : regExElements) {
@@ -120,19 +117,8 @@ public class TEXTContentType extends URLTriggerContentType {
                     }
                 }
             }
-        } catch (IOException ioe) {
-            throw new XTriggerException(ioe);
-        } finally {
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException ioe) {
-                    throw new XTriggerException(ioe);
-                }
-            }
-            if (stringReader != null) {
-                stringReader.close();
-            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
         return capturedValues;
     }
@@ -140,7 +126,7 @@ public class TEXTContentType extends URLTriggerContentType {
     private Map<String, List<String>> addMatchedValue(Map<String, List<String>> capturedValues, String regEx, String group) {
         List<String> values = capturedValues.get(regEx);
         if (values == null) {
-            values = new ArrayList<String>();
+            values = new ArrayList<>();
             values.add(group);
             capturedValues.put(regEx, values);
             return capturedValues;

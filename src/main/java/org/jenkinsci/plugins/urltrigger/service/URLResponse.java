@@ -6,13 +6,13 @@ import java.util.Date;
  * @author Victor Polozov
  */
 public interface URLResponse {
-    public Date getLastModified();
+    Date getLastModified();
 
-    public String getContent();
+    String getContent();
 
-    public int getStatus();
+    int getStatus();
 
-    public String getEntityTagValue();
+    String getEntityTagValue();
 
-    public boolean isSuccessfullFamily();
+    boolean isSuccessfullFamily();
 }

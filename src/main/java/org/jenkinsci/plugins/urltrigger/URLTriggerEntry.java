@@ -38,7 +38,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     private boolean inspectingContent = false ;
     private boolean useGlobalEnvVars = false ;
     private URLTriggerContentType[] contentTypes = new URLTriggerContentType[0] ;
-    private List<URLTriggerRequestHeader> requestHeaders = new ArrayList<URLTriggerRequestHeader>() ;
+    private List<URLTriggerRequestHeader> requestHeaders = new ArrayList<>();
 
     @SuppressFBWarnings("SE_TRANSIENT_FIELD_NOT_RESTORED")    
     private transient String ETag;
@@ -53,7 +53,6 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
      * Default data-bound constructor.
      * Given no other variables than a URL, we assume we're simply inspecting content
      * and monitoring for changes.
-     * @param url
      */
     @DataBoundConstructor
     public URLTriggerEntry( String url ) {
@@ -217,7 +216,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
 
 	public List<URLTriggerRequestHeader> getRequestHeaders() {
 		if( requestHeaders == null ) {
-			return new ArrayList<URLTriggerRequestHeader>() ;
+			return new ArrayList<>();
 		} else {
 			return requestHeaders;
 		}
@@ -225,7 +224,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
 
     @DataBoundSetter
 	public void setRequestHeaders(List<URLTriggerRequestHeader> requestHeaders) {
-		this.requestHeaders = new ArrayList<URLTriggerRequestHeader>(requestHeaders);
+		this.requestHeaders = new ArrayList<>(requestHeaders);
 	}
 	
     public Descriptor<URLTriggerEntry> getDescriptor() {

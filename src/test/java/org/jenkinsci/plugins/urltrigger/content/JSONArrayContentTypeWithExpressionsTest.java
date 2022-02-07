@@ -11,7 +11,7 @@ public class JSONArrayContentTypeWithExpressionsTest extends AbstractJSONContent
 
     public JSONArrayContentTypeWithExpressionsTest() {
         JSONContentEntry[] expressions = new JSONContentEntry[]{new JSONContentEntry("$..name")};
-        type = new JSONContentType(Arrays.<JSONContentEntry>asList(expressions));
+        type = new JSONContentType(Arrays.asList(expressions));
     }
 
     protected String getOldContentNotEmpty() throws IOException, URISyntaxException {

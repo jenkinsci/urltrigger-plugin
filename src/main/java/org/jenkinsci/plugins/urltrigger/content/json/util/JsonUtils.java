@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Gregory Boissinot
@@ -15,14 +15,14 @@ public class JsonUtils {
 
     public static void validateJson(String content) throws XTriggerException {
         try {
-            JsonParser parser = new JsonFactory().createJsonParser(content.getBytes(Charset.forName("UTF-8")));
+            JsonParser parser = new JsonFactory().createParser(content.getBytes(StandardCharsets.UTF_8));
             JsonToken currentToken = parser.nextToken();
             if (currentToken.equals(JsonToken.START_OBJECT)) {
                 validateObject(parser);
             } else if (currentToken.equals(JsonToken.START_ARRAY)) {
                 validateArray(parser);
             } else {
-                throw new XTriggerException("Bad Json value starting with: " + currentToken.toString());
+                throw new XTriggerException("Bad Json value starting with: " + currentToken);
             }
         } catch (IOException ex) {
             throw new XTriggerException("Bad Json value: " + ex.getMessage());
@@ -41,7 +41,7 @@ public class JsonUtils {
                 validateObject(parser);
                 currentToken = parser.nextValue();
             } else {
-                throw new IOException("Expected object/array start, found: " + currentToken.toString());
+                throw new IOException("Expected object/array start, found: " + currentToken);
             }
         }
     }
@@ -58,7 +58,7 @@ public class JsonUtils {
                 validateObject(parser);
                 currentToken = parser.nextValue();
             } else {
-                throw new IOException("Expected object/array start, found: " + currentToken.toString());
+                throw new IOException("Expected object/array start, found: " + currentToken);
             }
         }
     }

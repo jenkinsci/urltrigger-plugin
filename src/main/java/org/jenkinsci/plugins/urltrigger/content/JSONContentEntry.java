@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 
 import hudson.Extension;
 import hudson.model.Describable;
