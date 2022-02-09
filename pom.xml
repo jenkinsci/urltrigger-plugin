@@ -37,7 +37,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.level>8</java.level>
 		<xtrigger.api.version>0.3</xtrigger.api.version>
-		<json.path.version>2.6.0</json.path.version>
+		<json.path.version>2.7.0</json.path.version>
 		<jenkins.version>2.263.4</jenkins.version>
 	</properties>
 
