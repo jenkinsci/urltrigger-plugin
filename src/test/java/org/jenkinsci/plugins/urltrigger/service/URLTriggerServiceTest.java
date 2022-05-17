@@ -33,7 +33,7 @@ public class URLTriggerServiceTest {
     @Mock
     private Response clientResponseMock;
 
-    private XTriggerLog log = new XTriggerLog((StreamTaskListener) TaskListener.NULL);
+    private XTriggerLog log = new XTriggerLog(StreamTaskListener.fromStdout());
 
     private URLTriggerService urlTriggerService;
 

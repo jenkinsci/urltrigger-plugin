@@ -9,7 +9,7 @@ import org.jenkinsci.plugins.xtriggerapi.XTriggerLog;
  */
 public abstract class AbstractURLTriggerContentTypeTest {
 
-    protected XTriggerLog log = new XTriggerLog((StreamTaskListener) hudson.model.TaskListener.NULL);
+    protected XTriggerLog log = new XTriggerLog(StreamTaskListener.fromStdout());
 
     protected URLTriggerContentType type;
 
