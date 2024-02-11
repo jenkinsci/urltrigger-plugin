@@ -29,6 +29,7 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     private String url;
     private String username;
     private String password;
+    private boolean followRedirects = false ;
     private boolean proxyActivated = false ;
     private boolean checkStatus = false ;
     private int statusCode;
@@ -59,10 +60,11 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     	this.url = url ;
     }
   
-    public URLTriggerEntry(String url, String username, String password, boolean proxyActivated, boolean checkStatus, int statusCode, int timeout, boolean checkETag, boolean checkLastModificationDate, boolean inspectingContent, URLTriggerContentType[] contentTypes, String ETag, long lastModificationDate) {
+    public URLTriggerEntry(String url, String username, String password, boolean followRedirects, boolean proxyActivated, boolean checkStatus, int statusCode, int timeout, boolean checkETag, boolean checkLastModificationDate, boolean inspectingContent, URLTriggerContentType[] contentTypes, String ETag, long lastModificationDate) {
         this.url = url;
         this.username = username;
         this.password = password;
+        this.followRedirects = followRedirects;
         this.proxyActivated = proxyActivated;
         this.checkStatus = checkStatus;
         this.statusCode = statusCode;
@@ -109,6 +111,15 @@ public class URLTriggerEntry implements Serializable , Describable< URLTriggerEn
     @DataBoundSetter
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isFollowRedirects() {
+        return followRedirects;
+    }
+
+    @DataBoundSetter
+    public void setFollowRedirects(boolean followRedirects) {
+        this.followRedirects = followRedirects;
     }
 
     public boolean isProxyActivated() {
