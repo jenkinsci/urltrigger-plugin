@@ -361,7 +361,7 @@ public class URLTrigger extends AbstractTrigger {
         if (isAuthBasic(entry)) {
             addBasicAuth(entry, log, client);
         }
-
+        client.property(ClientProperties.FOLLOW_REDIRECTS, entry.isFollowRedirects());
         return client;
     }
 
@@ -637,6 +637,7 @@ public class URLTrigger extends AbstractTrigger {
         private URLTriggerEntry fillAndGetEntry(StaplerRequest req, JSONObject entryObject) {
             URLTriggerEntry urlTriggerEntry = new URLTriggerEntry();
             urlTriggerEntry.setUrl(entryObject.getString("url"));
+            urlTriggerEntry.setFollowRedirects(entryObject.getBoolean("followRedirects"));
             urlTriggerEntry.setProxyActivated(entryObject.getBoolean("proxyActivated"));
             urlTriggerEntry.setUseGlobalEnvVars(entryObject.getBoolean("useGlobalEnvVars"));
             String username = Util.fixEmpty(entryObject.getString("username"));

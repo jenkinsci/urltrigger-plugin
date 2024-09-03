@@ -22,6 +22,14 @@
                                 title="${%Activate the Jenkins Proxy}"/>
                     </f:entry>
 
+                    <f:entry field="followRedirects">
+                        <f:checkbox
+                                field="followRedirects"
+                                name="urlElements.followRedirects"
+                                checked="${urlElements.followRedirects}"
+                                title="${%Follow Redirects}"/>
+                    </f:entry>
+
                     <f:entry field="useGlobalEnvVars">
                         <f:checkbox
                                 field="useGlobalEnvVars"
