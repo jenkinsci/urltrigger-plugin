@@ -36,7 +36,7 @@
 		<gitHubRepo>jenkinsci/urltrigger-plugin</gitHubRepo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<xtrigger.api.version>0.4</xtrigger.api.version>
-		<json.path.version>2.8.0</json.path.version>
+		<json.path.version>2.9.0</json.path.version>
 		<jenkins.version>2.289.1</jenkins.version>
 	</properties>
 
