@@ -20,7 +20,17 @@ public class URLTriggerRequestHeader implements Serializable, Describable<URLTri
 	private static final long serialVersionUID = -4013307449944349433L;
 	@Exported public String headerName = "";
 	@Exported public String headerValue = "";
-    
+    @Exported public boolean maskValue = false ;
+
+    public boolean isMaskValue() {
+        return maskValue;
+    }
+
+    @DataBoundSetter
+    public void setMaskValue(boolean maskHeader) {
+        this.maskValue = maskHeader;
+    }
+
     public String getHeaderName() {
 		return headerName;
 	}
@@ -40,9 +50,10 @@ public class URLTriggerRequestHeader implements Serializable, Describable<URLTri
 	}
 
     @DataBoundConstructor
-    public URLTriggerRequestHeader(String headerName, String headerValue) {
+    public URLTriggerRequestHeader(String headerName, String headerValue, boolean maskValue) {
       this.headerName=headerName;
       this.headerValue=headerValue;
+      this.maskValue=maskValue;
     }
     
     public Descriptor<URLTriggerRequestHeader> getDescriptor() {
@@ -61,7 +72,7 @@ public class URLTriggerRequestHeader implements Serializable, Describable<URLTri
     }
     
     public static URLTriggerRequestHeader[] getDefaults() {
-    	return new URLTriggerRequestHeader[] { new URLTriggerRequestHeader( "" , "" ) } ;
+    	return new URLTriggerRequestHeader[] { new URLTriggerRequestHeader( "" , "" , false) } ;
     }
     
 }

@@ -288,7 +288,8 @@ public class URLTrigger extends AbstractTrigger {
         List< URLTriggerRequestHeader > requestHeaders = resolvedEntry.getEntry().getRequestHeaders() ;
         if( requestHeaders.size() > 0 ) {
         	for( URLTriggerRequestHeader requestHeader : requestHeaders ) {
-        		log.info("Adding header - " + requestHeader.headerName + ":" + requestHeader.headerValue) ;
+                String safeValue = requestHeader.maskValue ? "<MASKED>" : requestHeader.headerValue ;
+        		log.info("Adding header - " + requestHeader.headerName + ":" + safeValue) ;
         		webResourceBuilder = webResourceBuilder.header(requestHeader.headerName, requestHeader.headerValue) ;
         	}
         }
@@ -684,25 +685,25 @@ public class URLTrigger extends AbstractTrigger {
             //Process requestHeaders
             List< URLTriggerRequestHeader > requestHeaders = new ArrayList<>() ;
             Object requestHeaderListObject = entryObject.get("urlRequestHeaders") ;
+            JSONArray requestHeaderListArray;
             if( requestHeaderListObject instanceof JSONObject ) {
-            	JSONObject requestHeaderItem = (JSONObject) requestHeaderListObject ;
-            	String headerName = Util.fixEmpty(requestHeaderItem.getString("headerName")) ;
-            	String headerValue = Util.fixEmpty(requestHeaderItem.getString("headerValue" )) ;
-            	if( headerName != null && headerValue != null ) {
-            		requestHeaders.add( new URLTriggerRequestHeader( headerName , headerValue ) ) ;
-            	}
+                requestHeaderListArray = new JSONArray();
+                requestHeaderListArray.add( requestHeaderListObject );
             } else {
-            	JSONArray requestHeaderListArray = (JSONArray) requestHeaderListObject ;
-            	if( requestHeaderListArray != null ) {
-            		for( Object requestHeaderItemObject : requestHeaderListArray ) {
-                    	JSONObject requestHeaderItem = (JSONObject) requestHeaderItemObject ;
-                    	String headerName = Util.fixEmpty(requestHeaderItem.getString("headerName")) ;
-                    	String headerValue = Util.fixEmpty(requestHeaderItem.getString("headerValue" )) ;
-                    	if( headerName != null && headerValue != null ) {
-                    		requestHeaders.add( new URLTriggerRequestHeader( headerName , headerValue ) ) ;
-                    	}            		}
-            	}
+            	requestHeaderListArray = (JSONArray) requestHeaderListObject ;
             }
+
+        	if( requestHeaderListArray != null ) {
+           		for( Object requestHeaderItemObject : requestHeaderListArray ) {
+                   	JSONObject requestHeaderItem = (JSONObject) requestHeaderItemObject ;
+                   	String headerName = Util.fixEmpty(requestHeaderItem.getString("headerName")) ;
+                   	String headerValue = Util.fixEmpty(requestHeaderItem.getString("headerValue" )) ;
+                   	if( headerName != null && headerValue != null ) {
+           		        requestHeaders.add( new URLTriggerRequestHeader( headerName , headerValue , requestHeaderItem.getBoolean("maskValue")) ) ;
+                   	}
+           		}
+           	}
+
             urlTriggerEntry.setRequestHeaders(requestHeaders);
 
             //Process inspectingContent

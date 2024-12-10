@@ -67,6 +67,13 @@
 	                				<f:entry title="${%Header value}" field="headerValue">
 				                		<f:textbox value="${urlRequestHeaders.headerValue}"/>
 	        			        	</f:entry>
+                                    <f:entry title="">
+                                        <f:checkbox
+                                            field="maskValue"
+                                            name="urlRequestHeaders.maskValue"
+                                            checked="${urlRequestHeaders.maskValue}"
+                                            title="${%Mask value of header in logs}"/>
+                                    </f:entry>
                 					<f:entry title="">
 					                    <div align="right">
 					                        <f:repeatableDeleteButton/>
