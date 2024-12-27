@@ -8,7 +8,7 @@
 
                 <f:entry field="url" title="${%URL}">
                     <f:textbox name="url"
-                               checkUrl="'${rootURL}/trigger/URLTrigger/checkURL?value='+encodeURIComponent(this.value)"
+                               checkUrl="${rootURL}/trigger/URLTrigger/checkURL" checkDependsOn=""
                                value="${urlElements.url}"/>
                 </f:entry>
                 
@@ -41,7 +41,7 @@
                      <f:section title="${%Client parameters}">
                         <f:entry field="timeout" title="${%Timeout}">
                             <f:textbox name="timeout"
-                                       checkUrl="'${rootURL}/trigger/URLTrigger/checkTimeout?value='+encodeURIComponent(this.value)"
+                                       checkUrl="${rootURL}/trigger/URLTrigger/checkTimeout" checkDependsOn=""
                                        value="${urlElements.timeout}"/>
                         </f:entry>
                     </f:section>
@@ -97,7 +97,7 @@
 
                                 <f:entry field="statusCode" title="${%Status Code}">
                                     <f:textbox name="statusCode"
-                                               checkUrl="'${rootURL}/trigger/URLTrigger/checkStatus?value='+encodeURIComponent(this.value)"
+                                               checkUrl="${rootURL}/trigger/URLTrigger/checkStatus" checkDependsOn=""
                                                value="${urlElements.statusCode}"/>
                                 </f:entry>
 
@@ -172,7 +172,7 @@
 
     <f:entry title="${%Schedule}" help="/descriptor/hudson.triggers.TimerTrigger/help/spec">
         <f:textarea name="cronTabSpec"
-                    checkUrl="'${rootURL}/trigger/TimerTrigger/check?value='+encodeURIComponent(this.value)"
+                    checkUrl="${rootURL}/trigger/TimerTrigger/check" checkDependsOn=""
                     value="${instance.spec}"/>
     </f:entry>
 
