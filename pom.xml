@@ -37,7 +37,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<xtrigger.api.version>0.4</xtrigger.api.version>
 		<json.path.version>2.9.0</json.path.version>
-		<jenkins.version>2.289.1</jenkins.version>
+		<!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+		<jenkins.baseline>2.289</jenkins.baseline>
+		<jenkins.version>${jenkins.baseline}.1</jenkins.version>
 	</properties>
 
 	<scm>
@@ -62,7 +64,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>io.jenkins.tools.bom</groupId>
-				<artifactId>bom-2.289.x</artifactId>
+				<artifactId>bom-${jenkins.baseline}.x</artifactId>
 				<version>1382.v7d694476f340</version>
 				<scope>import</scope>
 				<type>pom</type>
