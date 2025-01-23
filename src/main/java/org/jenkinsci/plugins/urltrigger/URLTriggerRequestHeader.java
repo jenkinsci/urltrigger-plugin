@@ -18,9 +18,9 @@ import java.io.Serializable;
 public class URLTriggerRequestHeader implements Serializable, Describable<URLTriggerRequestHeader>{ 
 	
 	private static final long serialVersionUID = -4013307449944349433L;
-	@Exported public String headerName = "";
-	@Exported public String headerValue = "";
-    @Exported public boolean maskValue = false ;
+	@Exported private String headerName = "";
+	@Exported private String headerValue = "";
+    @Exported private boolean maskValue = false ;
 
     public boolean isMaskValue() {
         return maskValue;

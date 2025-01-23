@@ -288,9 +288,9 @@ public class URLTrigger extends AbstractTrigger {
         List< URLTriggerRequestHeader > requestHeaders = resolvedEntry.getEntry().getRequestHeaders() ;
         if( requestHeaders.size() > 0 ) {
         	for( URLTriggerRequestHeader requestHeader : requestHeaders ) {
-                String safeValue = requestHeader.maskValue ? "<MASKED>" : requestHeader.headerValue ;
-        		log.info("Adding header - " + requestHeader.headerName + ":" + safeValue) ;
-        		webResourceBuilder = webResourceBuilder.header(requestHeader.headerName, requestHeader.headerValue) ;
+                String safeValue = requestHeader.isMaskValue() ? "<MASKED>" : requestHeader.getHeaderValue() ;
+        		log.info("Adding header - " + requestHeader.getHeaderName() + ":" + safeValue) ;
+        		webResourceBuilder = webResourceBuilder.header(requestHeader.getHeaderName(), requestHeader.getHeaderValue()) ;
         	}
         }
         

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>4.51</version>
+		<version>5.4</version>
 		<relativePath />
 	</parent>
 
@@ -35,10 +35,10 @@
 		<changelist>-SNAPSHOT</changelist>
 		<gitHubRepo>jenkinsci/urltrigger-plugin</gitHubRepo>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<xtrigger.api.version>0.4</xtrigger.api.version>
+		<xtrigger.api.version>1.1</xtrigger.api.version>
 		<json.path.version>2.9.0</json.path.version>
 		<!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-		<jenkins.baseline>2.289</jenkins.baseline>
+		<jenkins.baseline>2.479</jenkins.baseline>
 		<jenkins.version>${jenkins.baseline}.1</jenkins.version>
 	</properties>
 
@@ -65,7 +65,7 @@
 			<dependency>
 				<groupId>io.jenkins.tools.bom</groupId>
 				<artifactId>bom-${jenkins.baseline}.x</artifactId>
-				<version>1382.v7d694476f340</version>
+				<version>3850.vb_c5319efa_e29</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
