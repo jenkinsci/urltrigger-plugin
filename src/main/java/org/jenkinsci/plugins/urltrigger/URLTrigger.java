@@ -43,11 +43,11 @@ import org.jenkinsci.plugins.urltrigger.service.URLTriggerService;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
@@ -599,7 +599,7 @@ public class URLTrigger extends AbstractTrigger {
         }
 
         @Override
-        public URLTrigger newInstance(StaplerRequest req, JSONObject formData) throws FormException {
+        public URLTrigger newInstance(StaplerRequest2 req, JSONObject formData) throws FormException {
 
             String cronTabSpec = formData.getString("cronTabSpec");
             boolean labelRestriction = false;
@@ -635,7 +635,7 @@ public class URLTrigger extends AbstractTrigger {
 
         }
 
-        private URLTriggerEntry fillAndGetEntry(StaplerRequest req, JSONObject entryObject) {
+        private URLTriggerEntry fillAndGetEntry(StaplerRequest2 req, JSONObject entryObject) {
             URLTriggerEntry urlTriggerEntry = new URLTriggerEntry();
             urlTriggerEntry.setUrl(entryObject.getString("url"));
             urlTriggerEntry.setFollowRedirects(entryObject.getBoolean("followRedirects"));
