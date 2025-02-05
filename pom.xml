@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.jenkins-ci.plugins</groupId>
 		<artifactId>plugin</artifactId>
-		<version>4.88</version>
+		<version>5.5</version>
 		<relativePath />
 	</parent>
 
@@ -31,20 +31,20 @@
 	</developers>
 
 	<properties>
-		<revision>1.04</revision>
+		<revision>1.05</revision>
 		<changelist>-SNAPSHOT</changelist>
 		<gitHubRepo>jenkinsci/urltrigger-plugin</gitHubRepo>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<xtrigger.api.version>0.4</xtrigger.api.version>
-		<json.path.version>2.9.0</json.path.version>
-		<jenkins.version>2.462.3</jenkins.version>
+		<xtrigger.api.version>1.1</xtrigger.api.version>
+		<!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+		<jenkins.baseline>2.479</jenkins.baseline>
+		<jenkins.version>${jenkins.baseline}.1</jenkins.version>
 	</properties>
 
 	<scm>
 		<connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
 		<developerConnection>scm:git:https@github.com:${gitHubRepo}.git</developerConnection>
 		<url>https://github.com/${gitHubRepo}</url>
-		<tag>urltrigger-1.03</tag>
+		<tag>urltrigger-1.04</tag>
 	</scm>
 
 	<distributionManagement>
@@ -62,8 +62,8 @@
 		<dependencies>
 			<dependency>
 				<groupId>io.jenkins.tools.bom</groupId>
-				<artifactId>bom-2.452.x</artifactId>
-				<version>3850.vb_c5319efa_e29</version>
+				<artifactId>bom-${jenkins.baseline}.x</artifactId>
+				<version>4023.va_eeb_b_4e45f07</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -106,16 +106,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
-			<artifactId>json-path</artifactId>
-			<version>${json.path.version}</version>
-			<exclusions>
-				<!-- Provided by Jenkins core -->
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>io.jenkins.plugins</groupId>
+			<artifactId>json-path-api</artifactId>
 		</dependency>
 
 		<dependency>
