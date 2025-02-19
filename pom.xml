@@ -34,7 +34,7 @@
 		<revision>1.05</revision>
 		<changelist>-SNAPSHOT</changelist>
 		<gitHubRepo>jenkinsci/urltrigger-plugin</gitHubRepo>
-		<xtrigger.api.version>1.1</xtrigger.api.version>
+		<xtrigger.api.version>1.2</xtrigger.api.version>
 		<!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
 		<jenkins.baseline>2.479</jenkins.baseline>
 		<jenkins.version>${jenkins.baseline}.1</jenkins.version>
