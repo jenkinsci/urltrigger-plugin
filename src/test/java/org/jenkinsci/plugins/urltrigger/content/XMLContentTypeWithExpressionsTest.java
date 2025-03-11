@@ -1,7 +1,8 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -10,7 +11,7 @@ import java.util.Arrays;
 /**
  * @author Gregory Boissinot
  */
-public class XMLContentTypeWithExpressionsTest extends AbstractXMLContentTypeTest {
+class XMLContentTypeWithExpressionsTest extends AbstractXMLContentTypeTest {
 
     public XMLContentTypeWithExpressionsTest() {
         XMLContentEntry[] expressions = new XMLContentEntry[]{new XMLContentEntry("/employees/employee[1]/name")};
@@ -26,13 +27,13 @@ public class XMLContentTypeWithExpressionsTest extends AbstractXMLContentTypeTes
     }
 
     @Test
-    public void testIsTriggeringMatchingNewContentWithEmptyPreviousContent() throws Exception {
-        Assert.assertTrue(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
+    void testIsTriggeringMatchingNewContentWithEmptyPreviousContent() throws Exception {
+        assertTrue(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
     }
 
     @Test
-    public void testIsTriggeringMatchingNewContentWithMatchingPreviousContent() throws Exception {
-        Assert.assertTrue(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
+    void testIsTriggeringMatchingNewContentWithMatchingPreviousContent() throws Exception {
+        assertTrue(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
     }
 
 }

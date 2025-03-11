@@ -1,25 +1,25 @@
 package org.jenkinsci.plugins.urltrigger;
 
+import java.io.Serial;
+
 /**
  * @author Gregory Boissinot
  */
 public class URLTriggerCauseTest extends URLTriggerCause {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     public URLTriggerCauseTest() {
-    	super() ;
+        super() ;
     }
 
     public URLTriggerCauseTest( boolean logEnabled ) {
-    	super(logEnabled) ;
+        super(logEnabled) ;
     }
 
     public URLTriggerCauseTest(String triggerName, String causeFrom, boolean logEnabled) {
-    	super( triggerName , causeFrom , logEnabled ) ;
+        super( triggerName , causeFrom , logEnabled ) ;
     }
 
 }

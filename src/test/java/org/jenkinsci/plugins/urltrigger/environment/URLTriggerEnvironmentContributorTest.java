@@ -8,32 +8,39 @@ import hudson.model.FreeStyleProject;
 import hudson.model.StreamBuildListener;
 import org.jenkinsci.plugins.urltrigger.URLTriggerCause;
 import org.jenkinsci.plugins.urltrigger.URLTriggerCauseTest;
-import org.junit.Before;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class URLTriggerEnvironmentContributorTest {
-    @ClassRule
-    public static JenkinsRule jenkins = new JenkinsRule();
+@WithJenkins
+class URLTriggerEnvironmentContributorTest {
+
+    private static JenkinsRule jenkins;
 
     private BuildListener listener;
 
-    @Before
-    public void setup() {
+    @BeforeAll
+    static void setUp(JenkinsRule r) {
+        jenkins = r;
+    }
+
+    @BeforeEach
+    void setup() {
         listener = new StreamBuildListener(jenkins.createTaskListener().getLogger(), Charset.defaultCharset());
     }
 
     @Test
-    public void freeStyleProjectTest() throws IOException, InterruptedException, ExecutionException {
+    void freeStyleProjectTest() throws IOException, InterruptedException, ExecutionException {
         FreeStyleProject p = jenkins.createFreeStyleProject();
         URLTriggerCause cause = new URLTriggerCauseTest( URLTriggerCause.NAME , URLTriggerCause.CAUSE , true );
         cause.setUrlTrigger("http://test.com");
@@ -44,7 +51,7 @@ public class URLTriggerEnvironmentContributorTest {
     }
 
     @Test
-    public void matrixProjectTest() throws IOException, InterruptedException, ExecutionException {
+    void matrixProjectTest() throws IOException, InterruptedException, ExecutionException {
         EnvVars env;
         MatrixProject p = jenkins.jenkins.createProject(MatrixProject.class, "matrixbuild");
         URLTriggerCause cause = new URLTriggerCauseTest(URLTriggerCause.NAME , URLTriggerCause.CAUSE , true );

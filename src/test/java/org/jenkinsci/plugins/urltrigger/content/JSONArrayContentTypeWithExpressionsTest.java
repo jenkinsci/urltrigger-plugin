@@ -1,13 +1,14 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
 
-public class JSONArrayContentTypeWithExpressionsTest extends AbstractJSONContentTypeTest {
+class JSONArrayContentTypeWithExpressionsTest extends AbstractJSONContentTypeTest {
 
     public JSONArrayContentTypeWithExpressionsTest() {
         JSONContentEntry[] expressions = new JSONContentEntry[]{new JSONContentEntry("$..name")};
@@ -23,13 +24,13 @@ public class JSONArrayContentTypeWithExpressionsTest extends AbstractJSONContent
     }
 
     @Test
-    public void testIsTriggeringMatchingNewContentWithEmptyPreviousContent() throws Exception {
-        Assert.assertTrue(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
+    void testIsTriggeringMatchingNewContentWithEmptyPreviousContent() throws Exception {
+        assertTrue(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
     }
 
     @Test
-    public void testIsTriggeringMatchingNewContentWithMatchingPreviousContent() throws Exception {
-        Assert.assertTrue(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
+    void testIsTriggeringMatchingNewContentWithMatchingPreviousContent() throws Exception {
+        assertTrue(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
     }
 }
 
