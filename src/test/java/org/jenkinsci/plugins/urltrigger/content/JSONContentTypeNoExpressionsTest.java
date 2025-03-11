@@ -1,7 +1,8 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -9,7 +10,7 @@ import java.net.URISyntaxException;
 /**
  * @author Gregory Boissinot
  */
-public class JSONContentTypeNoExpressionsTest extends AbstractJSONContentTypeTest {
+class JSONContentTypeNoExpressionsTest extends AbstractJSONContentTypeTest {
 
     public JSONContentTypeNoExpressionsTest() {
         type = new JSONContentType(null);
@@ -24,13 +25,13 @@ public class JSONContentTypeNoExpressionsTest extends AbstractJSONContentTypeTes
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_EmptyTypePreviousContent() throws Exception {
-        Assert.assertFalse(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
+    void testIsTriggeringBuildForContentWithChange_EmptyTypePreviousContent() throws Exception {
+        assertFalse(isTriggeringBuildForContentWithChange_EmptyTypePreviousContent());
     }
 
     @Test
-    public void testIsTriggeringBuildForContentWithChange_AnyContentPreviousContent() throws Exception {
-        Assert.assertFalse(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
+    void testIsTriggeringBuildForContentWithChange_AnyContentPreviousContent() throws Exception {
+        assertFalse(isTriggeringBuildForContentWithChange_AnyContentPreviousContent());
     }
 
 }

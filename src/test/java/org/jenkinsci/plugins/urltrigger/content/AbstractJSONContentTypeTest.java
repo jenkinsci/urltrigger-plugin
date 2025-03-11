@@ -1,9 +1,9 @@
 package org.jenkinsci.plugins.urltrigger.content;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.jenkinsci.plugins.xtriggerapi.XTriggerException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -11,7 +11,7 @@ import java.net.URISyntaxException;
 /**
  * @author Gregory Boissinot
  */
-public abstract class AbstractJSONContentTypeTest extends AbstractContentTypeTest {
+abstract class AbstractJSONContentTypeTest extends AbstractContentTypeTest {
 
     protected String getAnyContent() throws IOException, URISyntaxException {
         return readContentAsString("json/anyJson.json");
@@ -22,12 +22,12 @@ public abstract class AbstractJSONContentTypeTest extends AbstractContentTypeTes
     }
 
     @Test
-    public void testInitForContentEmpty() {
+    void testInitForContentEmpty() {
         assertThrows(XTriggerException.class, () -> initForContent(getEmptyContent()));
     }
 
     @Test
-    public void testInitForContentNoJSON() {
+    void testInitForContentNoJSON() {
         assertThrows(XTriggerException.class, () -> initForContent("NO JSON"));
     }
 }
