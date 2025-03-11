@@ -555,11 +555,11 @@ public class URLTrigger extends AbstractTrigger {
         if (timeResponse == null) {
             return null;
         }
-        String[] dateResponse = timeResponse.split(" "); //assume "CODE yyyyMMddhhmmss"
+        String[] dateResponse = timeResponse.split(" "); //assume "CODE yyyyMMddHHmmss"
         if (dateResponse.length != 2) {
             throw new IOException("Illegal FTP response");
         }
-        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddhhmmss");
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
         response.setLastModified(format.parse(dateResponse[1]));
         response.setStatus(Integer.parseInt(dateResponse[0]));
         response.setEntityTagValue(timeResponse); // I'm not sure what else could be used
