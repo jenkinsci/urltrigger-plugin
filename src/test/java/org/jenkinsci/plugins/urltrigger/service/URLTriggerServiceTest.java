@@ -70,11 +70,9 @@ class URLTriggerServiceTest {
         Date stubDate = Calendar.getInstance().getTime();
         URLTriggerEntry urlTriggerEntryMock = mock(URLTriggerEntry.class);
 
-        when(clientResponseMock.getLastModified()).thenReturn(stubDate);
-        when(urlTriggerEntryMock.isInspectingContent()).thenReturn(true);
         URLTriggerContentType urlTriggerContentTypeMock = mock(URLTriggerContentType.class);
-        when(urlTriggerEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{urlTriggerContentTypeMock});
-        when(clientResponseMock.readEntity(String.class)).thenReturn(null);
+        setupURLTriggerEntryIsInspectingContentAndGetContentTypesStubs(urlTriggerEntryMock, new URLTriggerContentType[] { urlTriggerContentTypeMock });
+        setupResponseReadEntityAndGetLastModifiedStubs(stubDate, null);
 
         assertThrows(XTriggerException.class, () -> urlTriggerService.initContent(new HTTPResponse(clientResponseMock), urlTriggerEntryMock, log));
     }
@@ -88,11 +86,9 @@ class URLTriggerServiceTest {
 
         URLTriggerEntry urlTriggerEntryMock = mock(URLTriggerEntry.class);
 
-        when(clientResponseMock.getLastModified()).thenReturn(stubDate);
-        when(urlTriggerEntryMock.isInspectingContent()).thenReturn(true);
         URLTriggerContentType urlTriggerContentTypeMock = mock(URLTriggerContentType.class);
-        when(urlTriggerEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{urlTriggerContentTypeMock});
-        when(clientResponseMock.readEntity(String.class)).thenReturn(contentStub);
+        setupURLTriggerEntryIsInspectingContentAndGetContentTypesStubs(urlTriggerEntryMock, new URLTriggerContentType[] { urlTriggerContentTypeMock });
+        setupResponseReadEntityAndGetLastModifiedStubs(stubDate, contentStub);
 
         urlTriggerService.initContent(new HTTPResponse(clientResponseMock), urlTriggerEntryMock, log);
 
@@ -172,11 +168,8 @@ class URLTriggerServiceTest {
     void isSchedulingForURLEntry_checkContent_1() throws XTriggerException {
         URLTriggerEntry urlEntryMock = mock(URLTriggerEntry.class);
 
-        when(urlEntryMock.isCheckStatus()).thenReturn(false);
+        setupURLTriggerEntryIsCheckStatusAndIsInspectingContentAnd2MoreStubs(urlEntryMock, new URLTriggerContentType[] {});
         when(urlEntryMock.isCheckETag()).thenReturn(false);
-        when(urlEntryMock.isCheckLastModificationDate()).thenReturn(false);
-        when(urlEntryMock.isInspectingContent()).thenReturn(true);
-        when(urlEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{});
 
         boolean result = urlTriggerService.isSchedulingAndGetRefresh(new HTTPResponse(clientResponseMock), urlEntryMock, mock(XTriggerLog.class));
         assertFalse(result);
@@ -200,10 +193,7 @@ class URLTriggerServiceTest {
         URLTriggerEntry urlEntryMock = mock(URLTriggerEntry.class);
         URLTriggerContentType contentTypeMock = mock(URLTriggerContentType.class);
 
-        when(urlEntryMock.isCheckStatus()).thenReturn(false);
-        when(urlEntryMock.isCheckLastModificationDate()).thenReturn(false);
-        when(urlEntryMock.isInspectingContent()).thenReturn(true);
-        when(urlEntryMock.getContentTypes()).thenReturn(new URLTriggerContentType[]{contentTypeMock});
+        setupURLTriggerEntryIsCheckStatusAndIsInspectingContentAnd2MoreStubs(urlEntryMock, new URLTriggerContentType[] { contentTypeMock });
         when(clientResponseMock.readEntity(any(Class.class))).thenReturn(null);
 
         urlTriggerService.isSchedulingAndGetRefresh(new HTTPResponse(clientResponseMock), urlEntryMock, mock(XTriggerLog.class));
@@ -259,5 +249,21 @@ class URLTriggerServiceTest {
     @Test
     void isSchedulingForURLEntry_checkContent_4() throws XTriggerException {
         checkContent(true, true);
+    }
+
+    private void setupURLTriggerEntryIsInspectingContentAndGetContentTypesStubs(URLTriggerEntry urlTriggerEntryMock, URLTriggerContentType[] getContentTypesReturnValue) {
+        when(urlTriggerEntryMock.isInspectingContent()).thenReturn(true);
+        when(urlTriggerEntryMock.getContentTypes()).thenReturn(getContentTypesReturnValue);
+    }
+
+    private void setupURLTriggerEntryIsCheckStatusAndIsInspectingContentAnd2MoreStubs(URLTriggerEntry urlEntryMock, URLTriggerContentType[] getContentTypesReturnValue) {
+        setupURLTriggerEntryIsInspectingContentAndGetContentTypesStubs(urlEntryMock, getContentTypesReturnValue);
+        when(urlEntryMock.isCheckStatus()).thenReturn(false);
+        when(urlEntryMock.isCheckLastModificationDate()).thenReturn(false);
+    }
+
+    private void setupResponseReadEntityAndGetLastModifiedStubs(Date stubDate, String readEntityReturnValue) {
+        when(clientResponseMock.getLastModified()).thenReturn(stubDate);
+        when(clientResponseMock.readEntity(String.class)).thenReturn(readEntityReturnValue);
     }
 }
